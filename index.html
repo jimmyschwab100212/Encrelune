@@ -326,6 +326,7 @@ function schedule(){
   if(G.hush){A.music.gain.cancelScheduledValues(t0);A.music.gain.setTargetAtTime(0,t0,.012);A.amb.gain.setTargetAtTime(0,t0,.03);A.next=t0+.05;return}
   A.amb.gain.setTargetAtTime(1,t0,.8);
   A.music.gain.setTargetAtTime(SAVE.mute?0:big?1:.8,t0,.6);
+  if(G.el){elMusic(t0);return}
   const e8=60/180;if(A.next<t0)A.next=t0+.05;
   while(A.next<t0+.3){const t=A.next,s=A.step%6,bar=Math.floor(A.step/6),bi=bar%8,ph=Math.floor(bar/8)%3,r=CROOT[bi],pc=CPAD[bi];
     if(G.moon&&G.pi!==10&&st!=='title'&&st!=='map'){moonMusic(t,s,bar,MEIGHTH);A.step++;A.next+=MEIGHTH;continue}
@@ -3235,13 +3236,13 @@ function ffJudge(){const pi=FAF.pi,n=PAL[pi].sig.length,minR=Math.min(W,H/2)*.13
   FAF.ph='judge';FAF.t0=performance.now();FAF.ptr={}}
 function ffClash(){const a=FAF.att,d=1-a,PA=FAF.P[a],PD=FAF.P[d];let o;
   if(PA.ok&&!PD.ok)o='hit';else if(PA.ok&&PD.ok)o=PD.pow>PA.pow?'reflect':'block';else if(!PA.ok&&PD.ok)o='riposte';else o='nul';if(FAF.forceO)o=FAF.forceO;
-  const sc=o==='hit'||o==='pierce'?a:(o==='reflect'||o==='riposte')?d:-1,fin=sc>=0&&FAF.pts[sc]+1>=3,atk=FF_ATK[FAF.ai],shd=FF_SHD[FAF.si],fast=atk.k==='foudre';
-  const tL=1.15,tI=tL+(fast?.5:1),T={tL,tI,tF:tL+.5,tR:0,tP:0,tEnd:0};
+  const pv=FAF.pv||1,sc=o==='hit'||o==='pierce'?a:(o==='reflect'||o==='riposte')?d:-1,fin=sc>=0&&FAF.pts[sc]+pv>=3,atk=FAF.ovAtk||FF_ATK[FAF.ai],shd=FAF.ovShd||FF_SHD[FAF.si],fast=atk.k==='foudre';
+  const tL=FAF.ovTL||1.15,tI=tL+(fast?.5:1),T={tL,tI,tF:tL+.5,tR:0,tP:0,tEnd:0};
   if(o==='hit'||o==='block')T.tP=tI;else if(o==='pierce')T.tP=tI+.45;else if(o==='reflect')T.tP=tI+.85;else if(o==='riposte'){T.tR=T.tF+.3;T.tP=T.tR+.6}else T.tP=T.tF+.35;
   T.tEnd=T.tP+(fin?3.3:2.7);
   const O=[W/2,a?H*.30:H*.70],SD=[W/2,d?H*.385:H*.615],BD=[W/2,d?H*.13:H*.87],BA=[W/2,a?H*.13:H*.87],F=fin?1.3:1;
   const rc=atk.c.map((x,j)=>{const m=mix(x,shd.c[j],.65).match(/\d+/g);return'#'+m.map(v=>(+v).toString(16).padStart(2,'0')).join('')});
-  FAF.res={o,sc,fin,a,d,atk,shd,T,O,SD,BD,BA,rc,ev:{},q:[(PA.ok?.75+.5*PA.pow:.55)*F,(PD.ok?.75+.5*PD.pow:.5)*F],tr:[],bolt:null,bt:0,zap:null,slash:null,dark:null,shT:null,cm:[0,0,0,0,0]};
+  FAF.res={o,sc,fin,pv,a,d,atk,shd,T,O,SD,BD,BA,rc,ev:{},q:[(PA.ok?.75+.5*PA.pow:.55)*F,(PD.ok?.75+.5*PD.pow:.5)*F],tr:[],bolt:null,bt:0,zap:null,slash:null,dark:null,shT:null,cm:[0,0,0,0,0]};
   [0,1].forEach(i=>{const P=FAF.P[i];P.scr=P.st.map(s=>resampleStep(s,5).map(q=>ffL2S(i,q[0],q[1])))});
   FAF.ph='clash';FAF.ck=0;FAF.t0=performance.now();ffS('charge')}
 function ffNext(){if(FAF.ph!=='clash')return;if(G.el){elNext();return}const R=FAF.res;if(R&&R.fin){ffEnd();return}ffRound()}
@@ -3249,8 +3250,8 @@ function ffEnd(){FAF.ph='end';FAF.endT=performance.now();FAF.win=FAF.pts[0]>=3?0
   if(!FAF.saved){FAF.saved=true;try{const d=duSv(),nm=FAF.names[FAF.win];d.ffn=(d.ffn|0)+1;if(!d.ffw||typeof d.ffw!=='object')d.ffw={};d.ffw[nm]=(d.ffw[nm]|0)+1;save()}catch(e){}}
   try{SND.perfect();setTimeout(()=>{try{SND.legend();SND.bell()}catch(e){}},500)}catch(e){}
   setTimeout(()=>{if(FAF.ph==='end')$('ffEnd').hidden=false},1400)}
-function ffPoint(){const R=FAF.res;if(R.sc<0||R.ev.pt)return;R.ev.pt=1;FAF.pts[R.sc]++;const lo=1-R.sc,j=3-FAF.pts[R.sc];FAF.crk[lo][clamp(j,0,2)]=performance.now();
-  const [x,y]=ffCrystalS(lo,clamp(j,0,2));for(let k=0;k<18;k++){const an=rnd(0,TAU),v=rnd(60,260)*S;ffAdd({x,y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:0,m:rnd(.5,1.1),s:rnd(2,4)*S,c:FF_COL[lo][1],ty:'sh',rot:rnd(0,TAU),vr:rnd(-12,12),g:300*S})}
+function ffPoint(){const R=FAF.res;if(R.sc<0||R.ev.pt)return;R.ev.pt=1;for(let n=0;n<(R.pv||1)&&FAF.pts[R.sc]<3;n++){FAF.pts[R.sc]++;const lo=1-R.sc,j=3-FAF.pts[R.sc];FAF.crk[lo][clamp(j,0,2)]=performance.now();
+  const [x,y]=ffCrystalS(lo,clamp(j,0,2));for(let k=0;k<18;k++){const an=rnd(0,TAU),v=rnd(60,260)*S;ffAdd({x,y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:0,m:rnd(.5,1.1),s:rnd(2,4)*S,c:FF_COL[lo][1],ty:'sh',rot:rnd(0,TAU),vr:rnd(-12,12),g:300*S})}}
   ffS('crystal');try{navigator.vibrate&&navigator.vibrate(R.fin?[60,40,160]:80)}catch(e){}}
 function ffCrystalL(i,j){return[64*S+j*20*S,ffHudY(i)+13*S]}
 function ffCrystalS(i,j){const [x,y]=ffCrystalL(i,j);return ffL2S(i,x,y)}
@@ -3305,10 +3306,12 @@ function ffS(n,x){if(!A)return;try{const t=at(),M=A.master,Rv=A.rev;switch(n){
   case 'B_ombre':osc('sine',70,t,.5,.01,1.4,M).frequency.exponentialRampToValueAtTime(28,t+1.2);noise(t,1,.2,'lowpass',300,.7,M,.1);[50,53,57].forEach(m=>choirV(t,m,1.6,.3));break;
   case 'B_vent':for(let i=0;i<3;i++){const f=noise(t+i*.08,.18,.2,'bandpass',2600,1.5,M,.005);f.frequency.exponentialRampToValueAtTime(600,t+i*.08+.18)}SND.burst();break;
   case 'B_astres':SND.burst();SND.bell();break;
+  case 'L_ult':ffS('L_feu');ffS('L_foudre');[50,57,62].forEach(m=>choirV(t,m,2.4,.16));break;
+  case 'B_ult':ffS('B_feu');ffS('B_foudre');osc('sine',38,t,.6,.01,2.2,M);[45,52,57].forEach(m=>choirV(t+.05,m,2.6,.2));break;
   case 'B_shield':SND.burst();[74,78,81,86].forEach((m,i)=>celesta(t+i*.04,m,1,Rv));break}}catch(e){}}
 
 /* ----- mise à jour ----- */
-function ffParts(dt){for(let i=FAF.parts.length-1;i>=0;i--){const p=FAF.parts[i];p.l+=dt;if(p.l>=p.m){FAF.parts.splice(i,1);continue}p.vy+=(p.g||0)*dt;const k=Math.pow(p.dr||.985,dt*60);p.vx*=k;p.vy*=k;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.vr)p.rot+=p.vr*dt}
+function ffParts(dt){for(let i=FAF.parts.length-1;i>=0;i--){const p=FAF.parts[i];p.l+=dt;if(p.l>=p.m){FAF.parts.splice(i,1);continue}p.vy+=(p.g||0)*dt;if(p.gx)p.vx+=p.gx*dt;const k=Math.pow(p.dr||.985,dt*60);p.vx*=k;p.vy*=k;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.vr)p.rot+=p.vr*dt}
   for(let i=FAF.rings.length-1;i>=0;i--){const r=FAF.rings[i];r.t+=dt;if(r.t>r.d)FAF.rings.splice(i,1)}}
 function ffUpdate(dt,now){const k=(now-FAF.t0)/1000;let sdt=dt;
   if(FAF.ph==='clash'&&FAF.res&&FAF.res.fin){const dd=FAF.ck-FAF.res.T.tP;if(dd>-.4&&dd<.55)sdt=dt*.3}
@@ -3327,7 +3330,7 @@ function ffAtkState(c){const R=FAF.res,T=R.T,o=R.o,a=R.a,dir=a?1:-1,PA=FAF.P[a];
   if(o==='pierce'&&c<T.tP){const u=clamp((c-T.tI)/(T.tP-T.tI)),e=Math.pow(u,1.1);return{x:lerp(R.SD[0],R.BD[0],e),y:lerp(R.SD[1],R.BD[1],e),ang:Math.atan2(R.BD[1]-R.SD[1],R.BD[0]-R.SD[0]),q:R.q[0]*1.1,col:R.atk.c,from:R.SD,u,tg:R.BD}}
   if(o==='reflect'&&c<T.tP){const u=clamp((c-T.tI)/(T.tP-T.tI)),e=Math.pow(u,1.15);return{x:lerp(R.SD[0],R.BA[0],e),y:lerp(R.SD[1],R.BA[1],e),ang:Math.atan2(R.BA[1]-R.SD[1],R.BA[0]-R.SD[0]),q:R.q[1],col:R.rc,from:R.SD,u,tg:R.BA}}
   return null}
-function ffEmit(st,k,now){const c=st.col,s=st.q*S,bx=-Math.cos(st.ang),by=-Math.sin(st.ang);
+function ffEmit(st,k,now){if(k==='ult'){const bx=-Math.cos(st.ang),by=-Math.sin(st.ang),s2=st.q*S;for(let j=0;j<(st.charge?2:4);j++){const sp=rnd(40,180)*S;ffAdd({x:st.x+rnd(-10,10)*s2,y:st.y+rnd(-10,10)*s2,vx:bx*sp+rnd(-60,60)*S,vy:by*sp+rnd(-60,60)*S,l:0,m:rnd(.35,.8),s:rnd(1.2,3),c:['#ffb030','#ff5a1a','#c080ff','#ffffff'][Math.random()*4|0]})}if(Math.random()<.6)ffEmit(st,'foudre',now);return}const c=st.col,s=st.q*S,bx=-Math.cos(st.ang),by=-Math.sin(st.ang);
   const n=st.charge?1:st.weak?1:3;for(let j=0;j<n;j++){const sp=rnd(40,160)*S;
     if(k==='feu'){ffAdd({x:st.x+rnd(-8,8)*s,y:st.y+rnd(-8,8)*s,vx:bx*sp+rnd(-50,50)*S,vy:by*sp+rnd(-50,50)*S,l:0,m:rnd(.35,.8),s:rnd(1.2,2.8),c:Math.random()<.5?c[1]:c[2]});if(Math.random()<.25)ffAdd({x:st.x,y:st.y,vx:bx*40*S,vy:by*40*S,l:0,m:rnd(.8,1.4),s:rnd(5,9)*S,c:'#000',ty:'m'})}
     else if(k==='glace')ffAdd({x:st.x+rnd(-6,6)*s,y:st.y+rnd(-6,6)*s,vx:bx*sp*.5+rnd(-30,30)*S,vy:by*sp*.5+rnd(-30,30)*S,l:0,m:rnd(.5,1),s:rnd(2,3.5)*S,c:c[1],ty:'ic',rot:rnd(0,TAU),vr:rnd(-6,6)});
@@ -3369,6 +3372,7 @@ function ffBoom(k,c,p,q,fin){const [x,y]=p,R=FAF.res,n=fin?1.7:1;FAF.shake=Math.
   else if(k==='ombre'){R.dark={x,y,t:FAF.ck};burst(60,60,300,()=>({c:Math.random()<.6?c[1]:c[2],m:rnd(.8,1.6),dr:.96}));ffRing(x,y,c[2],80*q*S,1,.1,12)}
   else if(k==='vent'){R.slash={x,y,t:FAF.ck};burst(40,120,420,()=>({ty:'lf',s:rnd(2.5,4)*S,rot:rnd(0,TAU),vr:rnd(-14,14),c:Math.random()<.5?c[1]:'#bfe8a0',m:rnd(.8,1.4)}))}
   else if(k==='astres'){for(let j=0;j<6;j++){const ox=x+rnd(-70,70)*S,oy=y+rnd(-40,40)*S;ffRing(ox,oy,[c[0],c[1],c[2]][j%3],22*S,.5,j*.08,4)}burst(80,80,420,()=>({c:[c[0],c[1],c[2],'#ffffff'][Math.random()*4|0]}))}
+  else if(k==='ult'){R.zap={x,y,t:FAF.ck};FAF.flash=1;FAF.fcol='#fff4e0';FAF.shake=Math.max(FAF.shake,1.2);burst(120,120,660,()=>({c:[c[0],c[1],c[2],'#ff5a1a'][Math.random()*4|0],g:120*S}));burst(20,20,110,()=>({ty:'m',c:'#000',s:rnd(10,20)*S,m:rnd(1.2,2)}));ffRing(x,y,c[2],110*q*S,1.4,.08,12);ffRing(x,y,'#ffffff',70*q*S,.9,0,8)}
   else{burst(60,100,460,()=>({c:Math.random()<.5?c[1]:c[0]}));burst(16,60,260,()=>({ty:'sh',s:rnd(3,6)*S,rot:rnd(0,TAU),vr:rnd(-10,10),c:c[1],g:300*S}))}
   ffS('B_'+k)}
 
@@ -3465,7 +3469,9 @@ function ffEndHalf(i,now){const win=FAF.win===i,t=(now-FAF.endT)/1000,a=clamp(t/
 // chemin d'éclair
 function ffBoltPts(x0,y0,x1,y1,n,jit){const p=[[x0,y0]],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;for(let i=1;i<n;i++){const t=i/n,j=rnd(-1,1)*jit*Math.sin(t*Math.PI);p.push([x0+dx*t+nx*j,y0+dy*t+ny*j])}p.push([x1,y1]);return p}
 function ffBoltDraw(p,c,a,w){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';for(const [lw,col,al] of [[16,c[2],.22],[7,c[1],.55],[2.4,c[0],.95],[1,'#ffffff',1]]){ctx.strokeStyle=hexA(col,al*a);ctx.lineWidth=lw*S*w;tracePath(ctx,p);ctx.stroke()}ctx.restore()}
-function ffAtkShape(k,c,q,now,weak){const s=q*S,fl=weak?(.35+.5*Math.random()):1;ctx.globalCompositeOperation='lighter';
+function ffAtkShape(k,c,q,now,weak){const s=q*S,fl=weak?(.35+.5*Math.random()):1;
+  if(k==='ult'){ffAtkShape('feu',['#fff1c0','#ff8a2a','#ff3a0a'],q*1.1,now,weak);ctx.globalCompositeOperation='lighter';gdraw(c[2],0,0,96*s,.45*fl);for(let j=0;j<5;j++){const a2=rnd(0,TAU),r=rnd(30,66)*s;ffBoltDraw(ffBoltPts(0,0,Math.cos(a2)*r,Math.sin(a2)*r,5,7*s),['#ffffff','#d8b0ff','#7a2aff'],.9*fl,.6)}ctx.globalCompositeOperation='source-over';return}
+  ctx.globalCompositeOperation='lighter';
   if(k==='feu'){gdraw(c[2],0,0,66*s,.5*fl);gdraw(c[1],0,0,40*s,.8*fl);
     for(let j=0;j<6;j++){const ph=now/90+j*1.3,len=(36+14*Math.sin(ph))*s,wd=(10+3*Math.sin(ph*1.7))*s,off=(j-2.5)*3*s;ctx.fillStyle=hexA(j%2?c[1]:c[2],.42*fl);ctx.beginPath();ctx.moveTo(8*s,off-wd);ctx.quadraticCurveTo(-len*.5,off-wd*.8+Math.sin(ph)*5*s,-len,off+Math.sin(ph*1.3)*6*s);ctx.quadraticCurveTo(-len*.5,off+wd*.8,8*s,off+wd);ctx.fill()}
     gdraw(c[0],0,0,22*s,fl);gdraw('#ffffff',0,0,11*s,fl)}
@@ -3498,12 +3504,12 @@ function ffAtkDraw(now){const R=FAF.res,c=FAF.ck,st=ffAtkState(c),k=R.atk.k;
     ctx.restore();return}
   // traînée
   ctx.save();ctx.globalCompositeOperation='lighter';const tr=R.tr,n=tr.length;
-  if(k==='feu')tr.forEach((p,j)=>{const a=1-j/n;gdraw(col[2],p[0],p[1],(30*a+8)*S*st.q,.32*a)});
+  if(k==='feu'||k==='ult')tr.forEach((p,j)=>{const a=1-j/n;gdraw(k==='ult'?'#ff5a1a':col[2],p[0],p[1],(30*a+8)*S*st.q,.32*a)});
   else if(k==='glace')tr.forEach((p,j)=>{const a=1-j/n;gdraw(col[1],p[0],p[1],(14*a+4)*S*st.q,.3*a)});
   else if(k==='ombre'&&n>2){for(let m=0;m<3;m++){ctx.strokeStyle=hexA(col[1],.5);ctx.lineWidth=(4-m)*S*st.q;ctx.beginPath();tr.forEach((p,j)=>{const w=Math.sin(j*.7+now/120+m*2)*(6+j*1.4)*S*st.q;const x=p[0]+w,y=p[1];j?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}}
   else if(k==='vent'&&n>2){for(const o of [-12,0,12]){ctx.strokeStyle=hexA(col[1],.35);ctx.lineWidth=2*S;ctx.beginPath();tr.forEach((p,j)=>{const x=p[0]+o*S*st.q+Math.sin(j+now/60)*3*S,y=p[1];j?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}}
-  else if(k==='foudre'&&!st.charge&&!st.weak){if(!R.bolt||now-R.bt>45){R.bt=now;R.bolt=ffBoltPts(st.from[0],st.from[1],st.x,st.y,14,22*S);R.br=[0,1].map(()=>{const i0=2+(Math.random()*(R.bolt.length-4)|0),p=R.bolt[i0],an=st.ang+rnd(-1.2,1.2),l=rnd(30,70)*S;return ffBoltPts(p[0],p[1],p[0]+Math.cos(an)*l,p[1]+Math.sin(an)*l,5,8*S)})}
-    ffBoltDraw(R.bolt,col,1,1.1*st.q);R.br.forEach(b=>ffBoltDraw(b,col,.7,.6))}
+  if((k==='foudre'||k==='ult')&&!st.charge&&!st.weak){if(!R.bolt||now-R.bt>45){R.bt=now;R.bolt=ffBoltPts(st.from[0],st.from[1],st.x,st.y,14,22*S);R.br=[0,1].map(()=>{const i0=2+(Math.random()*(R.bolt.length-4)|0),p=R.bolt[i0],an=st.ang+rnd(-1.2,1.2),l=rnd(30,70)*S;return ffBoltPts(p[0],p[1],p[0]+Math.cos(an)*l,p[1]+Math.sin(an)*l,5,8*S)})}
+    ffBoltDraw(R.bolt,col,1,(k==='ult'?.5:1.1)*st.q);R.br.forEach(b=>ffBoltDraw(b,col,.7,.6))}
   ctx.restore();
   ctx.save();ctx.translate(st.x,st.y);ctx.rotate(st.ang);ffAtkShape(k==='astres'?'feu':k,k==='astres'?col:col,st.q,now,st.weak);ctx.restore()}
 // boucliers (repère local : l'attaquant est vers le haut, y négatif)
@@ -3576,12 +3582,13 @@ $('ffEnd').addEventListener('click',e=>{if(e.target.closest('[data-ffr]')){SND.c
    sinon elle arrive trop tard ; défense mieux tracée → renvoyée (+1 défense), sinon le bouclier est percé (+1 attaque) ;
    attaque ratée contre défense réussie → riposte (+1 défense). Sort rapide = sceau simple mais moins fort (×0,85),
    sort lourd = sceau complexe mais plus fort (×1,15). Premier à 3 points. */
-const EL_V=3,EL_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789',EL_B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',EL_TL=10,EL_TIE=.15,EL_LATE=.3;
+const EL_V=4,EL_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789',EL_B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',EL_TL=10,EL_TIE=.15,EL_LATE=.3;
 function elRS(p,closed){return resampleStep(closed?p.concat([p[0]]):p.slice(),.03)}
 function elCirc(cx,cy,r){const p=[];for(let i=0;i<=96;i++){const a=-Math.PI/2+i/96*TAU;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return resampleStep(p,.03)}
 function elPoly(n,r,a0){const p=[];for(let i=0;i<n;i++){const a=a0+i/n*TAU;p.push([Math.cos(a)*r,Math.sin(a)*r])}return elRS(p,true)}
 const EL_SP=(()=>{
   const spiral=[];for(let i=0;i<=140;i++){const t=i/140,a=t*1.75*TAU,r=.1+.9*t;spiral.push([Math.cos(a)*r,Math.sin(a)*r])}
+  const spiral2=[];for(let i=0;i<=110;i++){const t=i/110,a=t*1.5*TAU,r=.06+.36*t;spiral2.push([Math.cos(a)*r,-.05+Math.sin(a)*r])}
   const cres=[];for(let i=0;i<=40;i++){const a=(60+i/40*240)*Math.PI/180;cres.push([Math.cos(a)*.62,Math.sin(a)*.62])}
   {const cx=.3,R=Math.hypot(.31-cx,.537),a1=Math.atan2(-.537,.31-cx)+TAU,a2=Math.atan2(.537,.31-cx);for(let i=1;i<=40;i++){const a=a1+(a2-a1)*i/40;cres.push([cx+Math.cos(a)*R,Math.sin(a)*R])}}
   return[
@@ -3590,29 +3597,33 @@ const EL_SP=(()=>{
   {k:'a',nm:"Pluie d'étoiles",ic:'☄️',el:5,v:'lourd',m:1.15,tol:1.3,sig:[elCirc(0,0,1),elPoly(3,.7,-Math.PI/2),elPoly(3,.7,Math.PI/2)]},
   {k:'d',nm:'Tourbillon',ic:'🌀',el:3,v:'rapide',m:.85,tol:1.3,sig:[resampleStep(spiral,.03)]},
   {k:'d',nm:'Bouclier runique',ic:'🛡️',el:0,v:'moyen',m:1,tol:1.3,sig:[elRS([[-.72,-.85],[.72,-.85],[.66,.15],[0,.95],[-.66,.15]],true),elRS([[0,-.55],[0,.55]])]},
-  {k:'d',nm:'Miroir de lune',ic:'🌙',el:4,v:'lourd',m:1.15,tol:1.3,sig:[elCirc(0,0,1),resampleStep(cres.concat([cres[0]]),.03),elCirc(.5,-.05,.16)]}]})();
+  {k:'d',nm:'Miroir de lune',ic:'🌙',el:4,v:'lourd',m:1.15,tol:1.3,sig:[elCirc(0,0,1),resampleStep(cres.concat([cres[0]]),.03),elCirc(.5,-.05,.16)]},
+  {k:'a',u:1,nm:'Tempête ardente',ic:'💥',el:-1,v:'ultime',m:1.2,tol:1.3,sig:[elCirc(0,0,.78),elRS([[-.3,-.95],[.35,-.2],[-.35,.2],[.3,.95]])]},
+  {k:'d',u:1,nm:'Bouclier parfait',ic:'💠',el:-1,v:'ultime',m:1.2,tol:1.3,sig:[elRS([[-.72,-.85],[.72,-.85],[.66,.15],[0,.95],[-.66,.15]],true),resampleStep(spiral2,.03)]}]})();
 // note d'un sceau de sort : même formule que les paliers (scoreV2), sur le modèle du sort
 function elScore(strokes,si){const s=EL_SP[si];PAL.push({name:s.nm,sig:s.sig,tol:s.tol,u:1});try{return scoreV2(strokes,PAL.length-1)}finally{PAL.pop()}}
 // issue d'une manche, calculée à l'identique sur les deux téléphones (x = hôte, y = invité) ; w = gagnant du point (-1 : personne), att = lanceur de l'attaque
-function elDecide(x,y){const A=p=>p.k==='a',D=p=>p.k==='d';
-  if(A(x)&&A(y)){if(x.ok&&y.ok){const dt=x.t-y.t;if(Math.abs(dt)>EL_TIE)return{w:dt<0?0:1,kind:'aa'};if(x.q!==y.q)return{w:x.q>y.q?0:1,kind:'aa'};return{w:-1,kind:'calm'}}
-    if(x.ok)return{w:0,kind:'aa1'};if(y.ok)return{w:1,kind:'aa1'};return{w:-1,kind:'calm'}}
-  if(A(x)||A(y)){const ai=A(x)?0:1,a=ai?y:x,d=ai?x:y;
-    if(!a.ok)return D(d)&&d.ok?{w:1-ai,att:ai,kind:'riposte'}:{w:-1,kind:'calm'};
-    if(!D(d))return{w:ai,att:ai,kind:'free'};
-    if(!d.ok)return{w:ai,att:ai,kind:'dfail'};
-    if(d.t>a.t+EL_LATE)return{w:ai,att:ai,kind:'late'};
-    if(d.q>a.q)return{w:1-ai,att:ai,kind:'reflect'};
-    return{w:ai,att:ai,kind:'pierce'}}
+// sceau double (u) : la Tempête ardente vaut 2 points, écrase une attaque normale et perce tout bouclier sauf le Bouclier parfait
+function elDecide(x,y){const A=p=>p.k==='a',D=p=>p.k==='d',V=p=>p.u?2:1;
+  if(A(x)&&A(y)){if(x.ok&&y.ok){if(!!x.u!==!!y.u)return{w:x.u?0:1,kind:'uover',pv:2};const dt=x.t-y.t;if(Math.abs(dt)>EL_TIE)return{w:dt<0?0:1,kind:'aa',pv:V(x)};if(x.q!==y.q)return{w:x.q>y.q?0:1,kind:'aa',pv:V(x)};return{w:-1,kind:'calm'}}
+    if(x.ok)return{w:0,kind:'aa1',pv:V(x)};if(y.ok)return{w:1,kind:'aa1',pv:V(y)};return{w:-1,kind:'calm'}}
+  if(A(x)||A(y)){const ai=A(x)?0:1,a=ai?y:x,d=ai?x:y,pv=V(a);
+    if(!a.ok)return D(d)&&d.ok?{w:1-ai,att:ai,kind:'riposte',pv:1}:{w:-1,kind:'calm'};
+    if(!D(d))return{w:ai,att:ai,kind:'free',pv};
+    if(!d.ok)return{w:ai,att:ai,kind:'dfail',pv};
+    if(d.t>a.t+EL_LATE)return{w:ai,att:ai,kind:'late',pv};
+    if(a.u)return d.u?{w:1-ai,att:ai,kind:'ublock',pv:1}:{w:ai,att:ai,kind:'upierce',pv:2};
+    if(d.u||d.q>a.q)return{w:1-ai,att:ai,kind:'reflect',pv:1};
+    return{w:ai,att:ai,kind:'pierce',pv:1}}
   return{w:-1,kind:'calm'}}
 const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,jT:0,lti:0,myPeer:'',oppPeer:'',opNm:'Ton ami',mid:0,seed:0,ph:'',t0:0,tGo:0,r:0,rr:0,rdT:0,cd:-1,lt:-1,hintT:0,
   rot:false,LW:0,LH:0,S:1,me:null,inkT:0,inkD:false,lostT:0,gone:false,forfeit:0,lost:0,endT:0,saved:false,ag:false,btns:[],qArm:0,bg:null,bgk:'',photo:null,unsub:[],oic:null,
-  kind:'',w:-1,res2:null,calm:null,showSh:false,loserAtk:-1,lz:0};
+  kind:'',w:-1,res2:null,calm:null,showSh:false,loserAtk:-1,lz:0,gg:[0,0],pv:1,lockT:0,ggT:0};
 
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='60';
+const EL_VER='61';
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -3737,7 +3748,7 @@ function elNewMe(){return{sp:-1,st:[],cur:null,done:false,tD:0,le:null,dto:0,res
 function elMatch(){clearInterval(EL.lti);EL.lti=0;const o=elOpp();EL.opNm=duName(o&&o.nm,'Ton ami');if(EL.opNm.toLowerCase()===EL.nm.toLowerCase())EL.opNm=Array.from(EL.opNm).slice(0,10).join('')+' 2';
   duStop();liveHide();usePal5(null);recAbort();duHide();$('duel').hidden=true;
   G={state:'el',el:true,pi:0,strokes:[],moonB:0,t0:performance.now()};document.body.classList.add('el');elPhoto();elReset();try{ffS('ready')}catch(e){}}
-function elReset(){EL.r=0;EL.rr=0;EL.rdT=0;EL.ag=false;EL.saved=false;EL.forfeit=0;EL.lost=0;EL.gone=false;EL.qArm=0;EL.calm=null;EL.kind='';EL.res2=null;EL.oic=null;
+function elReset(){EL.gg=[0,0];EL.pv=1;EL.lockT=0;EL.r=0;EL.rr=0;EL.rdT=0;EL.ag=false;EL.saved=false;EL.forfeit=0;EL.lost=0;EL.gone=false;EL.qArm=0;EL.calm=null;EL.kind='';EL.res2=null;EL.oic=null;
   FAF.names=[EL.nm,EL.opNm];FAF.pts=[0,0];FAF.round=0;FAF.res=null;FAF.ph='';FAF.parts=[];FAF.rings=[];FAF.crk=[[0,0,0],[0,0,0]];FAF.shake=FAF.flash=0;FAF.win=-1;ffPlayers();
   EL.me=elNewMe();EL.ph='ready';EL.t0=performance.now()}
 function elRound(r){EL.r=r;FAF.round=r;FAF.res=null;FAF.ph='';FAF.TL=EL_TL;EL.calm=null;EL.kind='';EL.me=elNewMe();EL.ph='intro';EL.t0=performance.now();EL.cd=-1;EL.lt=-1;EL.inkD=false;EL.oic=null;
@@ -3750,7 +3761,7 @@ function elDims(){const rot=W<H;EL.rot=rot;EL.LW=rot?H:W;EL.LH=rot?W:H;EL.S=clam
 function elGeo(){const LW=EL.LW,LH=EL.LH,s=EL.S,top=46*s,pad=10*s,mid=LW/2,gap=Math.max(16*s,LW*.02),x0=pad+50*s;
   const z0={x:x0,y:top,w:mid-gap-x0,h:LH-top-pad},z1={x:mid+gap,y:top,w:LW-pad-(mid+gap),h:LH-top-pad};
   [z0,z1].forEach(z=>{z.cx=z.x+z.w/2;z.cy=z.y+z.h/2;z.s=Math.min(z.w,z.h)/2});
-  const bt=[],bh=(LH-top-pad)/6.4;for(let i=0;i<6;i++)bt.push({x:pad+22*s,y:top+bh*(i+.5)+(i>=3?bh*.4:0),r:Math.min(20*s,bh*.44)});return{z0,z1,top,bt}}
+  const bt=[],n=EL_SP.length,bh=(LH-top-pad)/(n+.8);for(let i=0;i<n;i++)bt.push({x:pad+22*s,y:top+bh*(i+.5)+(i>=3?bh*.4:0)+(i>=6?bh*.4:0),r:Math.min(20*s,bh*.45)});return{z0,z1,top,bt}}
 function elPt(e){return EL.rot?[e.clientY,W-e.clientX]:[e.clientX,e.clientY]}
 function elUndoPos(){const z=elGeo().z0;return[z.x+22*EL.S,z.y+z.h-22*EL.S]}
 
@@ -3768,7 +3779,7 @@ cv.addEventListener('pointerdown',e=>{if(!G.el)return;e.preventDefault();elDims(
   if(EL.ph==='ready'){if(!EL.rr){EL.rr=1;elPres({rr:1});ffS('ready');for(let k=0;k<20;k++)elSpark(x,y,FF_COL[0][1],1)}return}
   if(EL.ph!=='intro'&&EL.ph!=='draw')return;const M=EL.me,g=elGeo();if(M.done||M.cur)return;
   const bi=g.bt.findIndex(c=>Math.hypot(x-c.x,y-c.y)<c.r+8*s);
-  if(bi>=0){if(M.sp!==bi){clearTimeout(M.dto);M.sp=bi;M.st=[];M.le=null;EL.inkD=true;ffS('ready')}return}
+  if(bi>=0){if(EL_SP[bi].u&&EL.gg[0]<EL_GMAX){EL.lockT=now;ffS('undo');return}if(M.sp!==bi){clearTimeout(M.dto);M.sp=bi;M.st=[];M.le=null;EL.inkD=true;ffS('ready')}return}
   if(EL.ph!=='draw')return;
   if(M.sp<0){EL.hintT=now;return}
   const ub=elUndoPos();if(M.st.length&&Math.hypot(x-ub[0],y-ub[1])<22*s){clearTimeout(M.dto);M.st.pop();M.le=null;EL.inkD=true;ffS('undo');return}
@@ -3806,27 +3817,34 @@ function elJudge(){const M=EL.me;if(EL.ph!=='draw')return;clearTimeout(M.dto);co
 
 /* ----- résolution de la manche ----- */
 function elFFU(fn){const w=W,h=H,s=S;W=EL.LH;H=EL.LW;S=EL.S;try{return fn()}finally{W=w;H=h;S=s}}
-function elClash(o){const M=EL.me,sp=M.sp>=0?EL_SP[M.sp]:null,n=sp?sp.sig.length:0,mine=M.res,their=o.res;
-  const nr=r=>({k:r.sp>=0&&EL_SP[r.sp]?EL_SP[r.sp].k:'',ok:!!r.ok,q:+r.q||0,t:r.t==null?99:+r.t});
+function elSpOf(r){return r&&r.sp>=0&&EL_SP[r.sp]?EL_SP[r.sp]:null}
+function elAtkOf(sp){return sp&&sp.u?EL_ULT:FF_ATK[sp&&sp.el>=0?sp.el:0]}
+function elShdOf(sp){return sp&&sp.u?EL_PARF:FF_SHD[sp&&sp.el>=0?sp.el:0]}
+// jauge : +1 par sort réussi, vidée quand on lance un sceau double (calcul identique sur les deux téléphones)
+function elGaugeUpd(res){const was=EL.gg[0];[0,1].forEach(i=>{const r=res[i],sp=elSpOf(r);if(sp&&sp.u)EL.gg[i]=0;else if(r&&r.ok)EL.gg[i]=Math.min(EL_GMAX,EL.gg[i]+1)});if(was<EL_GMAX&&EL.gg[0]>=EL_GMAX)EL.ggT=performance.now()}
+function elClash(o){const M=EL.me,sp=elSpOf(M.res),n=sp?sp.sig.length:0,mine=M.res,their=o.res;
+  const nr=r=>{const q=elSpOf(r);return{k:q?q.k:'',u:q&&q.u?1:0,ok:!!r.ok,q:+r.q||0,t:r.t==null?99:+r.t}};
   const X=EL.host?nr(mine):nr(their),Y=EL.host?nr(their):nr(mine),D=elDecide(X,Y),L=v=>v==null||v<0?-1:(EL.host?v:1-v);
-  EL.kind=D.kind;EL.w=L(D.w);const att=D.att!=null?L(D.att):EL.w,res=[mine,their];EL.res2=res;
+  EL.kind=D.kind;EL.w=L(D.w);EL.pv=D.pv||1;const att=D.att!=null?L(D.att):EL.w,res=[mine,their];EL.res2=res;elGaugeUpd(res);
   const sts=[M.st.slice(0,n).map(s=>s.map(q=>[q[1],EL.LW-q[0]])),elOppInk().map(s=>s.map(q=>[EL.LH-q[1],q[0]]))];
   FAF.P=[0,1].map(i=>{const r=res[i];return{st:sts[i],cur:null,done:true,tD:+r.t||0,t:+r.t||0,sc:r.tt>0?{stars:r.sr|0,total:+r.tt}:null,ok:false,pow:+r.q||0,sp:0,why:String(r.w||'').slice(0,24),le:null,dto:0,scr:null}});
   EL.ph='clash';EL.t0=performance.now();EL.lz=0;
-  if(EL.kind==='calm'){FAF.res=null;FAF.ph='';const sh=[0,1].map(i=>{const s=EL_SP[res[i].sp];return!!(s&&s.k==='d'&&res[i].ok)});
-    EL.calm={sh,fz:[0,1].map(i=>!!EL_SP[res[i].sp]&&!res[i].ok),ev:{}};
+  if(EL.kind==='calm'){FAF.res=null;FAF.ph='';const sh=[0,1].map(i=>{const q=elSpOf(res[i]);return!!(q&&q.k==='d'&&res[i].ok)});
+    EL.calm={sh,fz:[0,1].map(i=>!!elSpOf(res[i])&&!res[i].ok),ev:{}};
     elFFU(()=>FAF.P.forEach((P,i)=>{P.scr=P.st.map(s=>resampleStep(s,5).map(q=>ffL2S(i,q[0],q[1])))}));return}
-  const a=att,d=1-a,PA=FAF.P[a],PD=FAF.P[d],sA=EL_SP[res[a].sp],sD=EL_SP[res[d].sp],K=EL.kind;
-  FAF.att=a;FAF.ai=sA?sA.el:0;FAF.si=sD&&sD.k==='d'?sD.el:0;
-  PA.ok=K!=='riposte';PD.ok=K==='pierce'||K==='reflect'||K==='riposte';
+  const a=att,d=1-a,PA=FAF.P[a],PD=FAF.P[d],sA=elSpOf(res[a]),sD=elSpOf(res[d]),K=EL.kind,ult=!!(sA&&sA.u);
+  FAF.att=a;FAF.ai=sA&&sA.el>=0?sA.el:0;FAF.si=sD&&sD.k==='d'&&sD.el>=0?sD.el:0;
+  FAF.ovAtk=ult?EL_ULT:null;FAF.ovShd=sD&&sD.k==='d'&&sD.u?EL_PARF:null;FAF.ovTL=ult?2.3:1.6;FAF.pv=EL.pv;
+  PA.ok=K!=='riposte';PD.ok=K==='pierce'||K==='reflect'||K==='riposte'||K==='upierce'||K==='ublock';
   EL.showSh=!!(sD&&sD.k==='d');EL.loserAtk=sD&&sD.k==='a'?d:-1;
-  FAF.forceO=K==='pierce'?'pierce':null;try{elFFU(()=>ffClash())}finally{FAF.forceO=null}
-  FAF.res.noShd=!EL.showSh}
+  FAF.forceO=K==='pierce'||K==='upierce'?'pierce':K==='reflect'||K==='ublock'?'reflect':null;
+  try{elFFU(()=>ffClash())}finally{FAF.forceO=null;FAF.ovAtk=FAF.ovShd=null;FAF.ovTL=0;FAF.pv=1}
+  const R=FAF.res;R.noShd=!EL.showSh;R.O=elFFPos(a,'o');R.BA=elFFPos(a,'b');R.SD=elFFPos(d,'sd');R.BD=elFFPos(d,'b');R.q=R.q.map(v=>v*(ult?1.4:1.3))}
 // sort de l'ami (ou le mien) parti trop tard : il se charge puis est balayé
-function elClashFx(){const R=FAF.res,L=EL.loserAtk;if(!R||L<0||EL.lz||FAF.ck<R.T.tL+.3)return;EL.lz=1;const P=FAF.P[L],O=[W/2,L?H*.30:H*.70],col=FF_ATK[EL_SP[EL.res2[L].sp].el].c;
+function elClashFx(){const R=FAF.res,L=EL.loserAtk;if(!R||L<0||EL.lz||FAF.ck<R.T.tL+.3)return;EL.lz=1;const P=FAF.P[L],O=elFFPos(L,'o'),col=elAtkOf(elSpOf(EL.res2[L])).c;
   for(let k=0;k<26;k++){const an=rnd(0,TAU),v=rnd(40,220)*S;ffAdd({x:O[0],y:O[1],vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:0,m:rnd(.4,.9),s:rnd(1,2.4),c:Math.random()<.5?col[1]:col[2]})}
   for(let k=0;k<10;k++)ffAdd({x:O[0]+rnd(-12,12)*S,y:O[1]+rnd(-12,12)*S,vx:rnd(-20,20)*S,vy:rnd(-20,20)*S,l:0,m:rnd(.8,1.4),s:rnd(5,10)*S,c:'#000',ty:'m'});ffS(P.ok?'clang':'fizzle')}
-function elLoserOrb(now){const L=EL.loserAtk,R=FAF.res;if(L<0||!R)return;const c=FAF.ck,T=R.T;if(c>T.tL+.3)return;const P=FAF.P[L],sp=FF_ATK[EL_SP[EL.res2[L].sp].el],O=[W/2,L?H*.30:H*.70];
+function elLoserOrb(now){const L=EL.loserAtk,R=FAF.res;if(L<0||!R)return;const c=FAF.ck,T=R.T;if(c>T.tL+.3)return;const P=FAF.P[L],sp=elAtkOf(elSpOf(EL.res2[L])),O=elFFPos(L,'o');
   const g=ease(clamp((c-.5)/(T.tL-.2))),q=(P.ok?.6:.45)*(.3+.7*g);ctx.save();ctx.translate(O[0],O[1]);ctx.rotate(Math.PI/2*(L?1:-1));ffAtkShape(sp.k==='astres'?'feu':sp.k,sp.c,q,now,!P.ok);ctx.restore()}
 function elNext(){FAF.ph='done';const R=FAF.res;if(R&&R.fin){elEnd();return}EL.ph='next';EL.t0=performance.now();EL.rr=EL.r+1;elPres({rr:EL.rr})}
 function elEnd(){if(EL.ph==='end')return;EL.ph='end';EL.endT=performance.now();FAF.ph='end';if(EL.me)clearTimeout(EL.me.dto);
@@ -3836,7 +3854,7 @@ function elEnd(){if(EL.ph==='end')return;EL.ph='end';EL.endT=performance.now();F
 
 /* ----- boucle ----- */
 function elUpdate(dt,now){elDims();const k=(now-EL.t0)/1000,o=elOpp(),om=o&&o.mid===EL.mid?o:null;let sdt=dt;
-  if(EL.ph==='clash'&&FAF.res&&FAF.res.fin){const dd=FAF.ck-FAF.res.T.tP;if(dd>-.4&&dd<.55)sdt=dt*.3}
+  if(EL.ph==='clash'&&FAF.res&&(FAF.res.fin||FAF.res.atk.k==='ult')){const R=FAF.res,ti=R.o==='hit'?R.T.tI:R.T.tP,dd=FAF.ck-ti;if(dd>-.4&&dd<.55)sdt=dt*.3;if(R.atk.k==='ult'&&FAF.ck<R.T.tL)FAF.shake=Math.max(FAF.shake,.08+.3*FAF.ck/R.T.tL)}
   ffParts(sdt);FAF.shake=Math.max(0,FAF.shake-dt*2.2);FAF.flash=Math.max(0,FAF.flash-dt*2.6);
   if(Math.random()<.35){const lx=rnd(0,EL.LW),ly=rnd(EL.LH*.35,EL.LH);ffAdd({x:ly,y:EL.LW-lx,vx:-rnd(8,20)*EL.S,vy:rnd(-6,6)*EL.S,l:0,m:rnd(2,4),s:rnd(.6,1.3),c:'#ffb36a',dr:1})}
   if(EL.ph!=='end'){if(!o){if(!EL.lostT)EL.lostT=now;if(now-EL.lostT>10000){EL.forfeit=1;elEnd();return}}else{EL.lostT=0;if(o.q){EL.forfeit=1;elEnd();return}}}
@@ -3855,7 +3873,7 @@ function elUpdate(dt,now){elDims();const k=(now-EL.t0)/1000,o=elOpp(),om=o&&o.mi
       if(FAF.win===0&&Math.random()<.6){const c=[FF_COL[0][1],'#ffd27a','#ffffff',FF_COL[0][0]][Math.random()*4|0],lx=rnd(0,EL.LW);ffAdd({x:rnd(-10,0),y:EL.LW-lx,vx:rnd(60,180)*EL.S,vy:rnd(-40,40)*EL.S,l:0,m:rnd(1.5,2.6),s:rnd(2,4)*EL.S,c,ty:'cf',rot:rnd(0,TAU),vr:rnd(-8,8),dr:.995})}break}}
 function elCalmUpd(k){const C=EL.calm,e=C.ev;
   if(k>.35&&!e.sh){e.sh=1;if(C.sh[0]||C.sh[1])ffS('shield')}
-  if(k>.7&&!e.fz){e.fz=1;elFFU(()=>[0,1].forEach(i=>{if(!C.fz[i])return;const O=[W/2,i?H*.30:H*.70];for(let j=0;j<14;j++)ffAdd({x:O[0]+rnd(-14,14)*S,y:O[1]+rnd(-14,14)*S,vx:rnd(-20,20)*S,vy:rnd(-20,20)*S,l:0,m:rnd(.8,1.5),s:rnd(5,10)*S,c:'#000',ty:'m'})}));if(C.fz[0]||C.fz[1])ffS('fizzle')}
+  if(k>.7&&!e.fz){e.fz=1;elFFU(()=>[0,1].forEach(i=>{if(!C.fz[i])return;const O=elFFPos(i,'o');for(let j=0;j<14;j++)ffAdd({x:O[0]+rnd(-14,14)*S,y:O[1]+rnd(-14,14)*S,vx:rnd(-20,20)*S,vy:rnd(-20,20)*S,l:0,m:rnd(.8,1.5),s:rnd(5,10)*S,c:'#000',ty:'m'})}));if(C.fz[0]||C.fz[1])ffS('fizzle')}
   if(k>1.3&&!e.nul){e.nul=1;ffS('nul')}
   if(k>3.6)elNext()}
 
@@ -3885,15 +3903,22 @@ function elBtnD(id,label,x,y,w,h,main,off){EL.btns.push({id,x,y,w,h});ctx.save()
   if(main){const g=ctx.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#ffe2a0');g.addColorStop(1,'#d89a3a');ctx.fillStyle=g}else ctx.fillStyle='rgba(12,9,24,.78)';ctx.fill();
   ctx.strokeStyle=main?'rgba(255,240,200,.9)':'rgba(255,210,122,.55)';ctx.lineWidth=1.3*S;ctx.stroke();ctx.restore();
   elT(label,x+w/2,y+h/2+6*S,`700 ${Math.round(16*S)}px "Cormorant Garamond",serif`,main?'#2a1606':'#ffe6b0',off?.6:1,null,'center',w*.9)}
-function elSigDraw(si,cx,cy,r,a){const s=EL_SP[si];sigScreen(s.sig,cx,cy,r).forEach(p=>inkStroke(p,'#ffe6b0',s.k==='a'?'#ff7a3a':'#5aa0ff',a,0,.55))}
+function elSigDraw(si,cx,cy,r,a){const s=EL_SP[si];sigScreen(s.sig,cx,cy,r).forEach(p=>inkStroke(p,'#ffe6b0',s.u?'#ffb030':s.k==='a'?'#ff7a3a':'#5aa0ff',a,0,.55))}
 function elZone(z,i,a){ctx.save();ctx.globalAlpha=a;elRR(z.x,z.y,z.w,z.h,14*S);ctx.fillStyle='rgba(5,4,14,.4)';ctx.fill();ctx.setLineDash([6*S,6*S]);ctx.strokeStyle=hexA(FF_COL[i][1],.45);ctx.lineWidth=1.2*S;ctx.stroke();ctx.restore()}
 function elCard(z){const r=30*S;return{x:z.x+z.w-r-8*S,y:z.y+r+8*S,r}}
 function elCardDraw(z,si,a){if(si<0)return;const cd=elCard(z),r=cd.r;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(8,6,18,.75)';ctx.strokeStyle='rgba(255,210,122,.5)';ctx.lineWidth=1.2*S;elRR(cd.x-r,cd.y-r,r*2,r*2,10*S);ctx.fill();ctx.stroke();ctx.restore();elSigDraw(si,cd.x,cd.y,r*.76,.95*a)}
-function elStrip(g,now,act){const M=EL.me;g.bt.forEach((b,i)=>{const s=EL_SP[i],on=M&&M.sp===i,atk=s.k==='a',col=atk?'#ff8a5a':'#7ab8ff';ctx.save();
-    if(on){ctx.globalCompositeOperation='lighter';gdraw(col,b.x,b.y,b.r*2.6,.75+.2*Math.sin(now/180));ctx.globalCompositeOperation='source-over'}
-    ctx.globalAlpha=act?1:.55;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fillStyle=on?'rgba(40,24,40,.92)':'rgba(10,8,20,.8)';ctx.fill();ctx.strokeStyle=on?'#ffffff':hexA(col,.85);ctx.lineWidth=(on?2.2:1.4)*S;ctx.stroke();
-    ctx.font=`${Math.round(b.r*.95)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.fillText(s.ic,b.x,b.y+1);ctx.restore()});
-  const y3=(g.bt[2].y+g.bt[3].y)/2;ctx.save();ctx.strokeStyle='rgba(255,230,190,.25)';ctx.lineWidth=1*S;ctx.beginPath();ctx.moveTo(g.bt[0].x-14*S,y3);ctx.lineTo(g.bt[0].x+14*S,y3);ctx.stroke();ctx.restore()}
+function elStrip(g,now,act){const M=EL.me,full=EL.gg[0]>=EL_GMAX;g.bt.forEach((b,i)=>{const s=EL_SP[i],on=M&&M.sp===i,atk=s.k==='a',col=s.u?'#ffd27a':atk?'#ff8a5a':'#7ab8ff',lock=s.u&&!full;ctx.save();
+    if(on||(s.u&&full&&act)){ctx.globalCompositeOperation='lighter';gdraw(col,b.x,b.y,b.r*(on?2.6:2.3),(on?.75:.5)+.2*Math.sin(now/180+i));ctx.globalCompositeOperation='source-over'}
+    ctx.globalAlpha=lock?.42:act?1:.55;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fillStyle=on?'rgba(40,24,40,.92)':s.u?'rgba(34,24,10,.85)':'rgba(10,8,20,.8)';ctx.fill();ctx.strokeStyle=on?'#ffffff':hexA(col,.85);ctx.lineWidth=(on?2.2:s.u?1.8:1.4)*S;ctx.stroke();
+    ctx.font=`${Math.round(b.r*.95)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.fillText(s.ic,b.x,b.y+1);
+    if(lock){ctx.globalAlpha=1;ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2.6*S;ctx.beginPath();ctx.arc(b.x,b.y,b.r+3.5*S,0,TAU);ctx.stroke();
+      if(EL.gg[0]>0){ctx.strokeStyle='#ffd27a';ctx.beginPath();ctx.arc(b.x,b.y,b.r+3.5*S,-Math.PI/2,-Math.PI/2+TAU*EL.gg[0]/EL_GMAX);ctx.stroke()}
+      ctx.font=`${Math.round(b.r*.55)}px serif`;ctx.fillText('🔒',b.x+b.r*.72,b.y+b.r*.7)}
+    ctx.restore()});
+  ctx.save();ctx.strokeStyle='rgba(255,230,190,.25)';ctx.lineWidth=1*S;[[2,3],[5,6]].forEach(([p,q])=>{if(!g.bt[q])return;const y=(g.bt[p].y+g.bt[q].y)/2;ctx.beginPath();ctx.moveTo(g.bt[0].x-14*S,y);ctx.lineTo(g.bt[0].x+14*S,y);ctx.stroke()});ctx.restore()}
+// jauge des sceaux doubles (3 crans) sous le nom
+function elGaugeD(x,y,v,dir,now){const full=v>=EL_GMAX;for(let j=0;j<EL_GMAX;j++){const xx=x+dir*j*12*S,on=j<v;ctx.save();if(on&&full){ctx.globalCompositeOperation='lighter';gdraw('#ffd27a',xx+dir*4*S,y,10*S,.5+.3*Math.sin(now/160+j));ctx.globalCompositeOperation='source-over'}
+    elRR(dir>0?xx:xx-9*S,y-2.5*S,9*S,5*S,2.5*S);ctx.fillStyle=on?'#ffd27a':'rgba(255,255,255,.14)';ctx.fill();ctx.restore()}}
 function elGem(x,y,col,lost,now,j){ctx.save();ctx.translate(x,y);if(lost){ctx.strokeStyle='rgba(160,160,180,.4)';ctx.lineWidth=1.2*S;ctx.beginPath();ctx.moveTo(0,-7*S);ctx.lineTo(5*S,0);ctx.lineTo(0,7*S);ctx.lineTo(-5*S,0);ctx.closePath();ctx.stroke()}
   else{ctx.globalCompositeOperation='lighter';gdraw(col[1],0,0,13*S,.5+.1*Math.sin(now/300+j));ctx.globalCompositeOperation='source-over';const gr=ctx.createLinearGradient(0,-7*S,0,7*S);gr.addColorStop(0,'#ffffff');gr.addColorStop(.45,col[0]);gr.addColorStop(1,col[1]);ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,-7*S);ctx.lineTo(5*S,0);ctx.lineTo(0,7*S);ctx.lineTo(-5*S,0);ctx.closePath();ctx.fill()}ctx.restore()}
 function elHud(g,now,k){const LW=EL.LW,top=g.top,gr=ctx.createLinearGradient(0,0,0,top+10*S);gr.addColorStop(0,'rgba(5,4,12,.85)');gr.addColorStop(1,'rgba(5,4,12,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,LW,top+10*S);
@@ -3901,6 +3926,7 @@ function elHud(g,now,k){const LW=EL.LW,top=g.top,gr=ctx.createLinearGradient(0,0
   elT('✕',22*S,y+1*S,`700 ${Math.round(14*S)}px sans-serif`,'#ffe6b0',1);EL.btns.push({id:'quit',x:4*S,y:0,w:38*S,h:top});
   elT(FAF.names[0],44*S,y,FF_CIN(13),FF_COL[0][0],1,null,'left',LW*.25);for(let j=0;j<3;j++)elGem(44*S+j*16*S+6*S,y+13*S,FF_COL[0],j>=3-FAF.pts[1],now,j);
   elT(FAF.names[1],LW-14*S,y,FF_CIN(13),FF_COL[1][0],1,null,'right',LW*.25);for(let j=0;j<3;j++)elGem(LW-20*S-j*16*S,y+13*S,FF_COL[1],j>=3-FAF.pts[0],now,j);
+  if(EL.ph!=='ready'&&EL.ph!=='end'){elGaugeD(44*S+3*16*S+8*S,y+13*S,EL.gg[0],1,now);elGaugeD(LW-20*S-3*16*S-6*S,y+13*S,EL.gg[1],-1,now)}
   if(EL.ph==='draw'||EL.ph==='wait'||EL.ph==='intro'){elT(`Manche ${EL.r}`,LW/2,y-6*S,FF_COR(13),'rgba(243,230,200,.75)',1);if(EL.ph==='draw'){const rem=Math.max(0,EL_TL-k);elT(`${ffFmt(rem)} s`,LW/2,y+13*S,FF_CIN(16),rem<3?'#ff8a6a':'#ffffff',1)}}
   else if(EL.ph!=='ready'&&EL.ph!=='end')elT(`${FAF.pts[0]} – ${FAF.pts[1]}`,LW/2,y+6*S,FF_CIN(18),'#ffd27a',1);
   if(EL.qArm&&now-EL.qArm<2500)elT('Touche encore ✕ pour abandonner',LW/2,top+20*S,FF_COR(15),'#ff9a8a',1);
@@ -3910,13 +3936,14 @@ function elRift(g,k){if(EL.ph!=='draw')return;const rem=clamp(1-k/EL_TL),x=EL.LW
   gdraw(col,x,cy-hh,20*S,.9);gdraw(col,x,cy+hh,20*S,.9);ctx.restore()}
 function elReady(g,now){const LW=EL.LW,LH=EL.LH,o=elOpp(),orr=o&&o.mid===EL.mid&&o.rr>=1;ctx.fillStyle='rgba(4,3,10,.55)';ctx.fillRect(0,0,LW,LH);
   elT('DUEL EN LIGNE',LW/2,g.top+18*S,FF_CIN(22),'#ffd27a',1,'rgba(255,190,90,.8)');
-  const n=6,cw=Math.min(LW*.92/n,118*S),x0=LW/2-cw*n/2,rr=Math.min(cw*.28,26*S),cy=g.top+36*S+rr+6*S;
-  for(let i=0;i<n;i++){const s=EL_SP[i],x=x0+cw*(i+.5),atk=s.k==='a';ctx.save();elRR(x-cw*.46,cy-rr-8*S,cw*.92,rr*2+50*S,10*S);ctx.fillStyle='rgba(8,6,18,.6)';ctx.fill();ctx.strokeStyle=hexA(atk?'#ff8a5a':'#7ab8ff',.5);ctx.lineWidth=1*S;ctx.stroke();ctx.restore();
-    elSigDraw(i,x,cy,rr*.85,.95);elT(`${s.ic} ${s.nm}`,x,cy+rr+18*S,FF_COR(13),'#fff3d6',1,null,'center',cw*.9);elT(`${atk?'attaque':'défense'} · ${s.v}`,x,cy+rr+33*S,FF_COR(11.5),atk?'#ffb08a':'#9fd0ff',.9,null,'center',cw*.9)}
+  const n=EL_SP.length,cw=Math.min(LW*.94/n,118*S),x0=LW/2-cw*n/2,rr=Math.min(cw*.28,26*S),cy=g.top+36*S+rr+6*S;
+  for(let i=0;i<n;i++){const s=EL_SP[i],x=x0+cw*(i+.5),atk=s.k==='a';ctx.save();elRR(x-cw*.46,cy-rr-8*S,cw*.92,rr*2+50*S,10*S);ctx.fillStyle=s.u?'rgba(30,20,6,.7)':'rgba(8,6,18,.6)';ctx.fill();ctx.strokeStyle=hexA(s.u?'#ffd27a':atk?'#ff8a5a':'#7ab8ff',s.u?.85:.5);ctx.lineWidth=1*S;ctx.stroke();ctx.restore();
+    elSigDraw(i,x,cy,rr*.85,.95);elT(`${s.ic} ${s.nm}`,x,cy+rr+18*S,FF_COR(13),'#fff3d6',1,null,'center',cw*.9);elT(s.u?(atk?'ultime · +2':'arrête l’ultime'):`${atk?'attaque':'défense'} · ${s.v}`,x,cy+rr+33*S,FF_COR(11.5),s.u?'#ffd27a':atk?'#ffb08a':'#9fd0ff',.9,null,'center',cw*.9)}
   const y=cy+rr+62*S;
   elT('⚔️ Deux attaques : la plus rapide touche  ·  🛡️ Une défense doit être finie avant l’attaque',LW/2,y,FF_COR(14),'#f3e6c8',.92);
   elT('Défense mieux tracée : sort renvoyé · sinon bouclier percé · attaque ratée : riposte · premier à 3 points',LW/2,y+18*S,FF_COR(13),'rgba(243,230,200,.8)',.9);
-  const yb=Math.min(LH-12*S,y+70*S),p=.6+.4*Math.sin(now/280);
+  elT('✨ 3 sorts réussis remplissent ta jauge : 💥 Tempête ardente (+2 points) · seul le 💠 Bouclier parfait l’arrête',LW/2,y+37*S,FF_COR(13),'#ffd27a',.92);
+  const yb=Math.min(LH-12*S,y+86*S),p=.6+.4*Math.sin(now/280);
   elT(FAF.names[0],LW*.27,yb-22*S,FF_CIN(16),FF_COL[0][0],1,FF_COL[0][1],'center',LW*.4);
   elT(EL.rr?'Prêt ✓':'Touche l’écran quand tu es prêt',LW*.27,yb,EL.rr?FF_CIN(15):FF_COR(16),EL.rr?'#ffd27a':'#ffffff',EL.rr?1:p,null,'center',LW*.42);
   elT(FAF.names[1],LW*.73,yb-22*S,FF_CIN(16),FF_COL[1][0],1,FF_COL[1][1],'center',LW*.4);
@@ -3925,6 +3952,8 @@ function elIntro(g,now,k){const z=g.z0,z1=g.z1,a=clamp(k/.35),ta=a*(1-clamp((k-2
   elZone(z,0,a*.8);elZone(z1,1,a*.8);elStrip(g,now,true);if(M.sp>=0)elCardDraw(z,M.sp,1);
   elT(`Manche ${EL.r}`,EL.LW/2,EL.LH*.36,FF_CIN(26),'#ffd27a',ta,'rgba(255,190,90,.8)');
   elT('Attaque ⚔️ ou défense 🛡️ ? À l’instinct !',EL.LW/2,EL.LH*.36+30*S,FF_COR(19),'#fff3d6',ta);
+  if(EL.gg[0]>=EL_GMAX)elT('✨ Jauge pleine : tes sceaux doubles 💥 💠 sont prêts !',EL.LW/2,EL.LH*.36+56*S,FF_COR(17),'#ffd27a',ta*(.75+.25*Math.sin(now/150)),'rgba(255,190,90,.7)');
+  else if(EL.gg[1]>=EL_GMAX)elT(`⚠️ La jauge de ${EL.opNm} est pleine : gare à la Tempête ardente !`,EL.LW/2,EL.LH*.36+56*S,FF_COR(16),'#ff9a8a',ta);
   if(M.sp>=0){const s=EL_SP[M.sp];elT(`${s.ic} ${s.nm}`,z.x+12*S,z.y+22*S,FF_COR(16),s.k==='a'?'#ffb08a':'#9fd0ff',1,null,'left',z.w-80*S)}
   else elT('← choisis ton sort',z.x+10*S,z.y+z.h-18*S,FF_COR(15),'rgba(243,230,200,.75)',a,null,'left',z.w*.9);
   if(k>=2.2){const c=Math.floor((k-2.2)/.55),f=((k-2.2)/.55)%1;if(c<3)elT(String(3-c),EL.LW/2,EL.LH*.62,FF_CIN(70*(1.25-.35*ease(f))),'#ffffff',1-f*.6,'rgba(200,170,255,.9)')}}
@@ -3941,18 +3970,23 @@ function elPlay(g,now,k){const z=g.z0,z1=g.z1,M=EL.me,col=FF_COL[0],o=elOpp(),om
   if(EL.ph==='draw'){if(k<.7)elT('GO !',z.cx,z.cy+10*S,FF_CIN(50*(1+.4*(1-ease(k/.7)))),'#ffd27a',1-k/.7,'rgba(255,190,90,.9)');
     else if(!sp)elT('← touche un sort ⚔️ ou 🛡️',z.x+10*S,z.cy,FF_COR(18),'#ffffff',(.6+.4*Math.sin(now/200))*(EL.hintT&&now-EL.hintT<1500?1:.85),null,'left',z.w*.95);
     else if(!M.st.length&&!M.cur)elT('Trace le sceau ici, en grand',z.cx,z.cy,FF_COR(17),'rgba(243,230,200,.6)',.6+.4*Math.sin(now/300),null,'center',z.w*.9)}
+  if(EL.lockT&&now-EL.lockT<1800&&EL.ph==='draw')elT(`🔒 Jauge ${EL.gg[0]}/${EL_GMAX} : réussis encore ${EL_GMAX-EL.gg[0]} sort${EL_GMAX-EL.gg[0]>1?'s':''}`,z.cx,z.y+46*S,FF_COR(16),'#ffd27a',1-clamp((now-EL.lockT-1300)/500),null,'center',z.w*.95);
   if(EL.ph==='wait'){const ok=M.done&&M.res&&M.res.sp>=0;elT(ok?'Sort lancé ✓':'Temps écoulé',z.cx,yb-16*S,FF_CIN(16),ok?'#ffd27a':'#ff9a8a',1,'rgba(255,190,90,.6)','center',z.w*.9);
     elT(`${ok?ffFmt(M.tD)+' s · ':''}${od?'résolution…':'en attente de '+EL.opNm+'…'}`,z.cx,yb+2*S,FF_COR(14),'#f3e6c8',.85,null,'center',z.w*.95)}
   elT(od?`${EL.opNm} a lancé son sort ✓`:os.length?`${EL.opNm} trace…`:`${EL.opNm} se concentre…`,z1.cx,z1.y+z1.h-14*S,FF_COR(15),od?'#ffd27a':'rgba(243,230,200,.75)',1,null,'center',z1.w*.95)}
-function elMsgL(){const K=EL.kind,me=EL.w===0,R=FAF.res,fin=R&&R.fin,G1='#ffd27a',RED='#ff8a8a',big=t=>fin?'COUP FINAL !':t;
-  switch(K){case 'aa':return me?{b:big('TOUCHÉ !'),s:'+1 point · ton sort est parti le premier',c:G1}:{b:'Touché…',s:'son sort est parti plus vite',c:RED};
-    case 'aa1':return me?{b:big('TOUCHÉ !'),s:'+1 point · son sort a raté',c:G1}:{b:'Touché…',s:'ton sort a raté',c:RED};
-    case 'free':return me?{b:big('TOUCHÉ !'),s:'+1 point · aucun sort en face',c:G1}:{b:'Touché…',s:'aucun sort lancé à temps',c:RED};
-    case 'dfail':return me?{b:big('TOUCHÉ !'),s:'+1 point · son bouclier a raté',c:G1}:{b:'Touché…',s:'ton bouclier a raté',c:RED};
-    case 'late':return me?{b:big('TOUCHÉ !'),s:'+1 point · son bouclier est arrivé trop tard',c:G1}:{b:'Trop tard…',s:'ton bouclier n’a pas eu le temps',c:RED};
-    case 'pierce':return me?{b:big('PERCÉ !'),s:'+1 point · ton sort a brisé son bouclier',c:G1}:{b:'Bouclier percé…',s:'son attaque était mieux tracée',c:RED};
-    case 'reflect':return me?{b:big('RENVOYÉ !'),s:'+1 point · ta défense était mieux tracée',c:G1}:{b:'Renvoyé…',s:'sa défense était mieux tracée',c:RED};
-    case 'riposte':return me?{b:big('RIPOSTE !'),s:'+1 point · son attaque a raté',c:G1}:{b:'Sort raté…',s:'ton attaque a raté, il riposte',c:RED};
+function elMsgL(){const K=EL.kind,me=EL.w===0,R=FAF.res,fin=R&&R.fin,G1='#ffd27a',RED='#ff8a8a',big=t=>fin?'COUP FINAL !':t,pv=EL.pv||1,P=`+${pv} point${pv>1?'s':''}`,U=pv>1;
+  const myS=elSpOf(EL.res2&&EL.res2[0]),opS=elSpOf(EL.res2&&EL.res2[1]),hit=U?'TEMPÊTE ARDENTE !':'TOUCHÉ !';
+  switch(K){case 'aa':return me?{b:big(hit),s:`${P} · ton sort est parti le premier`,c:G1}:{b:'Touché…',s:'son sort est parti plus vite',c:RED};
+    case 'aa1':return me?{b:big(hit),s:`${P} · son sort a raté`,c:G1}:{b:'Touché…',s:'ton sort a raté',c:RED};
+    case 'uover':return me?{b:big('TEMPÊTE ARDENTE !'),s:`${P} · ton ultime écrase son sort`,c:G1}:{b:'Ultime…',s:'sa Tempête ardente a écrasé ton sort',c:RED};
+    case 'free':return me?{b:big(hit),s:`${P} · aucun sort en face`,c:G1}:{b:'Touché…',s:'aucun sort lancé à temps',c:RED};
+    case 'dfail':return me?{b:big(hit),s:`${P} · son bouclier a raté`,c:G1}:{b:'Touché…',s:'ton bouclier a raté',c:RED};
+    case 'late':return me?{b:big(hit),s:`${P} · son bouclier est arrivé trop tard`,c:G1}:{b:'Trop tard…',s:'ton bouclier n’a pas eu le temps',c:RED};
+    case 'pierce':return me?{b:big('PERCÉ !'),s:`${P} · ton sort a brisé son bouclier`,c:G1}:{b:'Bouclier percé…',s:'son attaque était mieux tracée',c:RED};
+    case 'upierce':return me?{b:big('ULTIME !'),s:`${P} · seul le Bouclier parfait pouvait l’arrêter`,c:G1}:{b:'Bouclier pulvérisé…',s:'seul le Bouclier parfait arrête une Tempête ardente',c:RED};
+    case 'reflect':return me?{b:big('RENVOYÉ !'),s:`${P} · ${myS&&myS.u?'ton Bouclier parfait renvoie tout':'ta défense était mieux tracée'}`,c:G1}:{b:'Renvoyé…',s:opS&&opS.u?'son Bouclier parfait renvoie tout':'sa défense était mieux tracée',c:RED};
+    case 'ublock':return me?{b:big('BOUCLIER PARFAIT !'),s:`${P} · tu as renvoyé sa Tempête ardente`,c:G1}:{b:'Ultime renvoyé…',s:'son Bouclier parfait l’a arrêtée',c:RED};
+    case 'riposte':return me?{b:big('RIPOSTE !'),s:`${P} · son attaque a raté`,c:G1}:{b:'Sort raté…',s:'ton attaque a raté, il riposte',c:RED};
     default:{const sh=EL.calm?EL.calm.sh:[0,0];return{b:'NUL',s:sh[0]&&sh[1]?'deux boucliers, personne n’attaque':sh[0]||sh[1]?'un bouclier, mais aucune attaque':'aucun sort n’a abouti',c:'#d6dcf0'}}}}
 function elStat(i){const r=EL.res2&&EL.res2[i];if(!r)return'';const s=EL_SP[r.sp];if(!s)return'aucun sort';const st='★'.repeat(r.sr|0)+'☆'.repeat(3-(r.sr|0));
   return r.ok?`${s.ic} ${s.nm} · ${st} ${Math.round((+r.tt||0)*100)} % · ${ffFmt(+r.t)} s`:`${s.ic} ${s.nm} · ${r.tt>0?st+' · ':''}${r.w||'raté'}`}
@@ -3964,9 +3998,9 @@ function elBanner(now){let t,end;if(EL.calm){t=(now-EL.t0)/1000-1.2;end=3.6-1.2}
   elT(`Toi · ${elStat(0)}`,LW*.27,y+52*S,FF_COR(14),'rgba(243,230,200,.9)',a,null,'center',LW*.46);
   elT(`${EL.opNm} · ${elStat(1)}`,LW*.73,y+52*S,FF_COR(14),'rgba(243,230,200,.75)',a,null,'center',LW*.46)}
 function elCalmDraw(now){const C=EL.calm,k=(now-EL.t0)/1000;
-  [0,1].forEach(i=>{const P=FAF.P[i];if(P&&P.scr){const f=clamp(1-k/1.1);if(f>0)P.scr.forEach(s=>ffStroke(s,C.sh[i]?FF_SHD[EL_SP[EL.res2[i].sp].el].c[0]:'#8a8090',FF_COL[i][1],f,0))}});
-  [0,1].forEach(i=>{if(!C.sh[i])return;const sh=FF_SHD[EL_SP[EL.res2[i].sp].el],f=ease(clamp((k-.3)/.6)),a=f*(1-clamp((k-2.8)/.6));if(a<=.01)return;
-    ctx.save();ctx.translate(W/2,i?H*.385:H*.615);if(i)ctx.scale(1,-1);ctx.globalCompositeOperation='lighter';try{FF_SH[sh.k](f,a,0,now,sh.c)}catch(e){}ctx.restore()})}
+  [0,1].forEach(i=>{const P=FAF.P[i];if(P&&P.scr){const f=clamp(1-k/1.1);if(f>0)P.scr.forEach(s=>ffStroke(s,C.sh[i]?elShdOf(elSpOf(EL.res2[i])).c[0]:'#8a8090',FF_COL[i][1],f,0))}});
+  [0,1].forEach(i=>{if(!C.sh[i])return;const sh=elShdOf(elSpOf(EL.res2[i])),f=ease(clamp((k-.3)/.6)),a=f*(1-clamp((k-2.8)/.6));if(a<=.01)return;
+    const pp=elFFPos(i,'sd');ctx.save();ctx.translate(pp[0],pp[1]);if(i)ctx.scale(1,-1);ctx.globalCompositeOperation='lighter';try{FF_SH[sh.k](f,a,0,now,sh.c)}catch(e){}ctx.restore()})}
 function elEndDraw(now){const LW=EL.LW,LH=EL.LH,t=(now-EL.endT)/1000,a=clamp(t/.6),win=FAF.win===0,cy=LH*.42;ctx.fillStyle=`rgba(4,3,10,${.5*a})`;ctx.fillRect(0,0,LW,LH);
   if(win){ctx.save();ctx.globalCompositeOperation='lighter';for(let j=0;j<14;j++){const an=j/14*TAU+now/2600,l=LW*.5,gr=ctx.createLinearGradient(LW/2,cy,LW/2+Math.cos(an)*l,cy+Math.sin(an)*l);gr.addColorStop(0,`rgba(255,210,122,${.22*a})`);gr.addColorStop(1,'rgba(255,210,122,0)');ctx.strokeStyle=gr;ctx.lineWidth=(10+8*(j%2))*S;ctx.beginPath();ctx.moveTo(LW/2,cy);ctx.lineTo(LW/2+Math.cos(an)*l,cy+Math.sin(an)*l);ctx.stroke()}gdraw('#ffd27a',LW/2,cy,120*S,.3*a);ctx.restore();
     elT('👑',LW/2,cy-44*S,`${Math.round(34*S)}px serif`,'#fff',a);elT(EL.forfeit?'VICTOIRE PAR FORFAIT':'VICTOIRE !',LW/2,cy,FF_CIN(EL.forfeit?26:36),'#ffd27a',a,'rgba(255,190,90,.9)')}
@@ -3979,10 +4013,10 @@ function elEndDraw(now){const LW=EL.LW,LH=EL.LH,t=(now-EL.endT)/1000,a=clamp(t/.
     else{elBtnD('menu','Retour au menu',LW/2-bw/2,by,bw,bh,true);if(EL.gone&&!EL.forfeit&&!EL.lost)elT(`${EL.opNm} a quitté le salon`,LW/2,by-10*S,FF_COR(15),'rgba(243,230,200,.75)',1)}}}
 function elDraw(now,dt){elDims();const W0=W,H0=H,S0=S,LW=EL.LW,LH=EL.LH;if(EL.rot)ctx.transform(0,1,-1,0,W0,0);W=LW;H=LH;S=EL.S;EL.btns=[];
   try{const k=(now-EL.t0)/1000,g=elGeo(),ph=EL.ph;ctx.save();if(FAF.shake)ctx.translate(rnd(-1,1)*FAF.shake*9*S,rnd(-1,1)*FAF.shake*9*S);
-    ctx.drawImage(elBG(),-12*S,-12*S,LW+24*S,LH+24*S);elAmb(now);
+    ctx.drawImage(elBG(),-12*S,-12*S,LW+24*S,LH+24*S);elAmb(now);elSeal(0,now);elSeal(1,now);
     if(ph==='intro')elIntro(g,now,k);else if(ph==='draw'||ph==='wait')elPlay(g,now,k);
     if(ph==='clash'||ph==='next'||ph==='end')elFF(()=>{if(EL.calm)elCalmDraw(now);else if(FAF.res){[0,1].forEach(i=>ffStrokesClash(i));ffShieldDraw(now);elLoserOrb(now);ffAtkDraw(now)}});
-    elFF(()=>ffPartsDraw());ctx.restore();
+    elFF(()=>ffPartsDraw());elFxL(now);ctx.restore();
     if(ph==='ready')elReady(g,now);
     if(ph==='clash')elBanner(now);
     if(ph==='next')elT(`Manche suivante… en attente de ${EL.opNm}`,LW/2,LH*.85,FF_COR(17),'#f3e6c8',.6+.4*Math.sin(now/300));
@@ -3992,7 +4026,97 @@ function elDraw(now,dt){elDims();const W0=W,H0=H,S0=S,LW=EL.LW,LH=EL.LH;if(EL.ro
     if(FAF.flash>0){ctx.save();ctx.globalAlpha=Math.min(.85,FAF.flash);ctx.fillStyle=FAF.fcol;ctx.globalCompositeOperation='lighter';ctx.fillRect(-20,-20,LW+40,LH+40);ctx.restore()}}
   finally{W=W0;H=H0;S=S0}}
 
-window.__enc={EL,EL_SP,elDecide,elScore,elEnc,elDec,elConnect,showOnline,elDims,elGeo,elClash,score,PAL,startPalier,get G(){return G},get A(){return A},evaluate,showMap,showGrim,replay,get SAVE(){return SAVE},DU,showDuel,duBegin,duTurn,duChance,duRoll,duSeed,duSpec,duPlay,duCxTable,duProbs,showDuCol,duPlayCol,duName,duReveal,makeCard,showCard,saveCard,CARD,diagSeal,ruleCheck,ruleSet,RULES,trySkip,spSeen,SFX,scoreV2,FAF,ffStart,ffRound,ffJudge,FF_ATK,FF_SHD};
+/* bouclier parfait : runes + tourbillon + dôme */
+/* ===== Duel en ligne : estrades, jauge, sceaux doubles, effets spectaculaires, musique ===== */
+const EL_GMAX=3;// sorts réussis pour remplir la jauge
+const EL_ULT={k:'ult',nm:'Tempête ardente',ic:'💥',c:['#fffbe8','#ffb030','#a040ff']};
+const EL_PARF={k:'parfait',nm:'Bouclier parfait',ic:'💠',c:['#ffffff','#ffe39a','#5ab8ff']};
+// position des estrades (sol de l'arène), repère paysage
+function elEstL(i){let [x,y]=elIP(i?.915:.09,.54);const m=64*EL.S;x=clamp(x,m,EL.LW-m);y=clamp(y,EL.LH*.38,EL.LH*.8);return[x,y]}
+// points de la mêlée dans le repère du Face à face (vertical) : départ du sort, bouclier, impact
+function elFFPos(i,what){const e=elEstL(i),o=elEstL(1-i),h=58*EL.S,yL=e[1]-h;let x=e[0];
+  if(what==='o')x=lerp(e[0],o[0],.07);else if(what==='sd')x=lerp(e[0],o[0],.2);return[yL,EL.LW-x]}
+function elLtoF(x,y){return[y,EL.LW-x]}
+// ajout d'une particule exprimée dans le repère paysage (gx : gravité vers le bas de l'écran paysage)
+function elAddL(x,y,vx,vy,o){ffAdd(Object.assign({x:y,y:EL.LW-x,vx:vy,vy:-vx,l:0,m:1,s:1.5,c:'#ffffff'},o||{}))}
+
+/* ----- intensité et couleur des sceaux d'estrade ----- */
+function elSealState(i,now){const t=now/1000,ph=EL.ph,base=FF_COL[i][1];let I=.28+.06*Math.sin(t*2+i),col=base,spin=.25,fail=false,flare=0;
+  if(ph==='draw'||ph==='wait'){
+    if(i===0){const M=EL.me,sp=M&&M.sp>=0?EL_SP[M.sp]:null;if(sp){const n=sp.sig.length,pr=M.done?1:clamp((M.st.length+(M.cur?.5:0))/n);I=.4+.55*pr+(M.done?.15*Math.sin(t*9):0);col=sp.u?'#ffd27a':sp.k==='a'?'#ff8a3a':'#5aa0ff';spin=.4+1.6*pr}}
+    else{const o=elOpp(),om=o&&o.mid===EL.mid?o:null,od=!!(om&&om.res&&om.res.r===EL.r&&om.res.m===EL.mid),os=elOppInk();const pr=od?1:clamp(os.length*.34);I=.4+.55*pr+(od?.15*Math.sin(t*9+1):0);spin=.4+1.6*pr}}
+  else if(ph==='clash'&&EL.calm){const C=EL.calm,k=(now-EL.t0)/1000;if(C.sh[i]){I=.5+.6*ease(clamp(k/.5));col=FF_SHD[EL_SP[EL.res2[i].sp].el]?FF_SHD[EL_SP[EL.res2[i].sp].el].c[1]:'#5aa0ff';if(EL_SP[EL.res2[i].sp].u)col=EL_PARF.c[1]}else if(C.fz[i]){fail=true;I=.2}}
+  else if((ph==='clash'||ph==='next')&&FAF.res){const R=FAF.res,c=FAF.ck,T=R.T,P=FAF.P[i];
+    if(i===R.a){col=R.atk.c[1];if(!P.ok){fail=c>T.tL;I=fail?.18:.5+.4*ease(clamp(c/T.tL))}else if(c<T.tL){const e=ease(clamp(c/T.tL));I=.55+1.05*e;spin=.6+5*e}else{const d=c-T.tL;flare=Math.exp(-d*3);I=.5+1.1*flare;spin=.6+4*flare}}
+    else{if(EL.showSh&&P.ok){col=R.shd.c[1];const e=ease(clamp((c-.3)/Math.max(.3,T.tL-.3)));I=.5+.8*e;spin=.5+3*e}else if(EL.loserAtk===i){col=FF_ATK[EL_SP[EL.res2[i].sp].el]?FF_ATK[EL_SP[EL.res2[i].sp].el].c[1]:base;I=.5+.5*ease(clamp(c/T.tL));if(c>T.tL+.3){fail=true;I=.18}}else if(P&&P.scr&&P.scr.length&&!P.ok){fail=c>.6;I=.2}}}
+  return{I,col,spin,fail,flare}}
+/* ----- sceau d'estrade : cercle runique au sol, qui s'illumine puis jaillit ----- */
+function elSeal(i,now){const [x,y]=elEstL(i),s=EL.S,st=elSealState(i,now),t=now/1000,rx=60*s,ry=rx*.36;let I=st.I;const col=st.fail?'#8a8090':st.col;
+  if(st.fail)I*=.6+.4*Math.random();
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  // halo au sol
+  ctx.save();ctx.translate(x,y);ctx.scale(1,.36);gdraw(col,0,0,rx*1.9,Math.min(1,.35*I));gdraw('#ffffff',0,0,rx*.7,Math.min(.6,.12*I*I));ctx.restore();
+  ctx.save();ctx.translate(x,y);ctx.scale(1,.36);
+  const a=Math.min(1,.45+.5*I),rot=t*st.spin*(i?-1:1);ctx.lineCap='round';
+  for(const [r,lw,al] of [[rx,2.4,1],[rx*.86,1.2,.75],[rx*.52,1.6,.85]]){ctx.strokeStyle=hexA(col,al*a);ctx.lineWidth=lw*s/.36*.5;ctx.beginPath();ctx.arc(0,0,r,0,TAU);ctx.stroke()}
+  ctx.strokeStyle=hexA('#ffffff',.55*a*Math.min(1,I));ctx.lineWidth=1*s/.36*.5;ctx.beginPath();ctx.arc(0,0,rx,rot,rot+1.4);ctx.stroke();ctx.beginPath();ctx.arc(0,0,rx,rot+Math.PI,rot+Math.PI+1.4);ctx.stroke();
+  // hexagramme qui tourne à l'envers
+  ctx.strokeStyle=hexA(col,.8*a);ctx.lineWidth=1.3*s/.36*.5;for(let k=0;k<2;k++){ctx.beginPath();for(let j=0;j<=3;j++){const an=-rot*.7+k*Math.PI/3+j*TAU/3;const px=Math.cos(an)*rx*.52,py=Math.sin(an)*rx*.52;j?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.stroke()}
+  // runes sur l'anneau
+  for(let j=0;j<10;j++){const an=rot+j*TAU/10;drawRune(Math.cos(an)*rx*.93,Math.sin(an)*rx*.93,6*s,j+i*3,an+Math.PI/2,j%2?'#ffffff':col,a*(.55+.45*Math.sin(t*3+j)))}
+  ctx.restore();
+  // colonne de lumière quand le sceau est chargé (faite de halos superposés : bords doux)
+  if(I>.95){const h=(150+110*Math.min(1,I-.95))*s,al=Math.min(.6,(I-.95)*.55),w=rx*(.75+.3*st.flare);
+    for(let j=0;j<10;j++){const u=j/9,yy=y-h*u,ww=w*(1-.45*u);gdraw(col,x,yy,ww,al*(1-u)*.9);gdraw('#ffffff',x,yy,ww*.3,al*(1-u)*.5)}}
+  // onde de choc au sol au moment où le sort jaillit
+  if(st.flare>.02){const u=1-st.flare;ctx.save();ctx.translate(x,y);ctx.scale(1,.36);ctx.strokeStyle=hexA(col,.9*st.flare);ctx.lineWidth=5*s*st.flare/.36*.5+1;ctx.beginPath();ctx.arc(0,0,rx*(1+u*2.4),0,TAU);ctx.stroke();ctx.restore()}
+  ctx.restore();
+  // étincelles qui montent
+  if(Math.random()<.12+.25*Math.min(1.4,I)&&!st.fail){const an=rnd(0,TAU);elAddL(x+Math.cos(an)*rx*.9,y+Math.sin(an)*ry*.9,rnd(-6,6)*s,-rnd(30,90)*s*(.5+I*.5),{m:rnd(.6,1.3),s:rnd(.8,1.8),c:Math.random()<.5?col:'#ffffff'})}}
+
+/* ----- grands effets dans le repère paysage (au-dessus des sorts) ----- */
+function elSkyBolt(x0,x1,y1,c,a,w){ffBoltDraw(ffBoltPts(x0,-10,x1,y1,16,26*EL.S),c,a,w)}
+function elPillar(x,y,c,a,h,w,now){ctx.save();ctx.globalCompositeOperation='lighter';for(let j=0;j<7;j++){const ph=now/80+j*1.7,hh=h*(.55+.45*Math.sin(ph*.7+j)),ww=w*(.25+.12*Math.sin(ph)),ox=(j-3)*w*.13+Math.sin(ph*1.3)*6*EL.S;
+    const g=ctx.createLinearGradient(0,y,0,y-hh);g.addColorStop(0,hexA(c[j%2?1:2],.32*a));g.addColorStop(.6,hexA(c[1],.16*a));g.addColorStop(1,hexA(c[0],0));ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x+ox-ww,y);ctx.quadraticCurveTo(x+ox-ww*.4,y-hh*.5,x+ox+Math.sin(ph)*8*EL.S,y-hh);ctx.quadraticCurveTo(x+ox+ww*.4,y-hh*.5,x+ox+ww,y);ctx.closePath();ctx.fill()}
+  for(let j=0;j<5;j++)gdraw(c[j%2?1:2],x,y-h*j/6,w*(1-j*.12),.32*a*(1-j/6));gdraw(c[0],x,y-h*.15,w*.7,.45*a);ctx.restore()}
+function elFxL(now){const R=FAF.res;if(!R||EL.calm||EL.ph!=='clash'&&EL.ph!=='next')return;const c=FAF.ck,T=R.T,s=EL.S,o=R.o,k=R.atk.k;
+  // ciel qui s'assombrit pendant la charge de l'ultime, éclairs
+  if(k==='ult'){const dk=c<T.tL?ease(clamp(c/T.tL)):1-clamp((c-T.tP-.4)/.8);if(dk>0){ctx.fillStyle=`rgba(6,2,16,${.45*dk})`;ctx.fillRect(-20,-20,EL.LW+40,EL.LH+40);
+      if(c<T.tI&&Math.random()<.18*dk){const [ex]=elEstL(R.a);ctx.save();elSkyBolt(ex+rnd(-80,80)*s,ex+rnd(-20,20)*s,elEstL(R.a)[1]-60*s,EL_ULT.c,.9,1.2);ctx.restore();FAF.flash=Math.max(FAF.flash,.12);FAF.fcol='#d8c0ff'}}}
+  // pluie d'étoiles : des météores tombent du ciel sur la cible pendant le vol
+  if(k==='astres'&&FAF.P[R.a].ok&&c>T.tL&&c<T.tI+.2){const tgi=o==='reflect'?R.a:R.d,[tx,ty]=elEstL(tgi);ctx.save();ctx.globalCompositeOperation='lighter';
+    for(let j=0;j<7;j++){const u=clamp((c-T.tL-j*.08)/((T.tI-T.tL)*.9));if(u<=0||u>=1)continue;const sx=tx+(j-3)*46*s+120*s*(tgi?-1:1),x=lerp(sx,tx+(j-3)*16*s,u),y=lerp(-20,ty-40*s,u*u),cc=R.atk.c[j%3];
+      const g=ctx.createLinearGradient(x,y,x+(sx-tx)*.25,y-90*s);g.addColorStop(0,hexA(cc,.95));g.addColorStop(1,hexA(cc,0));ctx.strokeStyle=g;ctx.lineWidth=5*s;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(sx-tx)*.25,y-90*s);ctx.stroke();gdraw(cc,x,y,22*s,.9);gdraw('#ffffff',x,y,7*s,1)}
+    ctx.restore()}
+  // impact
+  let ti=-1,idx=-1,kk=k,cc=R.atk.c;if(o==='hit'){ti=T.tI;idx=R.d}else if(o==='pierce'){ti=T.tP;idx=R.d}else if(o==='reflect'){ti=T.tP;idx=R.a;cc=R.rc}else if(o==='riposte'){ti=T.tP;idx=R.a;kk='shield';cc=R.shd.c}
+  if(o==='block'||o==='reflect'||o==='pierce'){const d=c-T.tI;if(d>=0&&d<.7){const [x,y]=elEstL(R.d),a=1-d/.7;ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(x,y);ctx.scale(1,.36);ctx.strokeStyle=hexA(R.shd.c[1],.9*a);ctx.lineWidth=6*s;ctx.beginPath();ctx.arc(0,0,60*s*(1+d*3),0,TAU);ctx.stroke();ctx.restore()}}
+  if(ti<0)return;const d=c-ti;if(d<0||d>1.4)return;const [x,y]=elEstL(idx),hy=y-58*s,a=1-clamp((d-.5)/.9);
+  if(kk==='foudre'||kk==='ult'){if(d<.45){const n=kk==='ult'?5:3;ctx.save();for(let j=0;j<n;j++)if(Math.random()<.7)elSkyBolt(x+rnd(-90,90)*s,x+rnd(-24,24)*s,hy+rnd(-10,30)*s,kk==='ult'?EL_ULT.c:cc,1-d/.45,kk==='ult'?1.5:1.2);ctx.restore();if(Math.random()<.4){FAF.flash=Math.max(FAF.flash,.18);FAF.fcol='#e0ecff'}}}
+  if(kk==='feu'||kk==='ult'||kk==='astres')elPillar(x,y,kk==='astres'?cc:['#fff1c0','#ff8a2a','#ff3a0a'],a,(kk==='ult'?330:220)*s,(kk==='ult'?110:80)*s,now);
+  if(kk==='ult'||R.fin){const u=clamp(d/1.1);ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(x,y);ctx.scale(1,.36);for(let j=0;j<3;j++){const uj=clamp(u-j*.12);if(uj<=0||uj>=1)continue;ctx.strokeStyle=hexA(cc[j],.85*(1-uj));ctx.lineWidth=8*s*(1-uj)+1;ctx.beginPath();ctx.arc(0,0,60*s+EL.LW*.5*uj,0,TAU);ctx.stroke()}ctx.restore()}
+  if(d<.05&&!R.ev.elfx){R.ev.elfx=1;// gerbe d'impact supplémentaire, vue paysage
+    const N=kk==='ult'?90:50;for(let j=0;j<N;j++){const an=rnd(-Math.PI,0),v=rnd(80,420)*s;elAddL(x,hy,Math.cos(an)*v,Math.sin(an)*v,{m:rnd(.6,1.4),s:rnd(1.2,3),c:cc[j%3],gx:520*s})}
+    for(let j=0;j<(kk==='ult'?18:8);j++)elAddL(x+rnd(-30,30)*s,y,rnd(-40,40)*s,-rnd(10,50)*s,{ty:'m',c:'#000',s:rnd(10,20)*s,m:rnd(1.2,2.2)})}}
+
+/* ----- musique du duel : ré mineur elfique, harpe, flûte, tambours sur cadre, chœur ----- */
+const ELCH=[[50,57,62,65],[46,53,58,62],[48,55,60,64],[50,57,62,65],[43,50,55,58],[46,53,58,62],[48,55,60,64],[45,52,57,61]];
+const ELMEL=[[[74,4],[77,2],[76,2],[74,3],[72,1],[70,4],[72,4],[76,2],[79,2],[77,6],[76,2],[74,4],[70,2],[74,2],[77,4],[74,2],[77,2],[79,3],[77,1],[76,2],[79,2],[81,8]],
+  [[81,4],[82,2],[81,2],[79,4],[77,2],[74,2],[76,4],[79,2],[84,2],[81,6],[77,2],[79,4],[77,2],[74,2],[77,4],[79,2],[82,2],[81,3],[79,1],[77,2],[76,2],[76,8]]].map(ph=>{let b=0;return ph.map(([m,d])=>{const n={b,m,d};b+=d;return n})});
+const EL_E8=60/104/2;
+function elMusic(t0){if(A.elN==null||A.elN<t0)A.elN=t0+.05;const hot=EL.ph==='intro'||EL.ph==='draw'||EL.ph==='wait'||EL.ph==='clash',E=EL_E8;
+  while(A.elN<t0+.3){const t=A.elN,st=A.elS||0,s=st%8,bar=Math.floor(st/8),bi=bar%8,sec=Math.floor(bar/8)%4,ch=ELCH[bi];
+    if(s===0)A.pads.forEach((o,i)=>o.frequency.setTargetAtTime(hz(ch[i%4]+(i>=4?12:0)),t,.5));
+    harp(t,ch[[0,1,2,3,2,1,2,3][s]]+12,s===0?.85:.5);if(s===0&&bar%2===0)[0,1,2,3].forEach((j,n)=>harp(t+.05+n*.06,ch[j]+24,.35));
+    if(s===0)bodh(t,hot?1.1:.8,true);else if(s===3||s===6)bodh(t,hot?.8:.5,true);else if(hot&&(s===2||s===5||s===7))bodh(t,.3,false);
+    if(hot&&EL.ph==='draw'&&s%2===1)noise(t,.03,.025,'highpass',6000,1,A.music,.001);
+    if(sec>0){const beat=bi*8+s,mel=ELMEL[sec===2?1:0];mel.forEach(n=>{if(n.b===beat){const dur=n.d*E;if(n.d>=3&&Math.random()<.4){whistle(t,n.m+2,.06,.75);whistle(t+.06,n.m,dur-.06,.95)}else whistle(t,n.m,dur*.95,.95)}})}
+    if(s===0&&bar%4===0&&sec!==1)[ch[1]+12,ch[2]+12].forEach(m=>choirV(t,m,E*8*3.6,.05,A.music));
+    if(Math.random()<.05)cel(t+rnd(0,E),[86,89,91,93,96,98][Math.random()*6|0],.16,.5);
+    A.elS=st+1;A.elN+=E}}
+
+FF_SH.parfait=function(f,a,h,now,c){FF_SH.hexa(f,a*.8,h,now,['#ffffff','#9ad8ff','#3a7aff']);FF_SH.runes(f,a,h,now,c);const w=ffSW(f);gdraw(c[2],0,-24*S,w*.5,.22*a*(1+h));gdraw(c[1],0,-18*S,w*.3,.18*a*(1+h))};
+window.__enc={EL_GMAX,elFFPos,elEstL,EL,EL_SP,elDecide,elScore,elEnc,elDec,elConnect,showOnline,elDims,elGeo,elClash,score,PAL,startPalier,get G(){return G},get A(){return A},evaluate,showMap,showGrim,replay,get SAVE(){return SAVE},DU,showDuel,duBegin,duTurn,duChance,duRoll,duSeed,duSpec,duPlay,duCxTable,duProbs,showDuCol,duPlayCol,duName,duReveal,makeCard,showCard,saveCard,CARD,diagSeal,ruleCheck,ruleSet,RULES,trySkip,spSeen,SFX,scoreV2,FAF,ffStart,ffRound,ffJudge,FF_ATK,FF_SHD};
 </script>
 </body>
 </html>
