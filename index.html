@@ -3310,6 +3310,11 @@ function ffS(n,x){if(!A)return;try{const t=at(),M=A.master,Rv=A.rev;switch(n){
   case 'B_ult':ffS('B_feu');ffS('B_foudre');osc('sine',38,t,.6,.01,2.2,M);[45,52,57].forEach(m=>choirV(t+.05,m,2.6,.2));break;
   case 'L_kitsune':[81,84,88,93].forEach((m,i)=>celesta(t+i*.04,m,1,M));{const f=noise(t,.7,.16,'bandpass',500,1,M,.05);f.frequency.exponentialRampToValueAtTime(4200,t+.6)}osc('sine',110,t,.2,.01,.8,M).frequency.exponentialRampToValueAtTime(220,t+.5);break;
   case 'B_kitsune':SND.burst();osc('sine',62,t,.5,.01,1.3,M).frequency.exponentialRampToValueAtTime(34,t+1);[69,76,81].forEach((m,i)=>celesta(t+i*.05,m,1,Rv));noise(t,1,.2,'lowpass',900,.8,M,.01);break;
+  case 'L_dragon':{const f=noise(t,1.3,.34,'lowpass',500,1,M,.03);f.frequency.exponentialRampToValueAtTime(5200,t+.45)}osc('sawtooth',58,t,.18,.02,1.1,M).frequency.exponentialRampToValueAtTime(30,t+1);[50,57].forEach(m=>choirV(t,m,1.4,.14));break;
+  case 'B_dragon':SND.burst();osc('sine',50,t,.6,.01,1.5,M).frequency.exponentialRampToValueAtTime(28,t+1.2);noise(t,1.2,.3,'lowpass',1400,.8,M,.01);[62,69,74].forEach((m,i)=>celesta(t+i*.05,m,1,Rv));break;
+  case 'droar':{const f=noise(t,1.4,.3,'bandpass',360,2.2,M,.08);f.frequency.linearRampToValueAtTime(640,t+.35);f.frequency.exponentialRampToValueAtTime(170,t+1.3)}osc('sawtooth',84,t,.14,.06,1.2,M).frequency.exponentialRampToValueAtTime(44,t+1.2);osc('square',42,t,.07,.06,1.2,M);break;
+  case 'dland':osc('sine',54,t,.75,.005,.8,M).frequency.exponentialRampToValueAtTime(26,t+.7);noise(t,.6,.32,'lowpass',520,.8,M,.005);break;
+  case 'dchg':{const f=noise(t,1.8,.14,'bandpass',220,3,M,.7);f.frequency.exponentialRampToValueAtTime(1900,t+1.8)}osc('sine',42,t,.2,.9,1.6,M).frequency.exponentialRampToValueAtTime(96,t+1.8);break;
   case 'kfuse':{const f=noise(t,.55,.22,'bandpass',260,1,M,.05);f.frequency.exponentialRampToValueAtTime(2800,t+.5)}[57,64,69].forEach(m=>choirV(t,m,1.3,.14));osc('sine',70,t+.3,.4,.01,.9,M);break;
   case 'kseal':noise(t,.05,.3,'bandpass',1900,2,M,.001);celesta(t+.01,[86,89,93,98][(x|0)%4],.8,Rv);break;
   case 'B_shield':SND.burst();[74,78,81,86].forEach((m,i)=>celesta(t+i*.04,m,1,Rv));break}}catch(e){}}
@@ -3334,7 +3339,7 @@ function ffAtkState(c){const R=FAF.res,T=R.T,o=R.o,a=R.a,dir=a?1:-1,PA=FAF.P[a];
   if(o==='pierce'&&c<T.tP){const u=clamp((c-T.tI)/(T.tP-T.tI)),e=Math.pow(u,1.1);return{x:lerp(R.SD[0],R.BD[0],e),y:lerp(R.SD[1],R.BD[1],e),ang:Math.atan2(R.BD[1]-R.SD[1],R.BD[0]-R.SD[0]),q:R.q[0]*1.1,col:R.atk.c,from:R.SD,u,tg:R.BD}}
   if(o==='reflect'&&c<T.tP){const u=clamp((c-T.tI)/(T.tP-T.tI)),e=Math.pow(u,1.15);return{x:lerp(R.SD[0],R.BA[0],e),y:lerp(R.SD[1],R.BA[1],e),ang:Math.atan2(R.BA[1]-R.SD[1],R.BA[0]-R.SD[0]),q:R.q[1],col:R.rc,from:R.SD,u,tg:R.BA}}
   return null}
-function ffEmit(st,k,now){if(k==='kitsune')return;if(k==='ult'){const bx=-Math.cos(st.ang),by=-Math.sin(st.ang),s2=st.q*S;for(let j=0;j<(st.charge?2:4);j++){const sp=rnd(40,180)*S;ffAdd({x:st.x+rnd(-10,10)*s2,y:st.y+rnd(-10,10)*s2,vx:bx*sp+rnd(-60,60)*S,vy:by*sp+rnd(-60,60)*S,l:0,m:rnd(.35,.8),s:rnd(1.2,3),c:['#ffb030','#ff5a1a','#c080ff','#ffffff'][Math.random()*4|0]})}if(Math.random()<.6)ffEmit(st,'foudre',now);return}const c=st.col,s=st.q*S,bx=-Math.cos(st.ang),by=-Math.sin(st.ang);
+function ffEmit(st,k,now){if(k==='kitsune'||k==='dragon')return;if(k==='ult'){const bx=-Math.cos(st.ang),by=-Math.sin(st.ang),s2=st.q*S;for(let j=0;j<(st.charge?2:4);j++){const sp=rnd(40,180)*S;ffAdd({x:st.x+rnd(-10,10)*s2,y:st.y+rnd(-10,10)*s2,vx:bx*sp+rnd(-60,60)*S,vy:by*sp+rnd(-60,60)*S,l:0,m:rnd(.35,.8),s:rnd(1.2,3),c:['#ffb030','#ff5a1a','#c080ff','#ffffff'][Math.random()*4|0]})}if(Math.random()<.6)ffEmit(st,'foudre',now);return}const c=st.col,s=st.q*S,bx=-Math.cos(st.ang),by=-Math.sin(st.ang);
   const n=st.charge?1:st.weak?1:3;for(let j=0;j<n;j++){const sp=rnd(40,160)*S;
     if(k==='feu'){ffAdd({x:st.x+rnd(-8,8)*s,y:st.y+rnd(-8,8)*s,vx:bx*sp+rnd(-50,50)*S,vy:by*sp+rnd(-50,50)*S,l:0,m:rnd(.35,.8),s:rnd(1.2,2.8),c:Math.random()<.5?c[1]:c[2]});if(Math.random()<.25)ffAdd({x:st.x,y:st.y,vx:bx*40*S,vy:by*40*S,l:0,m:rnd(.8,1.4),s:rnd(5,9)*S,c:'#000',ty:'m'})}
     else if(k==='glace')ffAdd({x:st.x+rnd(-6,6)*s,y:st.y+rnd(-6,6)*s,vx:bx*sp*.5+rnd(-30,30)*S,vy:by*sp*.5+rnd(-30,30)*S,l:0,m:rnd(.5,1),s:rnd(2,3.5)*S,c:c[1],ty:'ic',rot:rnd(0,TAU),vr:rnd(-6,6)});
@@ -3370,7 +3375,7 @@ function ffBlock(c,q){const R=FAF.res,[x,y]=R.SD;FAF.shake=Math.max(FAF.shake,.5
 function ffBoom(k,c,p,q,fin){const [x,y]=p,R=FAF.res,n=fin?1.7:1;FAF.shake=Math.max(FAF.shake,fin?1:.7);FAF.flash=Math.max(FAF.flash,fin?.9:.5);FAF.fcol=c[1];
   ffRing(x,y,c[1],60*q*S,fin?1:.7,0,8);ffRing(x,y,'#ffffff',30*q*S,.45,0,4);if(fin)ffRing(x,y,c[2],90*q*S,1.4,.12,10);
   const burst=(N,v0,v1,o)=>{for(let j=0;j<N*n;j++){const an=rnd(0,TAU),v=rnd(v0,v1)*S;ffAdd(Object.assign({x,y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:0,m:rnd(.5,1.2),s:rnd(1.2,3),c:Math.random()<.5?c[1]:c[0]},o&&o()))}};
-  if(k==='feu'){burst(70,120,560,()=>({c:Math.random()<.5?c[1]:c[2],g:140*S}));burst(14,20,90,()=>({ty:'m',c:'#000',s:rnd(8,16)*S,m:rnd(1,1.8)}))}
+  if(k==='feu'||k==='dragon'){burst(70,120,560,()=>({c:Math.random()<.5?c[1]:c[2],g:140*S}));burst(14,20,90,()=>({ty:'m',c:'#000',s:rnd(8,16)*S,m:rnd(1,1.8)}))}
   else if(k==='foudre'){R.zap={x,y,t:FAF.ck};burst(60,150,600,()=>({c:Math.random()<.6?'#ffffff':c[1],m:rnd(.2,.5)}))}
   else if(k==='glace'){burst(40,140,480,()=>({ty:'sh',s:rnd(3,7)*S,rot:rnd(0,TAU),vr:rnd(-12,12),g:420*S,c:Math.random()<.5?c[1]:c[0],m:rnd(.8,1.4)}));burst(30,30,120,()=>({c:'#ffffff',m:rnd(.8,1.5)}))}
   else if(k==='ombre'){R.dark={x,y,t:FAF.ck};burst(60,60,300,()=>({c:Math.random()<.6?c[1]:c[2],m:rnd(.8,1.6),dr:.96}));ffRing(x,y,c[2],80*q*S,1,.1,12)}
@@ -3473,7 +3478,7 @@ function ffEndHalf(i,now){const win=FAF.win===i,t=(now-FAF.endT)/1000,a=clamp(t/
 // chemin d'éclair
 function ffBoltPts(x0,y0,x1,y1,n,jit){const p=[[x0,y0]],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;for(let i=1;i<n;i++){const t=i/n,j=rnd(-1,1)*jit*Math.sin(t*Math.PI);p.push([x0+dx*t+nx*j,y0+dy*t+ny*j])}p.push([x1,y1]);return p}
 function ffBoltDraw(p,c,a,w){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';for(const [lw,col,al] of [[16,c[2],.22],[7,c[1],.55],[2.4,c[0],.95],[1,'#ffffff',1]]){ctx.strokeStyle=hexA(col,al*a);ctx.lineWidth=lw*S*w;tracePath(ctx,p);ctx.stroke()}ctx.restore()}
-function ffAtkShape(k,c,q,now,weak){if(k==='kitsune')return;const s=q*S,fl=weak?(.35+.5*Math.random()):1;
+function ffAtkShape(k,c,q,now,weak){if(k==='kitsune'||k==='dragon')return;const s=q*S,fl=weak?(.35+.5*Math.random()):1;
   if(k==='ult'){ffAtkShape('feu',['#fff1c0','#ff8a2a','#ff3a0a'],q*1.1,now,weak);ctx.globalCompositeOperation='lighter';gdraw(c[2],0,0,96*s,.45*fl);for(let j=0;j<5;j++){const a2=rnd(0,TAU),r=rnd(30,66)*s;ffBoltDraw(ffBoltPts(0,0,Math.cos(a2)*r,Math.sin(a2)*r,5,7*s),['#ffffff','#d8b0ff','#7a2aff'],.9*fl,.6)}ctx.globalCompositeOperation='source-over';return}
   ctx.globalCompositeOperation='lighter';
   if(k==='feu'){gdraw(c[2],0,0,66*s,.5*fl);gdraw(c[1],0,0,40*s,.8*fl);
@@ -3552,7 +3557,7 @@ function ffShieldDraw(now){const R=FAF.res,c=FAF.ck,PD=FAF.P[R.d],T=R.T;let f,a;
   ctx.restore()}
 function ffStrokesClash(i){const R=FAF.res,c=FAF.ck,P=FAF.P[i],T=R.T;if(!P.scr||!P.scr.length)return;const att=i===R.a;
   if(!P.ok){const f=clamp(1-c/1.3);if(f<=0)return;P.scr.forEach(s=>drawBlack(ctx,s.map(q=>[q[0]+rnd(-1.5,1.5),q[1]+rnd(-1.5,1.5)+(i?-1:1)*c*c*24*S]),f));return}
-  const tl=att&&R.atk.k==='kitsune'?1.1:T.tL,e=ease(clamp((c-.2)/(tl-.2))),a=1-clamp((c-tl+.15)/.3);if(a<=0)return;const col=att?R.atk.c:R.shd.c,w=Math.min(W*.84,360*S);
+  const tl=att&&(R.atk.k==='kitsune'||R.atk.k==='dragon')?1.1:T.tL,e=ease(clamp((c-.2)/(tl-.2))),a=1-clamp((c-tl+.15)/.3);if(a<=0)return;const col=att?R.atk.c:R.shd.c,w=Math.min(W*.84,360*S);
   P.scr.forEach(s=>{const p=s.map(q=>att?[lerp(q[0],R.O[0],e*.92),lerp(q[1],R.O[1],e*.92)]:[lerp(q[0],R.SD[0]+clamp((q[0]-R.SD[0])*1.6,-w/2,w/2),e),lerp(q[1],R.SD[1],e)]);ffStroke(p,col[0],col[1],a,.6+e)})}
 function ffPartsDraw(){ctx.save();for(const p of FAF.parts){const a=1-p.l/p.m;if(p.ty==='m'){ctx.fillStyle=`rgba(30,26,40,${a*.4})`;ctx.beginPath();ctx.arc(p.x,p.y,p.s*(1+p.l*1.5),0,TAU);ctx.fill()}
     else if(p.ty==='cf'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=Math.min(1,a*1.5);ctx.fillStyle=p.c;ctx.fillRect(-p.s,-p.s*.45,p.s*2,p.s*.9);ctx.restore()}}
@@ -3586,7 +3591,7 @@ $('ffEnd').addEventListener('click',e=>{if(e.target.closest('[data-ffr]')){SND.c
    sinon elle arrive trop tard ; défense mieux tracée → renvoyée (+1 défense), sinon le bouclier est percé (+1 attaque) ;
    attaque ratée contre défense réussie → riposte (+1 défense). Sort rapide = sceau simple mais moins fort (×0,85),
    sort lourd = sceau complexe mais plus fort (×1,15). Premier à 3 points. */
-const EL_V=5,EL_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789',EL_B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',EL_TL=10,EL_TIE=.15,EL_LATE=.3;
+const EL_V=6,EL_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789',EL_B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',EL_TL=10,EL_TIE=.15,EL_LATE=.3;
 function elRS(p,closed){return resampleStep(closed?p.concat([p[0]]):p.slice(),.03)}
 function elCirc(cx,cy,r){const p=[];for(let i=0;i<=96;i++){const a=-Math.PI/2+i/96*TAU;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return resampleStep(p,.03)}
 function elPoly(n,r,a0){const p=[];for(let i=0;i<n;i++){const a=a0+i/n*TAU;p.push([Math.cos(a)*r,Math.sin(a)*r])}return elRS(p,true)}
@@ -3605,20 +3610,25 @@ const EL_SP=(()=>{
   {k:'a',u:1,nm:'Tempête ardente',ic:'💥',el:-1,v:'ultime',m:1.2,tol:1.3,sig:[elCirc(0,0,.78),elRS([[-.3,-.95],[.35,-.2],[-.35,.2],[.3,.95]])]},
   {k:'d',u:1,nm:'Bouclier parfait',ic:'💠',el:-1,v:'ultime',m:1.2,tol:1.3,sig:[elRS([[-.72,-.85],[.72,-.85],[.66,.15],[0,.95],[-.66,.15]],true),resampleStep(spiral2,.03)]},
   {k:'s',cr:'call',nm:'Appel du Renard-Tortue',ic:'🦊',cc:'#7ae0b0',el:-1,v:'créature',m:1,tol:1.3,sig:[elCirc(0,.15,.62),elRS([[-.72,-.2],[-.5,-.95],[-.18,-.5],[.18,-.5],[.5,-.95],[.72,-.2]])]},
-  {k:'a',cr:'fox',nm:'Orbes du kitsune',ic:'🔴',cc:'#ff6a5a',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elCirc(-.48,0,.36),elCirc(.48,0,.36)]},
-  {k:'d',cr:'jade',nm:'Carapace de jade',ic:'🐢',cc:'#5ae0a0',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elPoly(6,.85,0),elRS([[-.62,0],[.62,0]])]}]})();
+  {k:'a',cr:'fox',ct:'fox',nm:'Orbes du kitsune',ic:'🔴',cc:'#ff6a5a',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elCirc(-.48,0,.36),elCirc(.48,0,.36)]},
+  {k:'d',cr:'jade',ct:'fox',nm:'Carapace de jade',ic:'🐢',cc:'#5ae0a0',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elPoly(6,.85,0),elRS([[-.62,0],[.62,0]])]},
+  {k:'s',cr:'dcall',nm:'Appel du Dragon',ic:'🐉',cc:'#ffb84a',bg:'rgba(34,12,6,.86)',el:-1,v:'créature',m:1,tol:1.3,sig:[elPoly(4,.9,-Math.PI/2),elRS([[0,-.62],[0,.62]])]},
+  {k:'a',cr:'breath',ct:'drg',nm:'Souffle du dragon',ic:'🔥',cc:'#ffd27a',bg:'rgba(34,12,6,.86)',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elRS([...Array(41)].map((_,i)=>{const u=i/40;return[-.9+1.8*u,Math.sin(u*TAU*1.5)*.42]}))]},
+  {k:'d',cr:'wings',ct:'drg',nm:'Ailes du dragon',ic:'🪽',cc:'#ffb84a',bg:'rgba(34,12,6,.86)',el:-1,v:'créature',m:1.1,tol:1.3,sig:[elRS([[-.88,-.7],[0,.72],[.88,-.7]])]}]})();
 // note d'un sceau de sort : même formule que les paliers (scoreV2), sur le modèle du sort
 function elScore(strokes,si){const s=EL_SP[si];PAL.push({name:s.nm,sig:s.sig,tol:s.tol,u:1});try{return scoreV2(strokes,PAL.length-1)}finally{PAL.pop()}}
 // issue d'une manche, calculée à l'identique sur les deux téléphones (x = hôte, y = invité) ; w = gagnant du point (-1 : personne), att = lanceur de l'attaque
 // sceau double (u) : la Tempête ardente vaut 2 points, écrase une attaque normale et perce tout bouclier sauf le Bouclier parfait
 function elDecide(x,y){const A=p=>p.k==='a',D=p=>p.k==='d',V=p=>p.u?2:1;
-  if(A(x)&&A(y)){if(x.ok&&y.ok){if(!!x.u!==!!y.u)return{w:x.u?0:1,kind:'uover',pv:2};if(!!x.f!==!!y.f)return{w:x.f?0:1,kind:'fover',pv:1};const dt=x.t-y.t;if(Math.abs(dt)>EL_TIE)return{w:dt<0?0:1,kind:'aa',pv:V(x)};if(x.q!==y.q)return{w:x.q>y.q?0:1,kind:'aa',pv:V(x)};return{w:-1,kind:'calm'}}
+  if(A(x)&&A(y)){if(x.ok&&y.ok){if(!!x.u!==!!y.u)return{w:x.u?0:1,kind:'uover',pv:2};if(!!x.f!==!!y.f&&!x.b&&!y.b)return{w:x.f?0:1,kind:'fover',pv:1};const dt=x.t-y.t;if(Math.abs(dt)>EL_TIE)return{w:dt<0?0:1,kind:'aa',pv:V(x)};if(x.q!==y.q)return{w:x.q>y.q?0:1,kind:'aa',pv:V(x)};return{w:-1,kind:'calm'}}
     if(x.ok)return{w:0,kind:'aa1',pv:V(x)};if(y.ok)return{w:1,kind:'aa1',pv:V(y)};return{w:-1,kind:'calm'}}
   if(A(x)||A(y)){const ai=A(x)?0:1,a=ai?y:x,d=ai?x:y,pv=V(a);
-    if(!a.ok)return D(d)&&d.ok?{w:1-ai,att:ai,kind:'riposte',pv:1}:{w:-1,kind:'calm'};
+    if(!a.ok)return D(d)&&d.ok&&!d.w?{w:1-ai,att:ai,kind:'riposte',pv:1}:{w:-1,kind:'calm'};
     if(!D(d))return{w:ai,att:ai,kind:'free',pv};
     if(!d.ok)return{w:ai,att:ai,kind:'dfail',pv};
     if(d.t>a.t+EL_LATE)return{w:ai,att:ai,kind:'late',pv};
+    if(d.w)return{w:-1,att:ai,kind:'wblock',pv:1};
+    if(a.b)return d.u||d.j?{w:1-ai,att:ai,kind:'reflect',pv:1}:{w:ai,att:ai,kind:'bpierce',pv:1};
     if(a.u)return d.u||d.j?{w:1-ai,att:ai,kind:'ublock',pv:1}:{w:ai,att:ai,kind:'upierce',pv:2};
     if(a.f)return d.u||d.j||d.q>a.q?{w:-1,att:ai,kind:'fblock',pv:1}:{w:ai,att:ai,kind:'pierce',pv:1};
     if(d.u||d.j||d.q>a.q)return{w:1-ai,att:ai,kind:'reflect',pv:1};
@@ -3631,7 +3641,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='65';
+const EL_VER='66';
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -3756,7 +3766,7 @@ function elNewMe(){return{sp:-1,st:[],cur:null,done:false,tD:0,le:null,dto:0,res
 function elMatch(){clearInterval(EL.lti);EL.lti=0;const o=elOpp();EL.opNm=duName(o&&o.nm,'Ton ami');if(EL.opNm.toLowerCase()===EL.nm.toLowerCase())EL.opNm=Array.from(EL.opNm).slice(0,10).join('')+' 2';
   duStop();liveHide();usePal5(null);recAbort();duHide();$('duel').hidden=true;
   G={state:'el',el:true,pi:0,strokes:[],moonB:0,t0:performance.now()};document.body.classList.add('el');elPhoto();elReset();try{ffS('ready')}catch(e){}}
-function elReset(){EL.cr=elCrNew();elCrLoad();EL.ftr=null;EL.gg=[0,0];EL.pv=1;EL.lockT=0;EL.r=0;EL.rr=0;EL.rdT=0;EL.ag=false;EL.saved=false;EL.forfeit=0;EL.lost=0;EL.gone=false;EL.qArm=0;EL.calm=null;EL.kind='';EL.res2=null;EL.oic=null;
+function elReset(){EL.cr=elCrNew();elCrLoad();elDrLoad();EL.dlast=null;EL.ftr=null;EL.gg=[0,0];EL.pv=1;EL.lockT=0;EL.r=0;EL.rr=0;EL.rdT=0;EL.ag=false;EL.saved=false;EL.forfeit=0;EL.lost=0;EL.gone=false;EL.qArm=0;EL.calm=null;EL.kind='';EL.res2=null;EL.oic=null;
   FAF.names=[EL.nm,EL.opNm];FAF.pts=[0,0];FAF.round=0;FAF.res=null;FAF.ph='';FAF.parts=[];FAF.rings=[];FAF.crk=[[0,0,0],[0,0,0]];FAF.shake=FAF.flash=0;FAF.win=-1;ffPlayers();
   EL.me=elNewMe();EL.ph='ready';EL.t0=performance.now()}
 function elRound(r){elCrRound();EL.r=r;FAF.round=r;FAF.res=null;FAF.ph='';FAF.TL=EL_TL;EL.calm=null;EL.kind='';EL.me=elNewMe();EL.ph='intro';EL.t0=performance.now();EL.cd=-1;EL.lt=-1;EL.inkD=false;EL.oic=null;
@@ -3787,7 +3797,7 @@ cv.addEventListener('pointerdown',e=>{if(!G.el)return;e.preventDefault();elDims(
   if(EL.ph==='ready'){if(!EL.rr){EL.rr=1;elPres({rr:1});ffS('ready');for(let k=0;k<20;k++)elSpark(x,y,FF_COL[0][1],1)}return}
   if(EL.ph!=='intro'&&EL.ph!=='draw')return;const M=EL.me,g=elGeo();if(M.done||M.cur)return;
   const bi=g.bt.findIndex(c=>Math.hypot(x-c.x,y-c.y)<c.r+8*s);
-  if(bi>=0){const si=g.bt[bi].si;if(EL_SP[si].u&&EL.gg[0]<EL_GMAX){EL.lockT=now;ffS('undo');return}if(EL_SP[si].cr&&EL_SP[si].k!=='s'&&!elCrOn(0)){ffS('undo');return}if(M.sp!==si){clearTimeout(M.dto);M.sp=si;M.st=[];M.le=null;EL.inkD=true;ffS('ready')}return}
+  if(bi>=0){const si=g.bt[bi].si;if(EL_SP[si].u&&EL.gg[0]<EL_GMAX){EL.lockT=now;ffS('undo');return}if(EL_SP[si].cr&&EL_SP[si].k!=='s'&&(!elCrOn(0)||EL_SP[si].ct!==EL.cr[0].ty)){ffS('undo');return}if(M.sp!==si){clearTimeout(M.dto);M.sp=si;M.st=[];M.le=null;EL.inkD=true;ffS('ready')}return}
   if(EL.ph!=='draw')return;
   if(M.sp<0){EL.hintT=now;return}
   const ub=elUndoPos();if(M.st.length&&Math.hypot(x-ub[0],y-ub[1])<22*s){clearTimeout(M.dto);M.st.pop();M.le=null;EL.inkD=true;ffS('undo');return}
@@ -3826,12 +3836,12 @@ function elJudge(){const M=EL.me;if(EL.ph!=='draw')return;clearTimeout(M.dto);co
 /* ----- résolution de la manche ----- */
 function elFFU(fn){const w=W,h=H,s=S;W=EL.LH;H=EL.LW;S=EL.S;try{return fn()}finally{W=w;H=h;S=s}}
 function elSpOf(r){return r&&r.sp>=0&&EL_SP[r.sp]?EL_SP[r.sp]:null}
-function elAtkOf(sp){return sp&&sp.u?EL_ULT:sp&&sp.cr==='fox'?EL_FOX:FF_ATK[sp&&sp.el>=0?sp.el:0]}
-function elShdOf(sp){return sp&&sp.u?EL_PARF:sp&&sp.cr==='jade'?EL_JADE:FF_SHD[sp&&sp.el>=0?sp.el:0]}
+function elAtkOf(sp){return sp&&sp.u?EL_ULT:sp&&sp.cr==='fox'?EL_FOX:sp&&sp.cr==='breath'?EL_DRB:FF_ATK[sp&&sp.el>=0?sp.el:0]}
+function elShdOf(sp){return sp&&sp.u?EL_PARF:sp&&sp.cr==='jade'?EL_JADE:sp&&sp.cr==='wings'?EL_WING:FF_SHD[sp&&sp.el>=0?sp.el:0]}
 // jauge : +1 par sort réussi, vidée quand on lance un sceau double (calcul identique sur les deux téléphones)
 function elGaugeUpd(res){const was=EL.gg[0];[0,1].forEach(i=>{const r=res[i],sp=elSpOf(r);if(sp&&sp.u)EL.gg[i]=0;else if(r&&r.ok)EL.gg[i]=Math.min(EL_GMAX,EL.gg[i]+1)});if(was<EL_GMAX&&EL.gg[0]>=EL_GMAX)EL.ggT=performance.now()}
 function elClash(o){const M=EL.me,sp=elSpOf(M.res),n=sp?sp.sig.length:0,mine=M.res,their=o.res;
-  const nr=r=>{const q=elSpOf(r);return{k:q?q.k:'',u:q&&q.u?1:0,f:q&&q.cr==='fox'?1:0,j:q&&q.cr==='jade'?1:0,ok:!!r.ok,q:+r.q||0,t:r.t==null?99:+r.t}};
+  const nr=r=>{const q=elSpOf(r);return{k:q?q.k:'',u:q&&q.u?1:0,f:q&&q.cr==='fox'?1:0,j:q&&q.cr==='jade'?1:0,b:q&&q.cr==='breath'?1:0,w:q&&q.cr==='wings'?1:0,ok:!!r.ok,q:+r.q||0,t:r.t==null?99:+r.t+(q&&q.cr==='breath'?EL_BSLOW:0)}};
   const X=EL.host?nr(mine):nr(their),Y=EL.host?nr(their):nr(mine),D=elDecide(X,Y),L=v=>v==null||v<0?-1:(EL.host?v:1-v);
   EL.kind=D.kind;EL.w=L(D.w);EL.pv=D.pv||1;const att=D.att!=null?L(D.att):EL.w,res=[mine,their];EL.res2=res;elGaugeUpd(res);elCrUpd(res);
   const sts=[M.st.slice(0,n).map(s=>s.map(q=>[q[1],EL.LW-q[0]])),elOppInk().map(s=>s.map(q=>[EL.LH-q[1],q[0]]))];
@@ -3842,12 +3852,12 @@ function elClash(o){const M=EL.me,sp=elSpOf(M.res),n=sp?sp.sig.length:0,mine=M.r
     elFFU(()=>FAF.P.forEach((P,i)=>{P.scr=P.st.map(s=>resampleStep(s,5).map(q=>ffL2S(i,q[0],q[1])))}));return}
   const a=att,d=1-a,PA=FAF.P[a],PD=FAF.P[d],sA=elSpOf(res[a]),sD=elSpOf(res[d]),K=EL.kind,ult=!!(sA&&sA.u);
   FAF.att=a;FAF.ai=sA&&sA.el>=0?sA.el:0;FAF.si=sD&&sD.k==='d'&&sD.el>=0?sD.el:0;
-  FAF.ovAtk=ult?EL_ULT:sA&&sA.cr==='fox'?EL_FOX:null;FAF.ovShd=sD&&sD.k==='d'&&sD.u?EL_PARF:sD&&sD.cr==='jade'?EL_JADE:null;FAF.ovTL=ult?2.3:FAF.ovAtk===EL_FOX?2.6:1.6;FAF.pv=EL.pv;
-  PA.ok=K!=='riposte';PD.ok=K==='pierce'||K==='reflect'||K==='riposte'||K==='upierce'||K==='ublock'||K==='fblock'||!!(sD&&sD.k==='s'&&res[d].ok);
+  FAF.ovAtk=ult?EL_ULT:sA&&sA.cr==='fox'?EL_FOX:sA&&sA.cr==='breath'?EL_DRB:null;FAF.ovShd=sD&&sD.k==='d'&&sD.u?EL_PARF:sD&&sD.cr==='jade'?EL_JADE:sD&&sD.cr==='wings'?EL_WING:null;FAF.ovTL=ult?2.3:FAF.ovAtk===EL_FOX?2.6:FAF.ovAtk===EL_DRB?EL_DRTL:1.6;FAF.pv=EL.pv;
+  PA.ok=K!=='riposte';PD.ok=K==='pierce'||K==='reflect'||K==='riposte'||K==='upierce'||K==='ublock'||K==='fblock'||K==='wblock'||K==='bpierce'||!!(sD&&sD.k==='s'&&res[d].ok);
   EL.showSh=!!(sD&&sD.k==='d');EL.loserAtk=sD&&sD.k==='a'?d:-1;
-  FAF.forceO=K==='pierce'||K==='upierce'?'pierce':K==='reflect'||K==='ublock'?'reflect':K==='fblock'?'block':sD&&sD.k==='s'&&PD.ok?'hit':null;
+  FAF.forceO=K==='pierce'||K==='upierce'||K==='bpierce'?'pierce':K==='reflect'||K==='ublock'?'reflect':K==='fblock'||K==='wblock'?'block':sD&&sD.k==='s'&&PD.ok?'hit':null;
   try{elFFU(()=>ffClash())}finally{FAF.forceO=null;FAF.ovAtk=FAF.ovShd=null;FAF.ovTL=0;FAF.pv=1}
-  const R=FAF.res;R.noShd=!EL.showSh;R.O=elFFPos(a,'o');R.BA=elFFPos(a,'b');R.SD=elFFPos(d,'sd');R.BD=elFFPos(d,'b');R.q=R.q.map(v=>v*(ult?1.4:1.3));if(R.atk.k==='kitsune')elFoxO(R)}
+  const R=FAF.res;R.noShd=!EL.showSh;R.O=elFFPos(a,'o');R.BA=elFFPos(a,'b');R.SD=elFFPos(d,'sd');R.BD=elFFPos(d,'b');R.q=R.q.map(v=>v*(ult?1.4:1.3));if(R.atk.k==='kitsune')elFoxO(R);if(R.atk.k==='dragon')elDrO(R)}
 // sort de l'ami (ou le mien) parti trop tard : il se charge puis est balayé
 function elClashFx(){const R=FAF.res,L=EL.loserAtk;if(!R||L<0||EL.lz||FAF.ck<R.T.tL+.3)return;EL.lz=1;const P=FAF.P[L],O=elFFPos(L,'o'),col=elAtkOf(elSpOf(EL.res2[L])).c;
   for(let k=0;k<26;k++){const an=rnd(0,TAU),v=rnd(40,220)*S;ffAdd({x:O[0],y:O[1],vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:0,m:rnd(.4,.9),s:rnd(1,2.4),c:Math.random()<.5?col[1]:col[2]})}
@@ -3862,7 +3872,7 @@ function elEnd(){if(EL.ph==='end')return;EL.ph='end';EL.endT=performance.now();F
 
 /* ----- boucle ----- */
 function elUpdate(dt,now){elDims();const k=(now-EL.t0)/1000,o=elOpp(),om=o&&o.mid===EL.mid?o:null;let sdt=dt;
-  if(EL.ph==='clash'&&FAF.res&&(FAF.res.fin||FAF.res.atk.k==='ult'||FAF.res.atk.k==='kitsune')){const R=FAF.res,ti=R.o==='hit'?R.T.tI:R.T.tP,dd=FAF.ck-ti;if(dd>-.4&&dd<.55)sdt=dt*.3;if(R.atk.k==='ult'&&FAF.ck<R.T.tL)FAF.shake=Math.max(FAF.shake,.08+.3*FAF.ck/R.T.tL)}
+  if(EL.ph==='clash'&&FAF.res&&(FAF.res.fin||FAF.res.atk.k==='ult'||FAF.res.atk.k==='kitsune'||FAF.res.atk.k==='dragon')){const R=FAF.res,ti=R.o==='hit'?R.T.tI:R.T.tP,dd=FAF.ck-ti;if(dd>-.4&&dd<.55)sdt=dt*.3;if(R.atk.k==='ult'&&FAF.ck<R.T.tL)FAF.shake=Math.max(FAF.shake,.08+.3*FAF.ck/R.T.tL)}
   ffParts(sdt);FAF.shake=Math.max(0,FAF.shake-dt*2.2);FAF.flash=Math.max(0,FAF.flash-dt*2.6);elCrTick(now);
   if(Math.random()<.35){const lx=rnd(0,EL.LW),ly=rnd(EL.LH*.35,EL.LH);ffAdd({x:ly,y:EL.LW-lx,vx:-rnd(8,20)*EL.S,vy:rnd(-6,6)*EL.S,l:0,m:rnd(2,4),s:rnd(.6,1.3),c:'#ffb36a',dr:1})}
   if(EL.ph!=='end'){if(!o){if(!EL.lostT)EL.lostT=now;if(now-EL.lostT>10000){EL.forfeit=1;elEnd();return}}else{EL.lostT=0;if(o.q){EL.forfeit=1;elEnd();return}}}
@@ -3917,7 +3927,7 @@ function elCard(z){const r=30*S;return{x:z.x+z.w-r-8*S,y:z.y+r+8*S,r}}
 function elCardDraw(z,si,a){if(si<0)return;const cd=elCard(z),r=cd.r;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(8,6,18,.75)';ctx.strokeStyle='rgba(255,210,122,.5)';ctx.lineWidth=1.2*S;elRR(cd.x-r,cd.y-r,r*2,r*2,10*S);ctx.fill();ctx.stroke();ctx.restore();elSigDraw(si,cd.x,cd.y,r*.76,.95*a)}
 function elStrip(g,now,act){const M=EL.me,full=EL.gg[0]>=EL_GMAX;g.bt.forEach((b,j)=>{const i=b.si,s=EL_SP[i],on=M&&M.sp===i,atk=s.k==='a',col=s.u?'#ffd27a':s.cc?s.cc:atk?'#ff8a5a':'#7ab8ff',lock=s.u&&!full;ctx.save();
     if(on||(s.u&&full&&act)||(s.cr&&s.k!=='s'&&act&&EL.cr&&EL.cr[0].t0&&performance.now()-EL.cr[0].t0<9000)){ctx.globalCompositeOperation='lighter';gdraw(col,b.x,b.y,b.r*(on?2.6:2.3),(on?.75:.5)+.2*Math.sin(now/180+i));ctx.globalCompositeOperation='source-over'}
-    ctx.globalAlpha=lock?.42:act?1:.55;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fillStyle=on?'rgba(40,24,40,.92)':s.u?'rgba(34,24,10,.85)':s.cc?'rgba(8,26,20,.86)':'rgba(10,8,20,.8)';ctx.fill();ctx.strokeStyle=on?'#ffffff':hexA(col,.85);ctx.lineWidth=(on?2.2:s.u?1.8:1.4)*S;ctx.stroke();
+    ctx.globalAlpha=lock?.42:act?1:.55;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fillStyle=on?'rgba(40,24,40,.92)':s.u?'rgba(34,24,10,.85)':s.cc?(s.bg||'rgba(8,26,20,.86)'):'rgba(10,8,20,.8)';ctx.fill();ctx.strokeStyle=on?'#ffffff':hexA(col,.85);ctx.lineWidth=(on?2.2:s.u?1.8:1.4)*S;ctx.stroke();
     ctx.font=`${Math.round(b.r*.95)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.fillText(s.ic,b.x,b.y+1);
     if(lock){ctx.globalAlpha=1;ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2.6*S;ctx.beginPath();ctx.arc(b.x,b.y,b.r+3.5*S,0,TAU);ctx.stroke();
       if(EL.gg[0]>0){ctx.strokeStyle='#ffd27a';ctx.beginPath();ctx.arc(b.x,b.y,b.r+3.5*S,-Math.PI/2,-Math.PI/2+TAU*EL.gg[0]/EL_GMAX);ctx.stroke()}
@@ -3944,15 +3954,16 @@ function elRift(g,k){if(EL.ph!=='draw')return;const rem=clamp(1-k/EL_TL),x=EL.LW
   gdraw(col,x,cy-hh,20*S,.9);gdraw(col,x,cy+hh,20*S,.9);ctx.restore()}
 function elReady(g,now){const LW=EL.LW,LH=EL.LH,o=elOpp(),orr=o&&o.mid===EL.mid&&o.rr>=1;ctx.fillStyle='rgba(4,3,10,.55)';ctx.fillRect(0,0,LW,LH);
   elT('DUEL EN LIGNE',LW/2,g.top+18*S,FF_CIN(22),'#ffd27a',1,'rgba(255,190,90,.8)');
-  const n=9,cw=Math.min(LW*.94/n,118*S),x0=LW/2-cw*n/2,rr=Math.min(cw*.28,26*S),cy=g.top+36*S+rr+6*S;
-  for(let i=0;i<n;i++){const s=EL_SP[i],x=x0+cw*(i+.5),atk=s.k==='a';ctx.save();elRR(x-cw*.46,cy-rr-8*S,cw*.92,rr*2+50*S,10*S);ctx.fillStyle=s.u?'rgba(30,20,6,.7)':s.cc?'rgba(6,24,18,.7)':'rgba(8,6,18,.6)';ctx.fill();ctx.strokeStyle=hexA(s.u?'#ffd27a':s.cc?s.cc:atk?'#ff8a5a':'#7ab8ff',s.u||s.cc?.85:.5);ctx.lineWidth=1*S;ctx.stroke();ctx.restore();
+  const LI=[0,1,2,3,4,5,6,7,8,11],n=LI.length,cw=Math.min(LW*.94/n,118*S),x0=LW/2-cw*n/2,rr=Math.min(cw*.28,26*S),cy=g.top+36*S+rr+6*S;
+  for(let j=0;j<n;j++){const i=LI[j],s=EL_SP[i],x=x0+cw*(j+.5),atk=s.k==='a';ctx.save();elRR(x-cw*.46,cy-rr-8*S,cw*.92,rr*2+50*S,10*S);ctx.fillStyle=s.u?'rgba(30,20,6,.7)':s.cc?(s.bg||'rgba(6,24,18,.7)'):'rgba(8,6,18,.6)';ctx.fill();ctx.strokeStyle=hexA(s.u?'#ffd27a':s.cc?s.cc:atk?'#ff8a5a':'#7ab8ff',s.u||s.cc?.85:.5);ctx.lineWidth=1*S;ctx.stroke();ctx.restore();
     elSigDraw(i,x,cy,rr*.85,.95);elT(`${s.ic} ${s.nm}`,x,cy+rr+18*S,FF_COR(13),'#fff3d6',1,null,'center',cw*.9);elT(s.k==='s'?'appelle une créature':s.u?(atk?'ultime · +2':'arrête l’ultime'):`${atk?'attaque':'défense'} · ${s.v}`,x,cy+rr+33*S,FF_COR(11.5),s.cc?s.cc:s.u?'#ffd27a':atk?'#ffb08a':'#9fd0ff',.9,null,'center',cw*.9)}
   const y=cy+rr+62*S;
   elT('⚔️ Deux attaques : la plus rapide touche  ·  🛡️ Une défense doit être finie avant l’attaque',LW/2,y,FF_COR(14),'#f3e6c8',.92);
   elT('Défense mieux tracée : sort renvoyé · sinon bouclier percé · attaque ratée : riposte · premier à 3 points',LW/2,y+18*S,FF_COR(13),'rgba(243,230,200,.8)',.9);
-  elT('✨ 3 sorts réussis remplissent ta jauge : 💥 Tempête ardente (+2 points) · seuls le 💠 Bouclier parfait et la 🐢 Carapace l’arrêtent',LW/2,y+37*S,FF_COR(13),'#ffd27a',.92);
+  elT('✨ 3 sorts réussis remplissent ta jauge : 💥 Tempête ardente (+2 points) · seuls le 💠 Bouclier parfait, la 🐢 Carapace et les 🪽 Ailes l’arrêtent',LW/2,y+37*S,FF_COR(13),'#ffd27a',.92);
   elT('🦊🐢 Appel : le Renard-Tortue vient t’aider pour 3 sorts · 🔴 Orbes du kitsune (jamais renvoyées) · 🐢 Carapace de jade (arrête tout)',LW/2,y+56*S,FF_COR(13),'#9ff0c8',.92);
-  const yb=Math.min(LH-12*S,y+100*S),p=.6+.4*Math.sin(now/280);
+  elT('🐉 Appel : le Dragon pour 3 sorts · 🔥 Souffle (traverse les défenses normales, mais lent) · 🪽 Ailes (arrêtent tout, sans renvoyer)',LW/2,y+75*S,FF_COR(13),'#ffd27a',.92);
+  const yb=Math.min(LH-12*S,y+116*S),p=.6+.4*Math.sin(now/280);
   elT(FAF.names[0],LW*.27,yb-22*S,FF_CIN(16),FF_COL[0][0],1,FF_COL[0][1],'center',LW*.4);
   elT(EL.rr?'Prêt ✓':'Touche l’écran quand tu es prêt',LW*.27,yb,EL.rr?FF_CIN(15):FF_COR(16),EL.rr?'#ffd27a':'#ffffff',EL.rr?1:p,null,'center',LW*.42);
   elT(FAF.names[1],LW*.73,yb-22*S,FF_CIN(16),FF_COL[1][0],1,FF_COL[1][1],'center',LW*.4);
@@ -3963,8 +3974,8 @@ function elIntro(g,now,k){const z=g.z0,z1=g.z1,a=clamp(k/.35),ta=a*(1-clamp((k-2
   elT('Attaque ⚔️ ou défense 🛡️ ? À l’instinct !',EL.LW/2,EL.LH*.36+30*S,FF_COR(19),'#fff3d6',ta);
   if(EL.gg[0]>=EL_GMAX)elT('✨ Jauge pleine : tes sceaux doubles 💥 💠 sont prêts !',EL.LW/2,EL.LH*.36+56*S,FF_COR(17),'#ffd27a',ta*(.75+.25*Math.sin(now/150)),'rgba(255,190,90,.7)');
   else if(EL.gg[1]>=EL_GMAX)elT(`⚠️ La jauge de ${EL.opNm} est pleine : gare à la Tempête ardente !`,EL.LW/2,EL.LH*.36+56*S,FF_COR(16),'#ff9a8a',ta);
-  if(elCrOn(0))elT(`🦊🐢 Ton Renard-Tortue est là : ${EL.cr[0].n} sort${EL.cr[0].n>1?'s':''} 🔴 🐢 avant son départ`,EL.LW/2,EL.LH*.36+80*S,FF_COR(16),'#9ff0c8',ta);
-  else if(elCrOn(1))elT(`🦊🐢 Le Renard-Tortue de ${EL.opNm} est dans l’arène`,EL.LW/2,EL.LH*.36+80*S,FF_COR(16),'#9ff0c8',ta);
+  if(elCrOn(0)){const D=EL.cr[0].ty==='drg',n=EL.cr[0].n;elT(D?`🐉 Ton Dragon est là : ${n} sort${n>1?'s':''} 🔥 🪽 avant son départ`:`🦊🐢 Ton Renard-Tortue est là : ${n} sort${n>1?'s':''} 🔴 🐢 avant son départ`,EL.LW/2,EL.LH*.36+80*S,FF_COR(16),D?'#ffd27a':'#9ff0c8',ta)}
+  else if(elCrOn(1)){const D=EL.cr[1].ty==='drg';elT(D?`🐉 Le Dragon de ${EL.opNm} est dans l’arène`:`🦊🐢 Le Renard-Tortue de ${EL.opNm} est dans l’arène`,EL.LW/2,EL.LH*.36+80*S,FF_COR(16),D?'#ffd27a':'#9ff0c8',ta)}
   if(M.sp>=0){const s=EL_SP[M.sp];elT(`${s.ic} ${s.nm}`,z.x+12*S,z.y+22*S,FF_COR(16),s.cc?s.cc:s.k==='a'?'#ffb08a':'#9fd0ff',1,null,'left',z.w-80*S)}
   else elT('← choisis ton sort',z.x+10*S,z.y+z.h-18*S,FF_COR(15),'rgba(243,230,200,.75)',a,null,'left',z.w*.9);
   if(k>=2.2){const c=Math.floor((k-2.2)/.55),f=((k-2.2)/.55)%1;if(c<3)elT(String(3-c),EL.LW/2,EL.LH*.62,FF_CIN(70*(1.25-.35*ease(f))),'#ffffff',1-f*.6,'rgba(200,170,255,.9)')}}
@@ -3986,21 +3997,23 @@ function elPlay(g,now,k){const z=g.z0,z1=g.z1,M=EL.me,col=FF_COL[0],o=elOpp(),om
     elT(`${ok?ffFmt(M.tD)+' s · ':''}${od?'résolution…':'en attente de '+EL.opNm+'…'}`,z.cx,yb+2*S,FF_COR(14),'#f3e6c8',.85,null,'center',z.w*.95)}
   elT(od?`${EL.opNm} a lancé son sort ✓`:os.length?`${EL.opNm} trace…`:`${EL.opNm} se concentre…`,z1.cx,z1.y+z1.h-14*S,FF_COR(15),od?'#ffd27a':'rgba(243,230,200,.75)',1,null,'center',z1.w*.95)}
 function elMsgL(){const K=EL.kind,me=EL.w===0,R=FAF.res,fin=R&&R.fin,G1='#ffd27a',RED='#ff8a8a',big=t=>fin?'COUP FINAL !':t,pv=EL.pv||1,P=`+${pv} point${pv>1?'s':''}`,U=pv>1;
-  const myS=elSpOf(EL.res2&&EL.res2[0]),opS=elSpOf(EL.res2&&EL.res2[1]),PN=q=>q&&q.cr==='jade'?'Carapace de jade':'Bouclier parfait',call=[0,1].map(i=>{const q=elSpOf(EL.res2&&EL.res2[i]);return!!(q&&q.k==='s'&&EL.res2[i].ok)}),hit=U?'TEMPÊTE ARDENTE !':'TOUCHÉ !';
+  const myS=elSpOf(EL.res2&&EL.res2[0]),opS=elSpOf(EL.res2&&EL.res2[1]),PN=q=>q&&q.cr==='jade'?'Carapace de jade':'Bouclier parfait',call=[0,1].map(i=>{const q=elSpOf(EL.res2&&EL.res2[i]);return!!(q&&q.k==='s'&&EL.res2[i].ok)}),CN=i=>{const q=elSpOf(EL.res2&&EL.res2[i]);return q&&q.cr==='dcall'?'Dragon':'Renard-Tortue'},hit=U?'TEMPÊTE ARDENTE !':'TOUCHÉ !';
   switch(K){case 'aa':return me?{b:big(hit),s:`${P} · ton sort est parti le premier`,c:G1}:{b:'Touché…',s:'son sort est parti plus vite',c:RED};
     case 'aa1':return me?{b:big(hit),s:`${P} · son sort a raté`,c:G1}:{b:'Touché…',s:'ton sort a raté',c:RED};
     case 'uover':return me?{b:big('TEMPÊTE ARDENTE !'),s:`${P} · ton ultime écrase son sort`,c:G1}:{b:'Ultime…',s:'sa Tempête ardente a écrasé ton sort',c:RED};
     case 'free':return me?{b:big(hit),s:`${P} · ${call[1]?'il appelait sa créature':'aucun sort en face'}`,c:G1}:{b:'Touché…',s:call[0]?'ta créature arrive, mais tu étais sans défense':'aucun sort lancé à temps',c:RED};
     case 'fover':return me?{b:big('ORBES DU KITSUNE !'),s:`${P} · tes orbes balaient son sort`,c:G1}:{b:'Balayé…',s:'les orbes du kitsune ont balayé ton sort',c:RED};
     case 'fblock':{const mine=R&&R.a===0;return{b:'BLOQUÉ !',s:mine?'sa défense arrête tes orbes (elles ne sont jamais renvoyées)':'ta défense arrête ses orbes',c:mine?'#d6dcf0':G1}}
+    case 'wblock':{const mine=R&&R.a===0;return{b:'BLOQUÉ !',s:mine?'les ailes de son dragon arrêtent ton sort (rien n’est renvoyé)':'les ailes de ton dragon arrêtent son sort',c:mine?'#d6dcf0':G1}}
+    case 'bpierce':return me?{b:big('SOUFFLE DU DRAGON !'),s:`${P} · ton souffle traverse sa défense`,c:G1}:{b:'Brûlé…',s:'le souffle du dragon traverse les défenses normales',c:RED};
     case 'dfail':return me?{b:big(hit),s:`${P} · son bouclier a raté`,c:G1}:{b:'Touché…',s:'ton bouclier a raté',c:RED};
     case 'late':return me?{b:big(hit),s:`${P} · son bouclier est arrivé trop tard`,c:G1}:{b:'Trop tard…',s:'ton bouclier n’a pas eu le temps',c:RED};
     case 'pierce':return me?{b:big('PERCÉ !'),s:`${P} · ton sort a brisé son bouclier`,c:G1}:{b:'Bouclier percé…',s:'son attaque était mieux tracée',c:RED};
-    case 'upierce':return me?{b:big('ULTIME !'),s:`${P} · seuls le Bouclier parfait ou la Carapace pouvaient l’arrêter`,c:G1}:{b:'Bouclier pulvérisé…',s:'seuls le Bouclier parfait et la Carapace de jade arrêtent une Tempête ardente',c:RED};
+    case 'upierce':return me?{b:big('ULTIME !'),s:`${P} · seuls le Bouclier parfait, la Carapace ou les Ailes pouvaient l’arrêter`,c:G1}:{b:'Bouclier pulvérisé…',s:'seuls le Bouclier parfait, la Carapace et les Ailes arrêtent une Tempête ardente',c:RED};
     case 'reflect':return me?{b:big('RENVOYÉ !'),s:`${P} · ${myS&&myS.u?'ton Bouclier parfait renvoie tout':myS&&myS.cr==='jade'?'ta Carapace de jade renvoie tout':'ta défense était mieux tracée'}`,c:G1}:{b:'Renvoyé…',s:opS&&opS.u?'son Bouclier parfait renvoie tout':opS&&opS.cr==='jade'?'sa Carapace de jade renvoie tout':'sa défense était mieux tracée',c:RED};
     case 'ublock':return me?{b:big('BOUCLIER PARFAIT !'),s:`${P} · ta ${PN(myS)} a renvoyé sa Tempête ardente`.replace('ta Bouclier','ton Bouclier'),c:G1}:{b:'Ultime renvoyé…',s:`${opS&&opS.cr==='jade'?'sa Carapace de jade':'son Bouclier parfait'} l’a arrêtée`,c:RED};
     case 'riposte':return me?{b:big('RIPOSTE !'),s:`${P} · son attaque a raté`,c:G1}:{b:'Sort raté…',s:'ton attaque a raté, il riposte',c:RED};
-    default:{const sh=EL.calm?EL.calm.sh:[0,0];if(call[0]||call[1])return{b:'APPEL !',s:call[0]&&call[1]?'deux Renards-Tortues entrent dans l’arène':call[0]?'ton Renard-Tortue entre dans l’arène':`le Renard-Tortue de ${EL.opNm} entre dans l’arène`,c:'#9ff0c8'};return{b:'NUL',s:sh[0]&&sh[1]?'deux boucliers, personne n’attaque':sh[0]||sh[1]?'un bouclier, mais aucune attaque':'aucun sort n’a abouti',c:'#d6dcf0'}}}}
+    default:{const sh=EL.calm?EL.calm.sh:[0,0];if(call[0]||call[1])return{b:'APPEL !',s:call[0]&&call[1]?(CN(0)!==CN(1)?'deux créatures entrent dans l’arène':CN(0)==='Dragon'?'deux Dragons entrent dans l’arène':'deux Renards-Tortues entrent dans l’arène'):call[0]?`ton ${CN(0)} entre dans l’arène`:`le ${CN(1)} de ${EL.opNm} entre dans l’arène`,c:call[0]&&CN(0)==='Dragon'||!call[0]&&CN(1)==='Dragon'?'#ffd27a':'#9ff0c8'};return{b:'NUL',s:sh[0]&&sh[1]?'deux boucliers, personne n’attaque':sh[0]||sh[1]?'un bouclier, mais aucune attaque':'aucun sort n’a abouti',c:'#d6dcf0'}}}}
 function elStat(i){const r=EL.res2&&EL.res2[i];if(!r)return'';const s=EL_SP[r.sp];if(!s)return'aucun sort';const st='★'.repeat(r.sr|0)+'☆'.repeat(3-(r.sr|0));
   return r.ok?`${s.ic} ${s.nm} · ${st} ${Math.round((+r.tt||0)*100)} % · ${ffFmt(+r.t)} s`:`${s.ic} ${s.nm} · ${r.tt>0?st+' · ':''}${r.w||'raté'}`}
 function elBanner(now){let t,end;if(EL.calm){t=(now-EL.t0)/1000-1.2;end=3.6-1.2}else{const R=FAF.res;if(!R)return;t=FAF.ck-R.T.tP-.3;end=R.T.tEnd-R.T.tP-.3}if(t<0)return;
@@ -4029,7 +4042,7 @@ function elDraw(now,dt){elDims();const W0=W,H0=H,S0=S,LW=EL.LW,LH=EL.LH;if(EL.ro
     ctx.drawImage(elBG(),-12*S,-12*S,LW+24*S,LH+24*S);elAmb(now);elSeal(0,now);elSeal(1,now);elCrDrawAll(now);
     if(ph==='intro')elIntro(g,now,k);else if(ph==='draw'||ph==='wait')elPlay(g,now,k);
     if(ph==='clash'||ph==='next'||ph==='end')elFF(()=>{if(EL.calm)elCalmDraw(now);else if(FAF.res){[0,1].forEach(i=>ffStrokesClash(i));ffShieldDraw(now);elLoserOrb(now);ffAtkDraw(now)}});
-    elFF(()=>ffPartsDraw());elFxL(now);elFoxFly(now);ctx.restore();
+    elFF(()=>ffPartsDraw());elFxL(now);elFoxFly(now);elDrFly(now);ctx.restore();
     if(ph==='ready')elReady(g,now);
     if(ph==='clash')elBanner(now);
     if(ph==='next')elT(`Manche suivante… en attente de ${EL.opNm}`,LW/2,LH*.85,FF_COR(17),'#f3e6c8',.6+.4*Math.sin(now/300));
@@ -4058,7 +4071,7 @@ function elSealState(i,now){const t=now/1000,ph=EL.ph,base=FF_COL[i][1];let I=.2
   if(ph==='draw'||ph==='wait'){
     if(i===0){const M=EL.me,sp=M&&M.sp>=0?EL_SP[M.sp]:null;if(sp){const n=sp.sig.length,pr=M.done?1:clamp((M.st.length+(M.cur?.5:0))/n);I=.4+.55*pr+(M.done?.15*Math.sin(t*9):0);col=sp.u?'#ffd27a':sp.cc?sp.cc:sp.k==='a'?'#ff8a3a':'#5aa0ff';spin=.4+1.6*pr}}
     else{const o=elOpp(),om=o&&o.mid===EL.mid?o:null,od=!!(om&&om.res&&om.res.r===EL.r&&om.res.m===EL.mid),os=elOppInk();const pr=od?1:clamp(os.length*.34);I=.4+.55*pr+(od?.15*Math.sin(t*9+1):0);spin=.4+1.6*pr}}
-  else if(ph==='clash'&&EL.calm){const C=EL.calm,k=(now-EL.t0)/1000;if(C.sh[i]){I=.5+.6*ease(clamp(k/.5));col=FF_SHD[EL_SP[EL.res2[i].sp].el]?FF_SHD[EL_SP[EL.res2[i].sp].el].c[1]:'#5aa0ff';if(EL_SP[EL.res2[i].sp].u)col=EL_PARF.c[1];if(EL_SP[EL.res2[i].sp].cr==='jade')col=EL_JADE.c[1]}else if(C.fz[i]){fail=true;I=.2}}
+  else if(ph==='clash'&&EL.calm){const C=EL.calm,k=(now-EL.t0)/1000;if(C.sh[i]){I=.5+.6*ease(clamp(k/.5));col=FF_SHD[EL_SP[EL.res2[i].sp].el]?FF_SHD[EL_SP[EL.res2[i].sp].el].c[1]:'#5aa0ff';if(EL_SP[EL.res2[i].sp].u)col=EL_PARF.c[1];if(EL_SP[EL.res2[i].sp].cr==='jade')col=EL_JADE.c[1];if(EL_SP[EL.res2[i].sp].cr==='wings')col=EL_WING.c[1]}else if(C.fz[i]){fail=true;I=.2}}
   else if((ph==='clash'||ph==='next')&&FAF.res){const R=FAF.res,c=FAF.ck,T=R.T,P=FAF.P[i];
     if(i===R.a){col=R.atk.c[1];if(!P.ok){fail=c>T.tL;I=fail?.18:.5+.4*ease(clamp(c/T.tL))}else if(c<T.tL){const e=ease(clamp(c/T.tL));I=.55+1.05*e;spin=.6+5*e}else{const d=c-T.tL;flare=Math.exp(-d*3);I=.5+1.1*flare;spin=.6+4*flare}}
     else{if(EL.showSh&&P.ok){col=R.shd.c[1];const e=ease(clamp((c-.3)/Math.max(.3,T.tL-.3)));I=.5+.8*e;spin=.5+3*e}else if(EL.loserAtk===i){col=FF_ATK[EL_SP[EL.res2[i].sp].el]?FF_ATK[EL_SP[EL.res2[i].sp].el].c[1]:base;I=.5+.5*ease(clamp(c/T.tL));if(c>T.tL+.3){fail=true;I=.18}}else if(P&&P.scr&&P.scr.length&&!P.ok){fail=c>.6;I=.2}}}
@@ -4137,12 +4150,12 @@ const EL_JADE={k:'jade',nm:'Carapace de jade',ic:'🐢',c:['#eafff4','#5ae0a0','
 const EL_CRN=3;// sorts de créature avant le départ
 const EL_TAILC=['#ff5a3a','#ff9a3a','#ffd25a','#ff7ad0','#b07aff','#5ab8ff','#5ae0b0'];
 const EL_OL='rgba(26,12,6,.9)';
-function elCrNew(){return[0,1].map(()=>({on:0,n:0,t0:0,leaveT:0,ev:{},lev:{}}))}
+function elCrNew(){return[0,1].map(()=>({on:0,n:0,t0:0,leaveT:0,ev:{},lev:{},ty:'fox'}))}
 function elCrOn(i){const c=EL.cr&&EL.cr[i];return!!(c&&c.on&&c.n>0)}
-function elVis(){return[0,1,2,3,4,5,6,7].concat(elCrOn(0)?[9,10]:[8])}
+function elVis(){return[0,1,2,3,4,5,6,7].concat(elCrOn(0)?(EL.cr[0].ty==='drg'?[12,13]:[9,10]):[8,11])}
 // après chaque manche, calcul identique sur les deux téléphones
 function elCrUpd(res){const now=performance.now();if(!EL.cr)EL.cr=elCrNew();[0,1].forEach(i=>{const r=res[i],sp=elSpOf(r),c=EL.cr[i];if(!sp||!r)return;
-  if(sp.k==='s'){if(r.ok&&!c.on){c.on=1;c.n=EL_CRN;c.t0=now;c.leaveT=0;c.ev={};c.lev={}}}
+  if(sp.k==='s'){if(r.ok&&!c.on){c.on=1;c.n=EL_CRN;c.t0=now;c.leaveT=0;c.ev={};c.lev={};c.ty=sp.cr==='dcall'?'drg':'fox';c.pk=c.dpk=null}}
   else if(sp.cr&&c.on)c.n=Math.max(0,c.n-1)})}
 // au début d'une manche : la créature qui a lancé ses 3 sorts repart
 function elCrRound(){const now=performance.now();if(!EL.cr)EL.cr=elCrNew();EL.cr.forEach(c=>{if(c.on&&c.n<=0){c.on=0;c.leaveT=now;c.lev={}}})}
@@ -4316,9 +4329,9 @@ function elCrGroundFx(i,P,now){const [x,y]=elEstL(i),s=EL.S,c0=EL.cr[i];let a=-1
       gdraw('#5ae0a0',x,y-50*s,90*s,.35*f*P.glow+.0001)}
     if(lv>=0&&lv<1.2){const k=1-clamp(lv/1.2);for(let j=0;j<7;j++)gdraw('#5ae0a0',x,y-30*s*j,50*s,.35*k*(1-j/7))}})}
 // pastilles : sorts de créature restants (sous l'estrade)
-function elCrPips(i,now){const c=EL.cr[i];if(!c.on)return;const [x,y]=elEstL(i),s=EL.S;for(let j=0;j<EL_CRN;j++){const on=j<c.n,xx=x+(j-1)*13*s,yy=y+20*s;
-  ctx.save();if(on){ctx.globalCompositeOperation='lighter';gdraw('#5ae0a0',xx,yy,9*s,.5+.2*Math.sin(now/300+j));ctx.globalCompositeOperation='source-over'}
-  ctx.beginPath();ctx.arc(xx,yy,3.6*s,0,TAU);ctx.fillStyle=on?'#bff5d8':'rgba(255,255,255,.15)';ctx.fill();ctx.strokeStyle='rgba(20,60,40,.8)';ctx.lineWidth=1*s;ctx.stroke();ctx.restore()}}
+function elCrPips(i,now){const c=EL.cr[i];if(!c.on)return;const D=c.ty==='drg';const [x,y]=elEstL(i),s=EL.S;for(let j=0;j<EL_CRN;j++){const on=j<c.n,xx=x+(j-1)*13*s,yy=y+20*s;
+  ctx.save();if(on){ctx.globalCompositeOperation='lighter';gdraw(D?'#ffb84a':'#5ae0a0',xx,yy,9*s,.5+.2*Math.sin(now/300+j));ctx.globalCompositeOperation='source-over'}
+  ctx.beginPath();ctx.arc(xx,yy,3.6*s,0,TAU);ctx.fillStyle=on?(D?'#ffe39a':'#bff5d8'):'rgba(255,255,255,.15)';ctx.fill();ctx.strokeStyle=D?'rgba(70,30,10,.8)':'rgba(20,60,40,.8)';ctx.lineWidth=1*s;ctx.stroke();ctx.restore()}}
 function elCrDrawAllRig(now){if(!EL.cr)return;[1,0].forEach(i=>{const c=EL.cr[i];if(!c.on&&!(c.leaveT&&now-c.leaveT<1300))return;const P=elCrPose(i,now),[ex,ey]=elEstL(i),u=elCrU();
   elCrGroundFx(i,P,now);ctx.save();ctx.translate(ex,ey+2*u);ctx.scale((i?-1:1)*u,u);if(P.rec){ctx.translate(-7*P.rec,0);ctx.rotate(-.09*P.rec)}
   try{elCrRig(P,i)}finally{ctx.restore()}elCrPips(i,now)})}
@@ -4331,7 +4344,7 @@ function elFoxFly(now){const R=FAF.res;if(!R||EL.calm||R.atk.k!=='kitsune'||(EL.
   for(let j=0;j<2;j++)if(Math.random()<.7)elAddL(p[0]+rnd(-.6,.6)*r,p[1]+rnd(-.6,.6)*r,rnd(-40,40)*s,rnd(-40,40)*s,{m:rnd(.3,.7),s:rnd(1.2,2.4),c:Math.random()<.5?'#ff5a3a':'#ffd0a0'})}
 
 /* ----- sons et particules déclenchés une seule fois ----- */
-function elCrTick(now){if(!EL.cr||!G.el)return;const s=EL.S;[0,1].forEach(i=>{const c=EL.cr[i],[x,y]=elEstL(i),ev=c.ev;
+function elCrTick(now){if(!EL.cr||!G.el)return;elDrTick(now);const s=EL.S;[0,1].forEach(i=>{const c=EL.cr[i],[x,y]=elEstL(i),ev=c.ev;if(c.ty==='drg')return;
   if(c.on&&c.t0){const a=(now-c.t0)/1000;if(a<3.2){
     if(!ev.a0){ev.a0=1;ffS('whoosh');try{[62,69,74].forEach(m=>choirV(at(),m,2,.12))}catch(e){}}
     if(a>.4&&!ev.a1){ev.a1=1;ffS('shield');for(let j=0;j<26;j++){const an=rnd(-Math.PI,0),v=rnd(40,160)*s;elAddL(x+rnd(-30,30)*s,y,Math.cos(an)*v,Math.sin(an)*v*.6,{ty:j%3?'lf':'m',c:j%3?(j%2?'#7ad08a':'#bfe8a0'):'#000',s:j%3?rnd(2.5,4)*s:rnd(8,14)*s,m:rnd(.8,1.6),rot:rnd(0,TAU),vr:rnd(-8,8),gx:j%3?120*s:0})}}
@@ -4391,10 +4404,132 @@ function elCrDrawImg(i,P,now){const c=EL.cr[i],key=elCrPoseK(P),t=P.t;
   if(mg>0){const g=Math.max(P.orbR,P.orbL);if(g>0){const O=elOrbImg(P,'F'),R0=EL_ORBR*(.35+.65*ease(mg))*(1+.05*Math.sin(t*9));elAdd(()=>{gdraw('#ff2a1a',O[0],O[1],R0*3.2,.35*g);if(mg<.7)gdraw('#ffffff',O[0],O[1],R0*1.5,.85*Math.sin(mg/.7*Math.PI))});elKOrb(O[0],O[1],R0*ease(g),g,t)}}
   if(P.fz>0&&P.fz<1)elAdd(()=>['F','B'].forEach(q=>{const O=elOrbImg({...P,thr:0,up:1},q);gdraw('#888090',O[0],O[1],80*(1+P.fz),.5*(1-P.fz))}));
   ctx.restore()}
-function elCrDrawAll(now){if(!EL.cr)return;elCrLoad();if(!elCrUseImg())return elCrDrawAllRig(now);
-  [1,0].forEach(i=>{const c=EL.cr[i];if(!c.on&&!(c.leaveT&&now-c.leaveT<1300))return;const P=elCrPose(i,now);elCrGroundFx(i,P,now);try{elCrDrawImg(i,P,now)}catch(e){}elCrPips(i,now)})}
+function elCrDrawAll(now){if(!EL.cr)return;elCrLoad();elDrLoad();const img=elCrUseImg();
+  [1,0].forEach(i=>{const c=EL.cr[i];if(c.ty==='drg'){elDrDraw(i,now);return}if(!c.on&&!(c.leaveT&&now-c.leaveT<1300))return;const P=elCrPose(i,now);elCrGroundFx(i,P,now);
+    if(img){try{elCrDrawImg(i,P,now)}catch(e){}}else{const [ex,ey]=elEstL(i),u=elCrU();ctx.save();ctx.translate(ex,ey+2*u);ctx.scale((i?-1:1)*u,u);if(P.rec){ctx.translate(-7*P.rec,0);ctx.rotate(-.09*P.rec)}try{elCrRig(P,i)}finally{ctx.restore()}}
+    elCrPips(i,now)})}
 
-window.__enc={elCrLoad,elCrDrawImgTest:elCrDrawImg,elCrUseImg,elCrPoseK,elCrOn,elVis,elCrPose,elCrRig,elFoxT,EL_FOX,EL_JADE,EL_CRN,get ctx(){return ctx},set ctx(v){ctx=v},EL_GMAX,elFFPos,elEstL,EL,EL_SP,elDecide,elScore,elEnc,elDec,elConnect,showOnline,elDims,elGeo,elClash,score,PAL,startPalier,get G(){return G},get A(){return A},evaluate,showMap,showGrim,replay,get SAVE(){return SAVE},DU,showDuel,duBegin,duTurn,duChance,duRoll,duSeed,duSpec,duPlay,duCxTable,duProbs,showDuCol,duPlayCol,duName,duReveal,makeCard,showCard,saveCard,CARD,diagSeal,ruleCheck,ruleSet,RULES,trySkip,spSeen,SFX,scoreV2,FAF,ffStart,ffRound,ffJudge,FF_ATK,FF_SHD};
+/* ===== Duel en ligne : le Dragon (v66) — poses générées par Jimmy avec Gemini, fond vert retiré =====
+   Repère « image » : 1408 × 768 d'origine ; les fichiers drg_*.webp couvrent x 60→1380, y 8→766 ; sol en y 745.
+   🐉 Appel du Dragon · 🔥 Souffle du dragon (perce toute défense normale, mais lent) · 🪽 Ailes du dragon (arrêtent tout, sans renvoyer). */
+const EL_DRB={k:'dragon',nm:'Souffle du dragon',ic:'🔥',c:['#ffffff','#ffe39a','#e8a43a']};
+const EL_WING={k:'wings',nm:'Ailes du dragon',ic:'🪽',c:['#fff1d6','#ffb84a','#c8401a']};
+const EL_DRP=['idle','charge','breath','guard'],EL_DRK=.18,EL_DRF=[600,745],EL_DRI={},EL_BSLOW=.4,EL_DRTL=2.2;
+const EL_DRMO={charge:[1120,190],chargeF:[1168,196],breath:[1300,312],breathF:[1348,302]};// gorge et bout de la gueule
+function elDrLoad(){EL_DRP.forEach(k=>{if(EL_DRI[k])return;const im=new Image(),o={im,ok:false};im.onload=()=>{o.ok=true};im.src='drg_'+k+'.webp';EL_DRI[k]=o})}
+function elDrUseImg(){return!!(EL_DRI.idle&&EL_DRI.idle.ok)}
+function elDrQ(i,X,Y){const [ex,ey]=elEstL(i),k=EL_DRK*EL.S;return[ex+(i?-1:1)*(X-EL_DRF[0])*k,ey+6*EL.S+(Y-EL_DRF[1])*k]}
+// départ du souffle (bout de la gueule ouverte), dans le repère du Face à face
+function elDrO(R){const [x,y]=elDrQ(R.a,...EL_DRMO.breathF);R.O=[y,EL.LW-x]}
+
+/* ----- chronologies ----- */
+function elDrT(i,now){if(!EL.res2)return null;const sp=elSpOf(EL.res2[i]);if(!sp||sp.cr!=='breath')return null;
+  if(EL.calm)return EL.ph==='clash'?{c:(now-EL.t0)/1000,Tc:1.15,fail:true,ev:EL.calm.ev}:null;
+  const R=FAF.res;if(!R||(EL.ph!=='clash'&&EL.ph!=='next'))return null;const c=FAF.ck;
+  if(i===R.a)return{c,Tc:R.T.tL,fail:!FAF.P[i].ok,att:1,ev:R.ev,R};
+  if(EL.loserAtk===i)return{c,Tc:R.T.tL+.3,fail:true,ev:R.ev};
+  return null}
+function elWingT(i,now){if(!EL.res2)return 0;const sp=elSpOf(EL.res2[i]);if(!sp||sp.cr!=='wings'||(EL.ph!=='clash'&&EL.ph!=='next'))return 0;
+  if(EL.calm){const k=(now-EL.t0)/1000;return ease(clamp((k-.25)/.35))*(1-clamp((k-3)/.5))*(EL.calm.sh[i]?1:.45)}
+  const R=FAF.res;if(!R)return 0;const k=FAF.ck,P=FAF.P[i];return ease(clamp((k-.25)/.35))*(1-clamp((k-(R.T.tP+1.3))/.5))*(P&&P.ok?1:.45)}
+
+/* ----- pose du dragon à l'instant now ----- */
+function elDrPose(i,now){const c0=EL.cr[i],t=now/1000+i*5.1;
+  const P={t,key:'idle',dy:0,rot:0,al:1,ch:0,br:0,fz:0,guard:0,rec:0,sq:0,roar:0,arr:99,lv:-1,c:-1,sh:1};
+  if(c0.t0){const a=(now-c0.t0)/1000;P.arr=a;
+    if(a<1.3){const u=clamp((a-.25)/1.05),e=1-Math.pow(1-u,3);P.dy=-(1-e)*1500-Math.sin(u*Math.PI*6)*55*(1-u);P.rot=-.1*(1-e);P.al=clamp((a-.25)/.2);P.sh=e}
+    else if(a<1.62)P.sq=Math.sin((a-1.3)/.32*Math.PI)*.055;
+    if(a>1.4&&a<2.6)P.roar=Math.sin(clamp((a-1.4)/1.2)*Math.PI)}
+  if(!c0.on&&c0.leaveT){const l=(now-c0.leaveT)/1000;P.lv=l;if(l<.32)P.sq=Math.sin(l/.32*Math.PI)*.06;const u=clamp((l-.28)/.95);P.dy=-u*u*1700;P.rot=-.1*u;P.al=1-clamp((l-.85)/.35);P.sh=1-u}
+  const F=elDrT(i,now);
+  if(F){const c=F.c*EL_DRTL/Math.max(.5,F.Tc),L=EL_DRTL;P.c=c;P.ch=ease(clamp((c-.15)/(L-.3)));
+    if(F.fail){if(c>=L-.1){P.fz=clamp((c-L+.1)/.6);P.ch*=1-P.fz}}
+    else if(c>=L-.08&&(!F.R||F.c<F.R.T.tP+.35)){P.br=1;P.ch=1}
+    else if(F.R&&F.c>=F.R.T.tP+.35)P.ch=0}
+  P.guard=elWingT(i,now);
+  const R=FAF.res;if(R&&!EL.calm&&(EL.ph==='clash'||EL.ph==='next')){const T=R.T,o=R.o;let idx=-1,tt=0;
+    if(o==='hit'||o==='pierce'){idx=R.d;tt=o==='hit'?T.tI:T.tP}else if(o==='reflect'||o==='riposte'){idx=R.a;tt=T.tP}
+    if(idx===i){const d=FAF.ck-tt;if(d>=0&&d<.8)P.rec=(1-d/.8)*Math.abs(Math.cos(d*9))}}
+  P.key=P.guard>.3?'guard':P.br?'breath':(P.ch>.04||P.roar>.12||(P.fz>0&&P.fz<.7))?'charge':'idle';
+  return P}
+
+/* ----- dessin ----- */
+function elDrImg(i,P,now){const c=EL.cr[i],key=P.key,t=P.t;
+  if(c.dpk!==key){c.dpp=c.dpk||key;c.dpk=key;c.dpt=now}
+  const fa=clamp((now-(c.dpt||0))/150),[ex,ey]=elEstL(i),k=EL_DRK*EL.S;
+  ctx.save();ctx.translate(ex,ey+6*EL.S);ctx.scale((i?-1:1)*k,k);
+  if(P.rec){ctx.translate(-46*P.rec,0);ctx.rotate(-.045*P.rec)}
+  ctx.translate(0,P.dy);if(P.rot)ctx.rotate(P.rot);if(P.sq)ctx.scale(1+P.sq,1-P.sq);ctx.scale(1,1+.005*Math.sin(t*1.9));ctx.translate(-EL_DRF[0],-EL_DRF[1]);
+  // halo doré des ailes en garde
+  if(P.guard>0)elAdd(()=>{gdraw('#ffb84a',960,400,520,.2*P.guard*(.8+.2*Math.sin(t*5)));gdraw('#fff1d6',1000,380,240,.14*P.guard)});
+  // braises qui montent autour du dragon pendant la charge
+  if(P.ch>0)elAdd(()=>{gdraw('#e8a43a',1000,330,560,.16*P.ch*(.8+.2*Math.sin(t*13)))});
+  ctx.imageSmoothingQuality='high';
+  const dr=(kk,a)=>{const o=EL_DRI[kk]&&EL_DRI[kk].ok?EL_DRI[kk]:EL_DRI.idle;if(!o||!o.ok||a<=0)return;ctx.globalAlpha=a;ctx.drawImage(o.im,60,8,1320,758);ctx.globalAlpha=1};
+  if(fa<1)dr(c.dpp,P.al);dr(key,fa*P.al);
+  // gorge incandescente blanc-or
+  if((P.ch>0||P.br)&&P.al>0){const br=key==='breath',m=br?EL_DRMO.breath:EL_DRMO.charge,f=br?EL_DRMO.breathF:EL_DRMO.chargeF,g=P.ch,fl=.85+.15*Math.sin(t*31)+.08*Math.sin(t*17);
+    elAdd(()=>{gdraw('#e8a43a',m[0],m[1],(80+170*g)*fl,.35*g);gdraw('#ffe39a',(m[0]+f[0])/2,(m[1]+f[1])/2,(40+90*g)*fl,.6*g);gdraw('#ffffff',m[0],m[1],(16+46*g)*fl,.75*g)})}
+  // fumée noire quand le souffle s'étouffe
+  if(P.fz>0&&P.fz<1)elAdd(()=>gdraw('#7a6a60',EL_DRMO.chargeF[0],EL_DRMO.chargeF[1],120*(1+P.fz),.35*(1-P.fz)));
+  // nervures des ailes qui s'illuminent en garde
+  if(P.guard>.05)elAdd(()=>{for(let j=0;j<7;j++){const u=j/6,x=lerp(800,1180,u),y=lerp(250,560,u)+Math.sin(u*7)*30;gdraw('#ffd890',x,y,70,.22*P.guard*(.6+.4*Math.sin(t*5+j)))}});
+  ctx.restore()}
+// ombre au sol, vent et poussière (repère paysage)
+function elDrGroundFx(i,P,now){const [x,y]=elEstL(i),s=EL.S,c0=EL.cr[i],k=EL_DRK*s;let a=-1;if(c0.t0)a=(now-c0.t0)/1000;
+  const sh=P.sh;if(sh>0){ctx.save();ctx.globalAlpha=.5*sh*Math.min(1,P.al+.4);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(x+(i?-1:1)*(770-EL_DRF[0])*k,y+5*s,(300+300*(1-sh))*k*sh+20*s,40*k*sh+3*s,0,0,TAU);ctx.fill();ctx.restore()}
+  elAdd(()=>{if(a>=1.25&&a<2.6){const u=clamp((a-1.25)/1.1);ctx.save();ctx.translate(x,y+4*s);ctx.scale(1,.3);for(let j=0;j<3;j++){const v=clamp(u*1.3-j*.15);if(v<=0||v>=1)continue;ctx.strokeStyle=hexA(j%2?'#ffe39a':'#e8a43a',.7*(1-v));ctx.lineWidth=(10*(1-v)+1)*s;ctx.beginPath();ctx.arc(0,0,(40+190*v)*s,0,TAU);ctx.stroke()}ctx.restore();
+      gdraw('#e8a43a',x,y-20*s,140*s,.3*(1-u))}
+    if(a>=0&&a<1.3){const g=clamp(a/1.2);gdraw('#ffb84a',x,y-10*s,(60+80*g)*s,.12*g)}
+    if(P.roar>0){const m=elDrQ(i,...EL_DRMO.chargeF);for(let j=0;j<3;j++){const v=((P.t*1.6+j/3)%1);ctx.strokeStyle=hexA('#ffe39a',.35*P.roar*(1-v));ctx.lineWidth=2.4*s*(1-v)+.5;ctx.beginPath();ctx.arc(m[0],m[1],(10+70*v)*s,(i?Math.PI-.9:-.9),(i?Math.PI+.9:.9));ctx.stroke()}}})}
+function elDrDraw(i,now){const c=EL.cr[i];if(!c.on&&!(c.leaveT&&now-c.leaveT<1500))return;const P=elDrPose(i,now);elDrGroundFx(i,P,now);
+  if(elDrUseImg()){try{elDrImg(i,P,now)}catch(e){}}else{const [x,y]=elEstL(i),s=EL.S;elAdd(()=>{gdraw('#e8a43a',x,y-60*s+P.dy*EL_DRK*s,90*s,.5*P.al);gdraw('#ffe39a',x,y-60*s+P.dy*EL_DRK*s,40*s,.6*P.al)})}
+  elCrPips(i,now)}
+
+/* ----- le souffle (repère paysage, au-dessus des sorts) ----- */
+function elDrFly(now){const R=FAF.res;if(!R||EL.calm||R.atk.k!=='dragon'||(EL.ph!=='clash'&&EL.ph!=='next'))return;const c=FAF.ck,T=R.T;if(c<T.tL-.04){EL.dlast=null;EL.dfl=null;return}
+  if(!FAF.P[R.a].ok)return;
+  const L2=p=>[EL.LW-p[1],p[0]],s=EL.S,M=L2(R.O),st=ffAtkState(c),tt=now/1000;let head=null,a=1,refl=false;
+  if(st&&!st.charge&&!st.weak){head=L2([st.x,st.y]);refl=R.o==='reflect'&&st.from===R.SD;if(!refl)EL.dlast=head}
+  else{if(R.o==='reflect')return;const tE=R.o==='pierce'?T.tP:T.tI;a=1-clamp((c-tE)/.45);if(a<=0||!EL.dlast)return}
+  const end=refl?L2(R.SD):(head||EL.dlast),sa=refl?1-clamp((c-T.tI)/.35):a,dx=end[0]-M[0],dy=end[1]-M[1],dl=Math.hypot(dx,dy)||1,ux=dx/dl,uy=dy/dl,nx=-uy,ny=ux;
+  // flammes : bouffées qui jaillissent de la gueule et s'élargissent en cône jusqu'à la tête du souffle
+  if(!EL.dfl||EL.dflR!==R){EL.dfl=[];EL.dflR=R;EL.dck=c}const dk=clamp(c-EL.dck,0,.05);EL.dck=c;const V=820*s,F=EL.dfl,live=sa>0&&(refl?c<T.tI:!!head);
+  if(live)for(let j=0;j<7;j++){const sp=rnd(-.2,.2),v=V*rnd(.85,1.1);F.push({x:M[0]+nx*rnd(-3,3)*s,y:M[1]+ny*rnd(-3,3)*s,vx:(ux+nx*sp)*v,vy:(uy+ny*sp)*v,d:0,ph:rnd(0,TAU),k:Math.random()})}
+  for(let j=F.length-1;j>=0;j--){const q=F[j],st2=Math.hypot(q.vx,q.vy)*dk;q.x+=q.vx*dk;q.y+=q.vy*dk-40*s*dk;q.d+=st2;if(q.d>dl+18*s||q.d>900*s)F.splice(j,1)}
+  elAdd(()=>{for(const q of F){const f=clamp(q.d/Math.max(60*s,dl)),r=(5+.2*q.d/s)*s*(.8+.4*q.k),w=Math.sin(tt*18+q.ph)*r*.25,x=q.x+nx*w,y=q.y+ny*w,al=(1-.45*f)*Math.max(sa,live?1:0);
+      gdraw(q.k<.3?'#c8401a':'#e8a43a',x,y,r*2.1,.075*al);gdraw('#ffe39a',x,y,r*1.15,.105*al);gdraw('#ffffff',x,y,r*.5,.14*al*(1-f*.7))}});
+  if(sa>0){const N=Math.max(10,Math.round(dl/(6*s)));
+    elAdd(()=>{for(let j=0;j<=N;j++){const u=j/N,w=(3+9*Math.pow(u,.8))*s,wob=Math.sin(tt*22-u*14)*w*.4,x=M[0]+dx*u+nx*wob,y=M[1]+dy*u+ny*wob;gdraw('#ffe39a',x,y,w*1.4,.16*sa);gdraw('#ffffff',x,y,w*.5,.3*sa)}});
+    for(let j=0;j<2;j++)if(Math.random()<.8*sa){const u=Math.random(),x=M[0]+dx*u,y=M[1]+dy*u,v=rnd(60,170)*s,dark=Math.random()<.45;
+      elAddL(x+nx*rnd(-1,1)*(6+30*u)*s,y+ny*rnd(-1,1)*(6+30*u)*s,ux*v+rnd(-50,50)*s,uy*v+rnd(-50,50)*s-20*s,dark?{ty:'m',c:'#000',s:rnd(4,9)*s,m:rnd(.6,1.1)}:{c:Math.random()<.5?'#ffe39a':'#ffffff',s:rnd(1,2.2),m:rnd(.25,.55)})}}
+  const p=refl?head:end,hr=(refl?18:30)*s,aa=refl?1:a;if(p)elAdd(()=>{gdraw('#e8a43a',p[0],p[1],hr*3,.35*aa);gdraw('#ffe39a',p[0],p[1],hr*1.8,.55*aa);gdraw('#ffffff',p[0],p[1],hr*.9,.85*aa)})}
+
+/* ----- sons et particules déclenchés une seule fois ----- */
+function elDrTick(now){const s=EL.S;[0,1].forEach(i=>{const c=EL.cr[i];if(c.ty!=='drg')return;const [x,y]=elEstL(i),ev=c.ev;
+  if(c.on&&c.t0){const a=(now-c.t0)/1000;if(a<3){
+    if(!ev.d0){ev.d0=1;ffS('whoosh')}
+    if(a>.6&&!ev.d1){ev.d1=1;ffS('whoosh')}
+    if(a>1.3&&!ev.d2){ev.d2=1;ffS('dland');FAF.shake=Math.max(FAF.shake,.55);for(let j=0;j<40;j++){const an=rnd(-Math.PI,0),v=rnd(60,240)*s,dk=j%3;elAddL(x+rnd(-60,60)*s,y+rnd(-4,4)*s,Math.cos(an)*v,Math.sin(an)*v*.35,dk?{ty:'m',c:'#000',s:rnd(8,16)*s,m:rnd(.8,1.6)}:{c:j%2?'#ffe39a':'#e8a43a',s:rnd(1.2,2.4),m:rnd(.4,.9)})}}
+    if(a>1.42&&!ev.d3){ev.d3=1;ffS('droar')}}}
+  if(!c.on&&c.leaveT&&!c.lev.d0&&now-c.leaveT<900){c.lev.d0=1;ffS('whoosh');for(let j=0;j<30;j++){const an=rnd(-Math.PI,0),v=rnd(60,200)*s;elAddL(x+rnd(-50,50)*s,y,Math.cos(an)*v,Math.sin(an)*v*.4,{ty:'m',c:'#000',s:rnd(8,14)*s,m:rnd(.8,1.4)})}}
+  const F=elDrT(i,now);if(F&&F.ev){const E=F.ev,cc=F.c*EL_DRTL/Math.max(.5,F.Tc),K='d'+i;
+    if(cc>.15&&!E[K+'c']){E[K+'c']=1;ffS('dchg')}
+    if(cc>.15&&cc<EL_DRTL-.1&&!F.fail||F.fail&&cc>.15&&cc<EL_DRTL-.2){const m=elDrQ(i,...EL_DRMO.chargeF);for(let j=0;j<2;j++){const an=rnd(0,TAU),r=rnd(50,110)*s,tt=rnd(.35,.6),px=m[0]+Math.cos(an)*r,py=m[1]+Math.sin(an)*r;elAddL(px,py,(m[0]-px)/tt,(m[1]-py)/tt,{c:Math.random()<.5?'#ffe39a':'#ffffff',s:rnd(1,2),m:tt,dr:1})}}
+    if(F.fail&&cc>EL_DRTL-.1&&!E[K+'fz']){E[K+'fz']=1;ffS('fizzle');const m=elDrQ(i,...EL_DRMO.chargeF);for(let j=0;j<14;j++)elAddL(m[0],m[1],rnd(-30,50)*s*(i?-1:1),rnd(-60,-10)*s,{ty:'m',c:'#000',s:rnd(6,12)*s,m:rnd(.8,1.5)})}}})}
+
+/* ----- ailes du dragon : deux ailes de lumière dorée croisées devant le défenseur ----- */
+FF_SH.wings=function(f,a,h,now,c){const w=ffSW(f),b=40*S*f,t=now/1000;
+  const g=ctx.createRadialGradient(0,-6*S,0,0,-6*S,w*.55);g.addColorStop(0,hexA(c[1],.2*a));g.addColorStop(1,hexA(c[2],0));ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,w*.55,64*S*f,0,Math.PI,TAU);ctx.fill();
+  [-1,1].forEach(sd=>{const R0=[sd*8*S,16*S],tips=[.13,.27,.39,.5].map((u,j)=>{const x=sd*u*w*.98;return[x,ffArcY(x,w,b)-(j===3?10*S:0)+Math.sin(t*3+j+sd)*1.6*S]});
+    ctx.beginPath();ctx.moveTo(R0[0],R0[1]);ctx.lineTo(tips[0][0],tips[0][1]);for(let j=1;j<4;j++){const p=tips[j-1],q=tips[j],mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2;ctx.quadraticCurveTo(lerp(mx,R0[0],.3),lerp(my,R0[1],.3),q[0],q[1])}
+    ctx.quadraticCurveTo(sd*w*.4,18*S,R0[0],R0[1]);ctx.closePath();
+    const lg=ctx.createLinearGradient(0,-b,0,20*S);lg.addColorStop(0,hexA(c[1],.32*a));lg.addColorStop(1,hexA(c[2],.2*a));ctx.fillStyle=lg;ctx.fill();ctx.strokeStyle=hexA(c[1],(.55+.4*h)*a);ctx.lineWidth=1.6*S;ctx.stroke();
+    tips.forEach((p,j)=>{ctx.strokeStyle=hexA('#ffd890',(.75+.25*h)*a);ctx.lineWidth=(2.6-j*.35)*S;ctx.beginPath();ctx.moveTo(R0[0],R0[1]);ctx.quadraticCurveTo(lerp(R0[0],p[0],.5),lerp(R0[1],p[1],.5)-7*S,p[0],p[1]);ctx.stroke();
+      ctx.fillStyle=hexA('#fff1d6',.9*a);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0]+sd*4*S,p[1]-8*S);ctx.lineTo(p[0]+sd*1.2*S,p[1]+1.2*S);ctx.closePath();ctx.fill();gdraw(c[1],p[0],p[1],9*S,.45*a*(1+h))})});
+  ffBand(ffArcPts(w,b,40,-2*S),c,a*.5,.7)};
+
+window.__enc={elDrPose,elDrUseImg,EL_DRB,EL_WING,elCrLoad,elCrDrawImgTest:elCrDrawImg,elCrUseImg,elCrPoseK,elCrOn,elVis,elCrPose,elCrRig,elFoxT,EL_FOX,EL_JADE,EL_CRN,get ctx(){return ctx},set ctx(v){ctx=v},EL_GMAX,elFFPos,elEstL,EL,EL_SP,elDecide,elScore,elEnc,elDec,elConnect,showOnline,elDims,elGeo,elClash,score,PAL,startPalier,get G(){return G},get A(){return A},evaluate,showMap,showGrim,replay,get SAVE(){return SAVE},DU,showDuel,duBegin,duTurn,duChance,duRoll,duSeed,duSpec,duPlay,duCxTable,duProbs,showDuCol,duPlayCol,duName,duReveal,makeCard,showCard,saveCard,CARD,diagSeal,ruleCheck,ruleSet,RULES,trySkip,spSeen,SFX,scoreV2,FAF,ffStart,ffRound,ffJudge,FF_ATK,FF_SHD};
 </script>
 </body>
 </html>
