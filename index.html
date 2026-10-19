@@ -3623,11 +3623,11 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='61';
+const EL_VER='62';
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
-const ELMQ_BROKERS=['wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt'];
+const ELMQ_BROKERS=['wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081/mqtt','wss://mqtt.eclipseprojects.io:443/mqtt','wss://mqtt-dashboard.com:8884/mqtt'];
 const ELMQ_PFX='encrelune-x7q2';
 function elmqLen(n){const o=[];do{let b=n%128;n=Math.floor(n/128);if(n>0)b|=128;o.push(b)}while(n>0);return o}
 function elmqStr(s){const b=new TextEncoder().encode(s);return[b.length>>8,b.length&255,...b]}
@@ -3687,7 +3687,7 @@ function elmqRoom(name){
     urls.forEach((u,i)=>conns.push(elmqConn(u,me+'-'+i,myT,onMsg,onState)));
     hb=setInterval(()=>{pub(true);sweep()},2500);
     addEventListener('pagehide',()=>{if(alive)api.leave()});
-    setTimeout(()=>{if(joinedRes){joinedRes=null;const r=joinedRej;joinedRej=null;api.leave();r({code:'upstream_error'})}},10000)})}
+    setTimeout(()=>{if(joinedRes){joinedRes=null;const r=joinedRej;joinedRej=null;api.leave();r({code:'upstream_error'})}},14000)})}
 const ELMQ_NS=Object.freeze({join:n=>elmqRoom(String(n))});
 
 function elDiagT(){const st=EL.ns===undefined?'vérification…':EL.ns===ELMQ_NS?'✓ serveur public':EL.ns?'✓ disponible sur ce téléphone':'✗ indisponible sur ce téléphone';return `Version ${EL_VER} · Salons en ligne : ${st}`}
