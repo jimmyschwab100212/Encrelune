@@ -1067,7 +1067,7 @@ function drawAnimal(lines,rev,a,col,gc){const sl=lines.map(l=>l.map(([x,y])=>ani
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
 const SPELL_END={spirit:8.5,lune:12,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
-function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
+function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?SPELL_END.stag+3.2:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
 function update(dt,now){
   {const v=!!(G.train&&G.state==='draw');if(v!==tDemoV){tDemoV=v;$('tDemo').hidden=!v}}
   if(G.ff){ffUpdate(dt,now);return}
@@ -1170,7 +1170,45 @@ function startSpell(){const pl=PAL[G.pi],SC=G.SC,pw=G.power,gold=G.moon?!!G.gold
   FL.forEach(f=>f.fl=Math.max(f.fl||0,.8*pw));SND.gust();
   if(gold){G.slow=1.7;G.shake=1.2;SND.perfect();spark(SC.x,SC.y,'#ffffff',90,620*S);WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.3,t:-.3,col:'#ffd27a'},{x:SC.x,y:SC.y,r:SC.r*.4,t:-.45,col:'#ff9ad8'});FL.forEach(f=>f.fl=1.5);for(let i=0;i<150;i++)P.push({x:rnd(0,W),y:rnd(-H*.1,H*.6),vx:rnd(-10,10),vy:rnd(20,70),l:0,m:rnd(3,6),s:rnd(1,2.6),c:Math.random()<.8?'#ffd27a':'#ffffff'})}
   if(G.anim==='birds'){G.bx=0;G.ba=0;G.rg=null;if(!gold&&pw>=.5){G.bx=3.8;const r0=Math.min(W*.13,70);G.rg=[{x:W*.24,y:H*.4,r:r0,h:0},{x:W*.76,y:H*.5,r:r0,h:0},{x:W*.5,y:H*.3,r:r0*1.15,h:0}]}const n=gold?96:Math.round(10+44*pw),ww=Math.min(W*.66,360),tg=gold?cloud(BIGBIRD,n):null;for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rnd(140,340)*S;BIRDS.push({x:SC.x+Math.cos(a)*SC.r*.2,y:SC.y+Math.sin(a)*SC.r*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ph:Math.random()*TAU,fr:rnd(10,15),s:rnd(.7,1.35)*S,age:-Math.random()*.6,gold:gold&&Math.random()<.65,tx:tg?tg[i%tg.length][0]:0,ty:tg?tg[i%tg.length][1]:0,th:Math.random()*TAU,R:rnd(40,125)*S,dir:Math.random()<.8?1:-1,ox:rnd(-.3,.3)*ww,oy:rnd(-50,40)*S,depth:0,lag:rnd(0,.14),rx:rnd(-.45,.45),ry:rnd(-.45,.45),hi:i/n})}SND.birds(n)}
-  if(G.anim==='stag')SND.stag();if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
+  if(G.anim==='stag'){SND.stag();G.bk=null;G.cst=null;G.su=null;G.rr=0;G.bw=0;G.bx=(!gold&&pw>=.5)?2.4:0}if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
+/* ----- Palier 2 : le galop des livres (2★) et la constellation (3★) ----- */
+const STAG_TIPS=[[64,1],[81,25],[46,7],[75,9],[44,3],[27,26],[30,15]];
+function stagPath(u){const cx=W/2,cy=G.ay0-H*.02,rx=W*.32,ry=H*.09,th=Math.PI/2+u*2.5*Math.PI;return{x:cx+rx*Math.cos(th),y:cy+ry*Math.sin(th)-u*H*.08,f:.74+.26*Math.sin(th)}}
+function stagFoot(f){return 80*G.SC.r*1.4/100*G.abase*.86*f}
+function stagRun(dt,now,sk){const T0=2.25,T1=6.25,SC=G.SC;
+  if(!G.bk){G.bk=[];const n=16;for(let i=0;i<n;i++){const L=i%2===0,u=(i+.6)/n,p=stagPath(u),sx=L?W*rnd(.03,.18):W*rnd(.82,.97),sy=H*rnd(.1,.6);
+      G.bk.push({sx,sy,x:sx,y:sy,u,tx:p.x,ty:p.y+stagFoot(p.f)+4*S,f:p.f,t0:sk+i*.05,hit:0,r0:rnd(-2,2),c:['#ffe6a8','#d6efff','#ffc8e0','#c8ffe0'][i%4]})}
+    try{SND.birds(10)}catch(e){}}
+  for(const b of G.bk){const k=clamp((sk-b.t0)/.75),e=ease(k);if(!b.hit){b.x=lerp(b.sx,b.tx,e);b.y=lerp(b.sy,b.ty,e)-Math.sin(k*Math.PI)*H*.08}
+    if(!b.hit&&G.su!=null&&G.su>b.u-.01&&sk>T0){b.hit=sk;for(let q=0;q<10;q++)P.push({x:b.x,y:b.y,vx:rnd(-60,60)*S,vy:rnd(-110,-20)*S,l:0,m:rnd(.5,1),s:rnd(1.2,2.2),c:'#d6efff'})}
+    if(b.hit){b.y-=dt*60*S;b.x+=Math.sin(sk*3+b.r0)*dt*20*S}}
+  if(sk<T0){const t=clamp((sk-1.7)/(T0-1.7)),p=stagPath(0),e=t*t*(3-2*t);G.ap[0]=lerp(SC.x,p.x,e);G.ap[1]=lerp(G.ay0,p.y,e);G.asc=lerp(G.abase,G.abase*p.f*.86,e);G.su=-1}
+  else if(sk<T1){const u=(sk-T0)/(T1-T0),p=stagPath(u),dx=p.x-G.ap[0];if(Math.abs(dx)>.3)G.aflip=dx>0?-1:1;G.ap[0]=p.x;G.ap[1]=p.y-Math.abs(Math.sin(G.ph))*5*S;G.asc=G.abase*p.f*.86;G.su=u}
+  else{const t=clamp((sk-T1)/1.25),wn=BGD.win||[W/2,H*.26];if(!G.leap0){G.leap0=[G.ap[0],G.ap[1]];G.asc0=G.asc;SND.leap()}G.su=2;G.aflip=G.leap0[0]<wn[0]?-1:1;G.ap[0]=lerp(G.leap0[0],wn[0],ease(t));G.ap[1]=lerp(G.leap0[1],wn[1],t)-Math.sin(t*Math.PI)*110*S;G.asc=lerp(G.asc0,.12,ease(t))}}
+function stagGold(dt,now,sk){G.run=sk<2.05;if(G.run)G.ph+=dt*12;const R=G.SC.r;
+  const rear=ease(clamp((sk-1.95)/.6))*(1-ease(clamp((sk-6.1)/.5))),bow=ease(clamp((sk-6.35)/.6));G.arot=.36*rear-.2*bow;const back=ease(clamp((sk-3)/1));G.asc=G.abase*(1-.34*back);G.ap[0]=lerp(G.SC.x,W*.5,back);G.ap[1]=G.ay0-rear*R*.22+bow*R*.05+back*H*.12;
+  if(sk>2&&!G.rr){G.rr=1;SND.stag();G.shake=.5}
+  if(!G.cst&&sk>3.1){const sc=Math.min(W*.86,H*.4)/200,ls=stagLines(0,false),tips=STAG_TIPS.map(q=>animalXY(q[0],q[1]));G.cst={lines:[],t:sk};let n=0;
+    ls.forEach(l=>{const st=[];l.forEach((q,j)=>{if(j%2&&j!==l.length-1)return;const s=tips[n%tips.length];st.push({sx:s[0],sy:s[1],x:s[0],y:s[1],tx:W/2+(q[0]-100)*sc,ty:H*.25+(q[1]-95)*sc,t0:sk+n*.012,big:Math.random()<.2});n++});G.cst.lines.push(st)});
+    try{[0,4,7,11,14].forEach((d,i)=>harp(at()+i*.14,pen(62,d)+12,.8))}catch(e){}}
+  if(G.cst)for(const l of G.cst.lines)for(const s of l){const k=ease(clamp((sk-s.t0)/1.1));s.x=lerp(s.sx,s.tx,k);s.y=lerp(s.sy,s.ty,k)-Math.sin(k*Math.PI)*H*.05}
+  if(sk>6.4&&!G.bw){G.bw=1;SND.bell()}}
+function drawStagFX(now,k){const t=now/1000;ctx.save();ctx.globalCompositeOperation='lighter';
+  if(G.bk&&!G.gold){const fa=clamp((7.6-k)/.5);for(const b of G.bk){const kk=clamp((k-b.t0)/.75);if(kk<=0)continue;const op=clamp((k-b.t0-.35)/.4),a=(b.hit?clamp(1-(k-b.hit)/1.1):1)*fa;if(a<=0)continue;
+      const s=(15+8*b.f)*S*(b.hit?1+(k-b.hit)*.6:1);ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.hit?Math.sin(k*4+b.r0)*.4:(1-op)*b.r0+Math.sin(t*2+b.r0)*.06);
+      gdraw(b.hit?'#ffffff':'#6fc3ff',0,0,s*3.2,(b.hit?.6:.35)*a);const sp=lerp(.08,1,op);
+      [-1,1].forEach(d=>{ctx.fillStyle=hexA(b.c,.55*a);ctx.strokeStyle=hexA('#ffffff',.9*a);ctx.lineWidth=1.2*S;ctx.beginPath();ctx.moveTo(0,s*.35);ctx.lineTo(d*s*sp,s*.15*sp+s*.25*(1-sp));ctx.lineTo(d*s*sp,-s*.55);ctx.lineTo(0,-s*.35);ctx.closePath();ctx.fill();ctx.stroke()});
+      ctx.strokeStyle=hexA('#ffffff',.5*a*op);ctx.lineWidth=.8*S;for(let j=1;j<3;j++)[-1,1].forEach(d=>{ctx.beginPath();ctx.moveTo(d*s*.2,-s*.32+j*s*.2);ctx.lineTo(d*s*.8*sp,-s*.42+j*s*.2);ctx.stroke()});ctx.restore()}
+    if(G.su>0&&G.su<1.5){const n=40;ctx.strokeStyle=hexA('#d6efff',.25*fa);ctx.lineWidth=3*S;ctx.setLineDash([2*S,10*S]);ctx.beginPath();for(let i=0;i<=n;i++){const p=stagPath(G.su+i/n*(1-G.su));const y=p.y+stagFoot(p.f)+4*S;i?ctx.lineTo(p.x,y):ctx.moveTo(p.x,y)}ctx.stroke();ctx.setLineDash([])}}
+  if(G.gold&&k>1.95){const g=ease(clamp((k-2)/1.3)),fa=clamp((5.4-k)/.7);if(fa>0&&g>0){const tips=STAG_TIPS.map(q=>animalXY(q[0],q[1]));
+      const br=(x,y,ang,len,d,seed)=>{if(d>3)return;const L=len*g,x2=x+Math.cos(ang)*L,y2=y+Math.sin(ang)*L;ctx.strokeStyle=hexA('#ffd27a',.35*fa);ctx.lineWidth=(5-d)*1.6*S;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x2,y2);ctx.stroke();ctx.strokeStyle=hexA('#ffffff',.85*fa);ctx.lineWidth=(4-d)*.5*S;ctx.stroke();
+        gdraw('#fff3c8',x2,y2,(9-d*1.5)*S,.8*fa*(.7+.3*Math.sin(t*5+seed)));const sp=.45+.1*Math.sin(seed);br(x2,y2,ang-sp,len*.62,d+1,seed*1.7+1);br(x2,y2,ang+sp,len*.62,d+1,seed*1.3+2)};
+      tips.forEach((p,i)=>br(p[0],p[1],-Math.PI/2+(i-3)*.16,Math.min(H*.075,55*S),0,i+1))}}
+  if(G.cst){const fa=clamp((8.6-k)/.6)*clamp((k-G.cst.t)/.3),pulse=1+.3*ease(clamp((k-6.4)/.4))*clamp((7.8-k)/.6);if(fa>0){
+      gdraw('#bcd8ff',W/2,H*.22,W*.7,.18*fa*pulse);
+      for(const l of G.cst.lines){for(let j=1;j<l.length;j++){const a=l[j-1],b=l[j],ok=clamp((k-Math.max(a.t0,b.t0)-1.1)/.5);if(ok<=0)continue;ctx.strokeStyle=hexA('#d6efff',.75*fa*ok*pulse);ctx.lineWidth=1.8*S;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
+        for(const s of l){if(k<s.t0)continue;gdraw(s.big?'#ffffff':'#ffd27a',s.x,s.y,(s.big?15:10)*S*pulse,.9*fa*(.75+.25*Math.sin(t*6+s.tx)))}}}}
+  ctx.restore()}
 /* ----- le hibou des étoiles ----- */
 const OWL_BODY=[[100,62],[112,64],[122,70],[126,58],[125,76],[128,88],[128,104],[126,124],[120,142],[110,156],[100,162],[90,156],[80,142],[74,124],[72,104],[72,88],[75,76],[74,58],[78,70],[88,64],[100,62]];
 const OWL_FACE=[[100,78],[110,74],[120,80],[122,92],[114,104],[100,110],[86,104],[78,92],[80,80],[90,74],[100,78]];
@@ -1294,11 +1332,9 @@ function updateSpell(dt,now){if(SPX[G.anim])return SPX[G.anim].update(dt,now);if
       if(Math.random()<.25*(1-b.depth))P.push({x:b.x,y:b.y,vx:0,vy:20,l:0,m:.6,s:1.4,c:b.gold?'#ffd27a':pl.glow})}}
   if(G.anim==='stag'||G.anim==='wolf'||G.anim==='fox'){const lines=animLines(),rev=clamp(sk/1.5)*(weak?.8:1);
     if(Math.random()<.8*G.power&&rev>.3&&!CONST&&G.foxA>0){const l=lines[Math.random()*lines.length|0],q=l[Math.random()*l.length|0],[x,y]=animalXY(q[0],q[1]);P.push({x,y,vx:rnd(-15,15),vy:rnd(-40,-10),l:0,m:rnd(.6,1.2),s:rnd(1,2.2),c:G.gold?'#ffd27a':pl.glow})}}
-  if(G.anim==='stag'&&!weak&&sk>1.7){G.run=true;G.ph+=dt*12;const startX=SC.x,endX=W*(G.gold?.4:.3);
-    if(sk<3.8){const t=clamp((sk-1.7)/2.1),e=t*t*(3-2*t);G.ap[0]=lerp(startX,endX,e);G.ap[1]=G.ay0-Math.sin(t*Math.PI)*8*S}
-    else{const t=clamp((sk-3.8)/1.4),wn=BGD.win||[W/2,H*.26];if(!G.leap0){G.leap0=[G.ap[0],G.ap[1]];SND.leap()}G.aflip=-1;G.ap[0]=lerp(G.leap0[0],wn[0],ease(t));G.ap[1]=lerp(G.leap0[1],wn[1],t)-Math.sin(t*Math.PI)*110*S;G.asc=lerp(G.abase,.12,ease(t))}
+  if(G.anim==='stag'&&!weak&&sk>1.7){if(G.gold)stagGold(dt,now,sk);else{G.run=true;G.ph+=dt*12;stagRun(dt,now,sk)}
     G.bloomT-=dt;if(G.bloomT<=0&&sk<3.9){G.bloomT=.09;const ls=stagLines(G.ph,true),leg=ls[1+(Math.random()*4|0)],h=leg[leg.length-1],[px,py]=animalXY(h[0],h[1]);BLOOMS.push({x:px+rnd(-6,6)*S,y:py+rnd(-2,6)*S,t:now,s:rnd(.6,1.15)*S})}
-    if(G.gold&&sk<3.9){G.vineT-=dt;if(G.vineT<=0){G.vineT=.2;const fy=animalXY(100,188)[1];VINES.push({x:G.ap[0]+rnd(-100,100)*S,y:fy,h:rnd(150,320)*S,t0:sk,ph:Math.random()*TAU,sd:Math.random()<.5?-1:1})}}
+    if(G.gold&&sk<3.9&&G.anim!=='stag'){G.vineT-=dt;if(G.vineT<=0){G.vineT=.2;const fy=animalXY(100,188)[1];VINES.push({x:G.ap[0]+rnd(-100,100)*S,y:fy,h:rnd(150,320)*S,t0:sk,ph:Math.random()*TAU,sd:Math.random()<.5?-1:1})}}
     const f2=G.SC.r*1.4/100*G.asc;for(const f of FL)if(Math.abs(f.x-G.ap[0])<90*f2&&f.y>G.ap[1]-110*f2&&f.y<G.ap[1]+90*f2)f.fl=1}
   if(G.anim==='wolf'){if(sk>1.6&&sk<3.6&&sk>G.ringT){G.ringT=sk+.38;const [mx,my]=animalXY(30,14);RINGS.push({x:mx,y:my,t:now});G.moonB=Math.min(1.2,G.moonB+.35*G.power)}
     if(!weak&&sk>3.7&&!CONST)makeConst();
@@ -1336,11 +1372,11 @@ function drawBirds(){drawBirdRings();const pl=PAL[G.pi];ctx.save();ctx.globalCom
   for(const b of BIRDS){if(b.age<0)continue;const a=clamp(1-(b.age-(G.gold?6.6:G.rg?9.2:4.3))/1)*(G.power<.5?.6:1)*(1-clamp((b.depth-.55)/.45)),fl=Math.sin(b.ph),s=b.s*1.25*(1-b.depth*.75),col=b.gold?'#ffd27a':pl.ink;if(a<=0)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(clamp(b.vy/600,-.5,.5)*(b.vx<0?-1:1));if(b.vx<0)ctx.scale(-1,1);
     gdraw(b.gold?'#ffb347':pl.glow,0,0,26*s,a*.45);ctx.beginPath();ctx.moveTo(-16*s,-9*s*fl);ctx.quadraticCurveTo(-8*s,-12*s*fl-3*s,0,0);ctx.quadraticCurveTo(8*s,-12*s*fl-3*s,16*s,-9*s*fl);
     ctx.strokeStyle=hexA(b.gold?'#ffb347':pl.glow,.5*a);ctx.lineWidth=5*s;ctx.stroke();ctx.strokeStyle=hexA(col,a);ctx.lineWidth=2*s;ctx.stroke();ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.beginPath();ctx.ellipse(1*s,1*s,4*s,1.8*s,0,0,TAU);ctx.fill();ctx.restore()}ctx.restore()}
-function drawSpell(now,k){if(SPX[G.anim])return SPX[G.anim].draw(now,k);if(G.anim==='spirit')return drawSpiritSpell(now,k);if(G.anim==='lune')return drawLuneSpell(now,k);if(G.anim==='whale')return drawWhaleSpell(now,k);if(G.anim==='owl')return drawOwlSpell(now,k);const pl=PAL[G.pi],weak=G.power<.5,END=SPELL_END[G.anim]+2;
+function drawSpell(now,k){if(G.anim==='stag'&&G.state==='spell')drawStagFX(now,k);if(SPX[G.anim])return SPX[G.anim].draw(now,k);if(G.anim==='spirit')return drawSpiritSpell(now,k);if(G.anim==='lune')return drawLuneSpell(now,k);if(G.anim==='whale')return drawWhaleSpell(now,k);if(G.anim==='owl')return drawOwlSpell(now,k);const pl=PAL[G.pi],weak=G.power<.5,END=SPELL_END[G.anim]+2;
   if(G.gold)drawLegendFront(now,k,END);
   if(G.anim==='stag'||G.anim==='wolf'||G.anim==='fox'){const lines=animLines(),rev=clamp(k/1.5)*(weak?.8:1);let a;
     if(weak)a=k>1.6?clamp(1-(k-1.6)/1.2)*(.6+.4*Math.sin(now*.05)):1;
-    else if(G.anim==='stag')a=clamp(1-(k-4.7)/.5);
+    else if(G.anim==='stag')a=G.gold?clamp(1-(k-8.1)/.6):G.bk?clamp(1-(k-7.25)/.4):clamp(1-(k-4.7)/.5);
     else if(G.anim==='fox')a=G.foxA;
     else a=clamp(1-(k-3.7)/.6);
     const col=G.gold?'#ffffff':pl.ink,gc=G.gold?'#ffd27a':pl.glow;if(a>0){drawAnimal(lines,rev,a*(.6+.4*G.power),col,gc);if(G.gold&&rev>.9)runeRings(G.ap[0],G.ap[1],G.SC.r*1.05*G.asc,now,a*.8,1)}
@@ -3732,7 +3768,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='85';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='86';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
