@@ -1083,7 +1083,7 @@ function update(dt,now){
     else if(!G.fail&&k>1.05){G.state='bloom';G.t0=now;SND.bloom();if(G.gold)SND.legend()}}
   if(G.state==='bloom'&&G.gold&&Math.random()<.7){const SC=G.SC;P.push({x:SC.x+rnd(-1,1)*SC.r*.35,y:SC.y,vx:0,vy:-rnd(250,500)*S,l:0,m:rnd(.8,1.4),s:rnd(1.2,2.6),c:'#ffd27a'})}
   if(G.state==='bloom'&&k>(G.gold?2.5:1.35)){G.state='spell';G.t0=now;G.sk=0;if(!(PAL[G.pi].animal==='whale'&&G.gold)){G.flash=1;SND.burst()}startSpell();sigInit()}
-  let pdt=dt;if(G.state==='spell'){const ts=G.slow>0?.3:1;G.slow=Math.max(0,(G.slow||0)-dt);pdt=dt*ts;G.sdt=pdt;G.st=(G.st||0)+pdt;sigAdvance(pdt);if(!G.lvid&&G.sk>(G.power<.5?3.8:G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)))showResult()}
+  let pdt=dt;if(G.state==='spell'){const ts=G.slow>0?.3:1;G.slow=Math.max(0,(G.slow||0)-dt);pdt=dt*ts;G.sdt=pdt;G.st=(G.st||0)+pdt;sigAdvance(pdt);if(!G.lvid&&G.sk>(G.power<.5?3.8:G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)+(G.bx||0)))showResult()}
   {const wg=G.anim==='whale'&&G.state==='spell',on=G.gold&&(G.state==='bloom'||(G.state==='spell'&&(wg?G.sk>WG.cut&&G.sk<WG.end-2:G.sk<goldEnd()-.8)));G.lb=lerp(G.lb||0,on?1:0,1-Math.pow(.03,dt))}
   if(G.state==='fizzle'&&k>2){if(G.moon)moonRetry();else showResult()}
   if(G.flash)G.flash=Math.max(0,G.flash-dt*2.2);if(G.moonB)G.moonB=Math.max(0,G.moonB-dt*.2);if(G.shake)G.shake=Math.max(0,G.shake-dt*3);if(G.zoom)G.zoom=Math.max(0,G.zoom-dt*1.4);
@@ -1169,7 +1169,7 @@ function startSpell(){const pl=PAL[G.pi],SC=G.SC,pw=G.power,gold=G.moon?!!G.gold
   WAVES.push({x:SC.x,y:SC.y,r:SC.r,t:0,col:gold?'#ffd27a':pl.glow},{x:SC.x,y:SC.y,r:SC.r*.7,t:-.15,col:'#ffffff'});
   FL.forEach(f=>f.fl=Math.max(f.fl||0,.8*pw));SND.gust();
   if(gold){G.slow=1.7;G.shake=1.2;SND.perfect();spark(SC.x,SC.y,'#ffffff',90,620*S);WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.3,t:-.3,col:'#ffd27a'},{x:SC.x,y:SC.y,r:SC.r*.4,t:-.45,col:'#ff9ad8'});FL.forEach(f=>f.fl=1.5);for(let i=0;i<150;i++)P.push({x:rnd(0,W),y:rnd(-H*.1,H*.6),vx:rnd(-10,10),vy:rnd(20,70),l:0,m:rnd(3,6),s:rnd(1,2.6),c:Math.random()<.8?'#ffd27a':'#ffffff'})}
-  if(G.anim==='birds'){const n=gold?96:Math.round(10+44*pw),ww=Math.min(W*.66,360),tg=gold?cloud(BIGBIRD,n):null;for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rnd(140,340)*S;BIRDS.push({x:SC.x+Math.cos(a)*SC.r*.2,y:SC.y+Math.sin(a)*SC.r*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ph:Math.random()*TAU,fr:rnd(10,15),s:rnd(.7,1.35)*S,age:-Math.random()*.6,gold:gold&&Math.random()<.65,tx:tg?tg[i%tg.length][0]:0,ty:tg?tg[i%tg.length][1]:0,th:Math.random()*TAU,R:rnd(40,125)*S,dir:Math.random()<.8?1:-1,ox:rnd(-.3,.3)*ww,oy:rnd(-50,40)*S,depth:0})}SND.birds(n)}
+  if(G.anim==='birds'){G.bx=0;G.ba=0;G.rg=null;if(!gold&&pw>=.5){G.bx=3.8;const r0=Math.min(W*.13,70);G.rg=[{x:W*.24,y:H*.4,r:r0,h:0},{x:W*.76,y:H*.5,r:r0,h:0},{x:W*.5,y:H*.3,r:r0*1.15,h:0}]}const n=gold?96:Math.round(10+44*pw),ww=Math.min(W*.66,360),tg=gold?cloud(BIGBIRD,n):null;for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rnd(140,340)*S;BIRDS.push({x:SC.x+Math.cos(a)*SC.r*.2,y:SC.y+Math.sin(a)*SC.r*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ph:Math.random()*TAU,fr:rnd(10,15),s:rnd(.7,1.35)*S,age:-Math.random()*.6,gold:gold&&Math.random()<.65,tx:tg?tg[i%tg.length][0]:0,ty:tg?tg[i%tg.length][1]:0,th:Math.random()*TAU,R:rnd(40,125)*S,dir:Math.random()<.8?1:-1,ox:rnd(-.3,.3)*ww,oy:rnd(-50,40)*S,depth:0,lag:rnd(0,.14),rx:rnd(-.45,.45),ry:rnd(-.45,.45),hi:i/n})}SND.birds(n)}
   if(G.anim==='stag')SND.stag();if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
 /* ----- le hibou des étoiles ----- */
 const OWL_BODY=[[100,62],[112,64],[122,70],[126,58],[125,76],[128,88],[128,104],[126,124],[120,142],[110,156],[100,162],[90,156],[80,142],[74,124],[72,104],[72,88],[75,76],[74,58],[78,70],[88,64],[100,62]];
@@ -1278,9 +1278,16 @@ function drawWhaleSpell(now,k){const pl=PAL[G.pi],gold=G.gold,weak=G.power<.5;if
 function animLines(){return G.anim==='stag'?stagLines(G.ph,G.run):G.anim==='wolf'?WOLF:foxLines(G.fan,G.swish||0)}
 function updateSpell(dt,now){if(SPX[G.anim])return SPX[G.anim].update(dt,now);if(G.anim==='spirit')return updateSpirit(dt,now);if(G.anim==='lune')return updateLune(dt,now);if(G.anim==='whale')return updateWhale(dt,now);if(G.anim==='owl')return updateOwl(dt,now);const sk=G.sk,SC=G.SC,pl=PAL[G.pi],weak=G.power<.5;
   if(G.anim==='birds'){const C=BGD.chand||[W/2,H*.12],Wn=BGD.win||[W/2,H*.25];
+    if(!G.hon)G.ba=(G.ba||0)+dt;
+    if(G.rg){const A0=G.ba-.3;G.rg.forEach((r,i)=>{const tp=3.5+(i+.5)*.75;if(!r.h&&A0>tp){r.h=1;SND.bell&&SND.bell();for(let k=0;k<26;k++){const a=k/26*TAU;P.push({x:r.x+Math.cos(a)*r.r,y:r.y+Math.sin(a)*r.r*.9,vx:Math.cos(a)*90,vy:Math.sin(a)*90,l:0,m:.8,s:2,c:'#ffd27a'})}}if(r.h)r.h=Math.min(2,r.h+dt*2)});
+      if(!G.hrt&&A0>6){G.hrt=1;try{[0,4,7,12].forEach((d,i)=>harp(at()+i*.12,pen(62,d)+12,.8))}catch(e){}}}
     for(const b of BIRDS){if(!G.hon)b.age+=dt;b.ct=(b.ct||0)+dt;if(b.age<0)continue;b.ph+=b.fr*dt;
       if(G.gold&&!weak&&sk>1&&sk<4.3){const fl=Math.sin((G.st||sk)*3.6),sc=W*.46*(G.bfs||1),tx=W/2+(G.bfx||0)+b.tx*sc,ty=H*.33+(G.bfy||0)+(b.ty-Math.abs(b.tx)*.28*fl)*sc;b.vx+=((tx-b.x)*9-b.vx*3)*dt;b.vy+=((ty-b.y)*9-b.vy*3)*dt}
       else if(b.age<1.1||weak||(G.gold&&sk<=1)){const dx=b.x-SC.x,dy=b.y-SC.y;b.vx+=(-dy*2.4-dx*.9)*dt;b.vy+=(dx*2.4-dy*.9)*dt;b.vy-=(weak&&b.age>1.5?120:0)*dt;b.vx*=.97;b.vy*=.97}
+      else if(G.rg&&b.age>=3.4&&b.age<8.2){let tx,ty,kk=9;if(b.age<5.8){const u=clamp((b.age-3.4)/2.2-b.lag,0,1)*3,j=Math.min(2,Math.floor(u)),f=u-j,P0=j===0?{x:C[0],y:C[1]+H*.05}:G.rg[j-1],P1=G.rg[j],e=f*f*(3-2*f);
+          tx=lerp(P0.x,P1.x,e)+b.rx*P1.r*.9;ty=lerp(P0.y,P1.y,e)-Math.sin(f*Math.PI)*H*.06+b.ry*P1.r*.8;kk=12}
+        else{const t=b.hi*TAU,sc=Math.min(W,H)*.0165,bt=1+.06*Math.sin(G.ba*7)*clamp(b.age-6.4);tx=W/2+16*Math.pow(Math.sin(t),3)*sc*bt;ty=H*.34-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*sc*bt;kk=7}
+        b.vx+=((tx-b.x)*kk-b.vx*2.6)*dt;b.vy+=((ty-b.y)*kk-b.vy*2.6)*dt}
       else{let tx,ty;if(!G.gold&&b.age<3.4){const th=b.th+b.ct*2.3*b.dir;tx=C[0]+Math.cos(th)*b.R*1.6;ty=C[1]+H*.03+Math.sin(th)*b.R*.42}else{tx=Wn[0]+b.ox;ty=Wn[1]+b.oy;b.depth=Math.min(1,b.depth+dt*.55)}
         b.vx+=((tx-b.x)*5-b.vx*2.2)*dt;b.vy+=((ty-b.y)*5-b.vy*2.2)*dt}
       b.x+=b.vx*dt;b.y+=b.vy*dt;for(const f of FL)if(Math.abs(f.x-b.x)<26*S&&Math.abs(f.y-b.y)<34*S)f.fl=1;
@@ -1315,8 +1322,18 @@ function drawConst(now){const t=G.state==='spell'?G.sk-CONST.t0:9,m=ease(clamp(t
   const pos=CONST.stars.map(s=>[lerp(s.f[0],s.t[0],m),lerp(s.f[1],s.t[1],m)]);
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=hexA(pl.ink,la);ctx.lineWidth=1.1*S;ctx.beginPath();pos.forEach((p,i)=>{if(i===0||i===CONST.n0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1])});ctx.stroke();
   pos.forEach((p,i)=>{const s=CONST.stars[i],tw=.65+.35*Math.sin(now*.004+s.tw);gdraw(G.gold?'#ffd27a':pl.glow,p[0],p[1],14*S*tw*gz,.7);gdraw('#ffffff',p[0],p[1],4.5*S*tw*gz,1)});ctx.restore()}
-function drawBirds(){const pl=PAL[G.pi];ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';
-  for(const b of BIRDS){if(b.age<0)continue;const a=clamp(1-(b.age-(G.gold?6.6:4.3))/1)*(G.power<.5?.6:1)*(1-clamp((b.depth-.55)/.45)),fl=Math.sin(b.ph),s=b.s*1.25*(1-b.depth*.75),col=b.gold?'#ffd27a':pl.ink;if(a<=0)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(clamp(b.vy/600,-.5,.5)*(b.vx<0?-1:1));if(b.vx<0)ctx.scale(-1,1);
+function drawBirdRings(){if(!G.rg)return;const A0=(G.ba||0)-.3,t=performance.now()/1000;ctx.save();ctx.globalCompositeOperation='lighter';
+  G.rg.forEach((r,i)=>{const a=clamp((A0-3.1-i*.25)/.5)*clamp((6.2-A0)/.6);if(a<=0)return;const hb=r.h?Math.max(0,1.4-r.h)*1.2:0,rr=r.r*(1+.05*Math.sin(t*3+i)+hb*.12);
+    ctx.save();ctx.translate(r.x,r.y);ctx.scale(1,.9);gdraw('#ffb347',0,0,rr*1.9,.22*a+.35*hb);
+    ctx.strokeStyle=hexA('#ffb347',.35*a);ctx.lineWidth=10*S;ctx.beginPath();ctx.arc(0,0,rr,0,TAU);ctx.stroke();
+    ctx.strokeStyle=hexA(r.h?'#ffffff':'#ffe6a8',.95*a);ctx.lineWidth=2.6*S;ctx.beginPath();ctx.arc(0,0,rr,0,TAU);ctx.stroke();
+    ctx.strokeStyle=hexA('#ffd27a',.5*a);ctx.lineWidth=1.2*S;ctx.setLineDash([3*S,7*S]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.arc(0,0,rr*.84,0,TAU);ctx.stroke();ctx.setLineDash([]);
+    for(let k=0;k<6;k++){const q=t*1.2*(i%2?-1:1)+k/6*TAU;gdraw('#fff3c8',Math.cos(q)*rr,Math.sin(q)*rr,7*S,.8*a)}ctx.restore()});
+  const ha=clamp((A0-6.2)/.6)*clamp((8.6-A0)/.6);if(ha>0){const sc=Math.min(W,H)*.0165;gdraw('#ff7ab8',W/2,H*.34-2*sc,sc*24,.28*ha);ctx.strokeStyle=hexA('#ffc8e0',.35*ha);ctx.lineWidth=6*S;ctx.beginPath();
+    for(let k=0;k<=80;k++){const q=k/80*TAU,x=W/2+16*Math.pow(Math.sin(q),3)*sc,y=H*.34-(13*Math.cos(q)-5*Math.cos(2*q)-2*Math.cos(3*q)-Math.cos(4*q))*sc;k?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}
+  ctx.restore()}
+function drawBirds(){drawBirdRings();const pl=PAL[G.pi];ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';
+  for(const b of BIRDS){if(b.age<0)continue;const a=clamp(1-(b.age-(G.gold?6.6:G.rg?9.2:4.3))/1)*(G.power<.5?.6:1)*(1-clamp((b.depth-.55)/.45)),fl=Math.sin(b.ph),s=b.s*1.25*(1-b.depth*.75),col=b.gold?'#ffd27a':pl.ink;if(a<=0)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(clamp(b.vy/600,-.5,.5)*(b.vx<0?-1:1));if(b.vx<0)ctx.scale(-1,1);
     gdraw(b.gold?'#ffb347':pl.glow,0,0,26*s,a*.45);ctx.beginPath();ctx.moveTo(-16*s,-9*s*fl);ctx.quadraticCurveTo(-8*s,-12*s*fl-3*s,0,0);ctx.quadraticCurveTo(8*s,-12*s*fl-3*s,16*s,-9*s*fl);
     ctx.strokeStyle=hexA(b.gold?'#ffb347':pl.glow,.5*a);ctx.lineWidth=5*s;ctx.stroke();ctx.strokeStyle=hexA(col,a);ctx.lineWidth=2*s;ctx.stroke();ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.beginPath();ctx.ellipse(1*s,1*s,4*s,1.8*s,0,0,TAU);ctx.fill();ctx.restore()}ctx.restore()}
 function drawSpell(now,k){if(SPX[G.anim])return SPX[G.anim].draw(now,k);if(G.anim==='spirit')return drawSpiritSpell(now,k);if(G.anim==='lune')return drawLuneSpell(now,k);if(G.anim==='whale')return drawWhaleSpell(now,k);if(G.anim==='owl')return drawOwlSpell(now,k);const pl=PAL[G.pi],weak=G.power<.5,END=SPELL_END[G.anim]+2;
@@ -1579,7 +1596,7 @@ const HOLDS={birds:{2:[[2,5]],3:[[2.4,10]]},stag:{2:[[1.6,5]],3:[[1.6,10]]},wolf
 const RUNES=[...Array(14)].map((_,i)=>{let s=i*7919+31;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};const n=3+(R()*3|0),pts=[];for(let j=0;j<n;j++)pts.push([R()*2-1,R()*2-1]);return pts});
 function drawRune(x,y,r,k,rot,col,a){if(a<=.01)return;const pts=RUNES[k%RUNES.length];ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.strokeStyle=hexA(col,a);ctx.lineWidth=Math.max(1,r*.18);ctx.lineCap=ctx.lineJoin='round';ctx.beginPath();pts.forEach((q,i)=>ctx[i?'lineTo':'moveTo'](q[0]*r,q[1]*r));ctx.stroke();ctx.restore()}
 function fxPos(){if(G.jd)return jdP(G.sk);if(G.anim==='dragon'&&G.dr&&G.dr.h)return G.dr.h;if(G.anim==='phoenix'&&G.px&&G.px.c)return G.px.c;return G.ap||[G.SC.x,G.SC.y]}
-function sgEndSk(){return G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)}
+function sgEndSk(){return G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)+(G.bx||0)}
 function sigInit(){G.st=0;G.hi=0;G.hon=false;G.hd=0;G.jx=0;G.sx=null;G.hl=[];G.bfx=0;G.bfy=0;G.bfs=1;
   const Sg=SIG[G.anim],ok=Sg&&!G.lvid&&!G.moon&&!G.day&&G.pi<9&&G.power>=.5&&G.SC&&G.res&&G.res.stars>=2;
   if(G.jd){G.jx=ok?5:0;G.jd.K=jdBuild()}if(!ok)return;
@@ -3715,7 +3732,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='84';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='85';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
