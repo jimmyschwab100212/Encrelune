@@ -1099,7 +1099,7 @@ function render(now,dt){
   if(G.el){try{elDraw(now,dt)}catch(e){elErr(e,'d');try{ctx.setTransform(DPR,0,0,DPR,0,0)}catch(_){}}if(EL.err){ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.font='11px sans-serif';ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,H-16,W,16);ctx.fillStyle='#ff9a8a';ctx.textAlign='left';ctx.fillText('v'+EL_VER+' · '+EL.err,4,H-4);ctx.restore()}return}
   if(G.shake){ctx.translate(rnd(-1,1)*G.shake*6,rnd(-1,1)*G.shake*6)}
   if(G.zoom){const z=1+G.zoom*.04;ctx.translate(W/2,H*.45);ctx.scale(z,z);ctx.translate(-W/2,-H*.45)}
-  if(realP()){ctx.fillStyle='rgba(0,6,4,.12)';ctx.fillRect(0,0,W,H)}else if(BG)ctx.drawImage(BG,0,0,W,H);drawFlames(now);drawAmbient(now,dt);if(G.dim>0){ctx.fillStyle=`rgba(2,1,8,${G.dim})`;ctx.fillRect(-30,-30,W+60,H+60)}
+  if(realP()){ctx.fillStyle='rgba(0,6,4,.12)';ctx.fillRect(0,0,W,H)}else if(BG)ctx.drawImage(BG,0,0,W,H);if(!(realP()&&G.pi===7))drawFlames(now);drawAmbient(now,dt);if(G.dim>0){ctx.fillStyle=`rgba(2,1,8,${G.dim})`;ctx.fillRect(-30,-30,W+60,H+60)}
   if(G.state==='duSpell'||G.state==='duEnd'){duDraw(now);return}
   if(G.state==='title'||G.state==='map'){ctx.fillStyle='rgba(4,3,10,.45)';ctx.fillRect(0,0,W,H);return}
   const pl=PAL[G.pi],k=(now-G.t0)/1000;
@@ -1702,7 +1702,7 @@ SPELL_END.dragon=6.3;
 /* ---- Palier VII : décor en prise de vue réelle (vidéo en boucle serre_live.mp4) ---- */
 var BGV={ok:true};
 // paliers en prise de vue réelle : photo de fond (+ vidéo en boucle facultative)
-var REALP={6:{img:'serre_live.jpg',vid:'serre_live.mp4'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
+var REALP={6:{img:'serre_live.jpg',vid:'serre_live.mp4'},7:{img:'grande_live.jpg'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
 function bgvEl(){rhLoad();const R=REALP[G.pi];if(R.d)return R.d;const d=document.createElement('div');d.className='bgv';d.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none;background:#020806 center/cover no-repeat';
   const im=new Image();im.onload=()=>{R.iok=true;d.style.backgroundImage=`url(${R.img})`};im.onerror=()=>{R.bad=true;BGK=''};im.src=R.img;
   const v=document.createElement('video');v.muted=true;v.loop=true;v.preload='auto';v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('webkit-playsinline','');
@@ -3879,7 +3879,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='99';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='100';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
