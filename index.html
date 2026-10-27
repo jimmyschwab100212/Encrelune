@@ -2313,15 +2313,32 @@ function kirinLines(ph,run,t){const bob=run?Math.sin(ph*2)*3:0,mv=l=>l.map(([x,y
   const mane=[0,1,2].map(m=>{const o=[[156-m*4,48+m*12]];for(let j=1;j<=6;j++){const u=j/6;o.push([156-m*4-u*30,48+m*12+u*4+Math.sin(u*5+t*7+m)*4*u])}return o});
   const tail=[];for(let j=0;j<=10;j++){const u=j/10;tail.push([48-u*40,96-u*10+Math.sin(u*6+t*6)*7*u])}
   return[mv(KIR_BODY),mv(KIR_HEAD),...legs.map(mv),...KIR_DET.map(mv),...mane.map(mv),mv(tail)]}
-let PET=[],KSTEP=[];
+let PET=[],KSTEP=[],KLAN=[];
+/* ---- 2★ : le kirin traverse le pont suspendu, des lanternes célestes s'envolent sur son passage ---- */
+function kBridge(){const B=BGD.br9||{by:H*.585,ax:W*.13,bx:W*.87},sag=H*.045,deck=x=>B.by+sag*(1-Math.pow((x-W/2)/((B.bx-B.ax)/2),2));return{ax:B.ax,bx:B.bx,deck}}
+function kLan(x,y,big){KLAN.push({x,y,t:0,vy:-rnd(26,44)*S*(big?1.1:1),sw:rnd(0,TAU),sa:rnd(6,16)*S,s:rnd(.75,1.25)*(big?1.15:1)*S,fl:rnd(0,TAU)})}
+function kirinBridge(dt,sk){const KB=kBridge(),ab=.2,feet=a=>80*G.SC.r*1.4/100*a,T1=1.1,T2=2.3,T3=7.6,T4=8.7;
+  if(sk<T1){G.run=false;G.arot=-.3*Math.sin(Math.PI*clamp((sk-.2)/.85))}
+  else if(sk<T2){G.run=true;G.arot=0;G.ph+=dt*11;if(!G.kb){G.kb={p0:G.ap.slice(),a0:G.asc};SND.leap()}const t=ease(clamp((sk-T1)/(T2-T1))),x1=KB.ax+W*.03,y1=KB.deck(x1)-feet(ab);
+    G.ap=[lerp(G.kb.p0[0],x1,t),lerp(G.kb.p0[1],y1,t)-Math.sin(t*Math.PI)*H*.08];G.asc=lerp(G.kb.a0,ab,t)}
+  else if(sk<T3){G.run=true;G.ph+=dt*10;const t=(sk-T2)/(T3-T2),x=lerp(KB.ax+W*.03,KB.bx-W*.03,t);G.ap=[x,KB.deck(x)-feet(ab)+Math.sin(G.ph*2)*1.5*S];G.asc=ab;RK.t.path=.5;RK.t.sun=.36;
+    if(!G.kb.n||sk>G.kb.n){G.kb.n=sk+rnd(.16,.26);kLan(x-rnd(4,14)*S,KB.deck(x)-rnd(6,16)*S,true);if(Math.random()<.5)try{celesta(at(),[81,86,88,90,93][Math.random()*5|0],.35,A.rev)}catch(e){}}
+    if(Math.random()<dt*2.2)kLan(rnd(0,W),H*rnd(.66,.9))}
+  else if(sk<T4){G.run=true;G.ph+=dt*13;if(!G.kb.p3){G.kb.p3=G.ap.slice();SND.leap()}const t=ease(clamp((sk-T3)/(T4-T3)));G.ap=[lerp(G.kb.p3[0],W*.8,t),lerp(G.kb.p3[1],H*.12,t)-Math.sin(t*Math.PI)*H*.05];G.asc=lerp(ab,.08,t);
+    if(Math.random()<dt*3)kLan(rnd(0,W),H*rnd(.66,.9))}
+  G.ka=sk<T4-.4?1:clamp(1-(sk-(T4-.4))/.5);if(sk>T4-.2&&!G.kb.g){G.kb.g=1;spark(G.ap[0],G.ap[1],'#ffd27a',50,320*S);try{SND.glory()}catch(e){}}
+  for(let i=KLAN.length-1;i>=0;i--){const L=KLAN[i];L.t+=dt;L.y+=L.vy*dt;L.x+=Math.cos(L.t*.9+L.sw)*L.sa*dt;if(L.y<-40)KLAN.splice(i,1)}}
+function drawKLan(now){const fade=G.gold?1:clamp((G.sk-9.6)/1.2);ctx.save();for(const L of KLAN){const a=clamp(L.t/.6)*(1-fade),s=L.s*(1-Math.max(0,(H*.6-L.y)/H)*.45);if(a<=0)continue;const f=.85+.15*Math.sin(now*.012+L.fl);
+    ctx.globalCompositeOperation='lighter';gdraw('#ffa640',L.x,L.y,26*s*f,.55*a);ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle=`rgba(255,${Math.round(150+50*f)},80,${.92*a})`;ctx.beginPath();ctx.moveTo(L.x-5*s,L.y-7*s);ctx.lineTo(L.x+5*s,L.y-7*s);ctx.lineTo(L.x+4*s,L.y+6*s);ctx.lineTo(L.x-4*s,L.y+6*s);ctx.closePath();ctx.fill();
+    ctx.fillStyle=`rgba(255,245,200,${.85*a*f})`;ctx.beginPath();ctx.ellipse(L.x,L.y+3*s,2.4*s,2*s,0,0,TAU);ctx.fill();ctx.strokeStyle=`rgba(140,60,20,${.5*a})`;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(L.x-5*s,L.y-7*s);ctx.lineTo(L.x+5*s,L.y-7*s);ctx.stroke()}ctx.restore()}
 function kPos(Q,u){const n=Q.length-1,s=clamp(u)*n,i=Math.min(n-1,Math.floor(s)),f=s-i,p0=Q[Math.max(0,i-1)],p1=Q[i],p2=Q[i+1],p3=Q[Math.min(n,i+2)],cr=(a,b,c,d)=>.5*(2*b+(-a+c)*f+(2*a-5*b+4*c-d)*f*f+(-a+3*b-3*c+d)*f*f*f);return[cr(p0[0],p1[0],p2[0],p3[0]),cr(p0[1],p1[1],p2[1],p3[1])]}
 const KRG={end:17};
-function startKirin(gold,pw){G.abase*=.66;G.asc=G.abase;G.ph=0;G.run=false;G.kt=0;G.ka=1;G.lastLeg=0;PET=[];KSTEP=[];G.kq=null;setTimeout(()=>{if(G.state==='spell')SND.kirin(gold)},300);if(gold)RK.t.sun=.3}
+function startKirin(gold,pw){G.abase*=.66;G.asc=G.abase;G.ph=0;G.run=false;G.kt=0;G.ka=1;G.lastLeg=0;PET=[];KSTEP=[];KLAN=[];G.kq=null;G.kb=null;G.bx=(!gold&&pw>=.5)?4.6:0;setTimeout(()=>{if(G.state==='spell')SND.kirin(gold)},300);if(gold)RK.t.sun=.3}
 function updateKirin(dt,now){const sk=G.sk,SC=G.SC,weak=G.power<.5,gold=G.gold,hz=H*.56;const prev=[G.ap[0],G.ap[1]];
   const rear=(t0,d,amp)=>{G.arot=-amp*Math.sin(Math.PI*clamp((sk-t0)/d))};
   if(weak){rear(.3,1.2,.18);G.ka=sk>1.7?clamp(1-(sk-1.7)/1.2)*(.6+.4*Math.sin(now*.05)):1;return}
-  if(!gold){if(sk<1.2){rear(.25,.95,.3);G.run=false}else{G.run=true;G.arot=0;G.ph+=dt*11;const t=clamp((sk-1.2)/4.3),e=t*(1.4-.4*t);G.ap=bez([SC.x,SC.y],[W*.92,H*.74],[W*.62,H*.575],e);G.asc=lerp(G.abase,.12,Math.pow(t,1.3));RK.t.path=.5;RK.t.sun=.4}
-    G.ka=clamp(1-(sk-5.3)/.7)}
+  if(!gold){kirinBridge(dt,sk)}
   else{const Q=[[SC.x,SC.y+22*S],[W*.84,H*.66],[W*.5,H*.72],[W*.14,H*.56],[W*.16,H*.34],[W*.36,H*.28]],sp=sunPos();
     if(sk<1.6){rear(.25,1.25,.4);G.run=false;G.asc=G.abase}
     else if(sk<8){if(!G.ksr){G.ksr=true;RK.t.sun=1;RK.t.path=1;setTimeout(()=>{if(G.state==='spell')SND.sunrise()},200)}G.run=true;G.arot=0;G.ph+=dt*11;const u=(sk-1.6)/6.4;G.ap=kPos(Q,u*(1.15-.15*u));G.asc=G.abase*.85}
@@ -2335,7 +2352,7 @@ function updateKirin(dt,now){const sk=G.sk,SC=G.SC,weak=G.power<.5,gold=G.gold,h
   const vx=G.ap[0]-prev[0];if(Math.abs(vx)>.4){const tf=vx>=0?1:-1;G.aflip+=(tf-G.aflip)*Math.min(1,dt*9);if(Math.abs(G.aflip)<.08)G.aflip=G.aflip<0?-.08:.08}
   if(G.ka>0&&Math.random()<.85){const l=kirinLines(G.ph,G.run,sk),L=l[Math.random()*6|0],q=L[Math.random()*L.length|0],[x,y]=animalXY(q[0],q[1]);P.push({x,y,vx:rnd(-15,15),vy:rnd(-35,-8),l:0,m:rnd(.6,1.2),s:rnd(1,2.2),c:gold?'#ffd27a':'#ff8ac0'})}
   for(let i=PET.length-1;i>=0;i--){const f=PET[i];f.l+=dt;if(f.l>f.m||f.y>H+20){PET.splice(i,1);continue}f.x+=(f.vx+Math.sin(f.l*1.6+f.ph)*30*S)*dt;f.y+=f.vy*dt;f.a+=f.va*dt}}
-function drawKirinSpell(now,k){const pl=PAL[G.pi],gold=G.gold,weak=G.power<.5,col=gold?'#ffffff':pl.ink,gc=gold?'#ffd27a':pl.glow;
+function drawKirinSpell(now,k){const pl=PAL[G.pi],gold=G.gold,weak=G.power<.5,col=gold?'#ffffff':pl.ink,gc=gold?'#ffd27a':pl.glow;if(KLAN.length)drawKLan(now);
   ctx.save();ctx.globalCompositeOperation='lighter';for(const s of KSTEP){const t=k-s.t,a=clamp(1-t/1.2);if(a<=0)continue;const r=(8+30*t)*S*Math.max(.3,G.asc||1);ctx.strokeStyle=hexA('#ffd27a',.7*a);ctx.lineWidth=1.6*S;ctx.beginPath();ctx.ellipse(s.x,s.y,r,r*.32,0,0,TAU);ctx.stroke();
     for(let i=0;i<6;i++){const an=i/6*TAU+t;ctx.fillStyle=hexA('#ffe6a0',.35*a);ctx.beginPath();ctx.ellipse(s.x+Math.cos(an)*r*.45,s.y+Math.sin(an)*r*.15,r*.22,r*.08,an,0,TAU);ctx.fill()}gdraw('#ffffff',s.x,s.y,10*S*a,a)}ctx.restore();
   if(gold&&k>10.9&&k<15){const a=clamp((k-11.2)/.8)*clamp((15-k)/1.5)*.4,sv=[G.ap,G.asc,G.aflip,G.arot];G.ap=[W/2,H*.3];G.asc=.78;G.aflip=1;G.arot=0;drawAnimal(kirinLines(now*.004,true,k),1,a,'#fff3c8','#ffd27a');[G.ap,G.asc,G.aflip,G.arot]=sv}
@@ -3879,7 +3896,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='100';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='101';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
