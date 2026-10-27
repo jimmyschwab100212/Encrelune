@@ -1295,7 +1295,7 @@ function drawFoxLava(now,k){if(!G.lava)return;const t0=G.lv0,FL2=2.2,fade=clamp(
       ctx.fillStyle='#fff0f6';ctx.beginPath();ctx.arc(0,0,sz*.2,0,TAU);ctx.fill();ctx.restore()}}
   ctx.restore()}
 /* ----- Grand Grimoire : le sort jaillit de la baguette ----- */
-function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!(G.pi===6&&G.gold&&liveSrc(3))}
+function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!((G.pi===6||G.pi===7)&&G.gold&&liveSrc(3))}
 function castStart(now){G.state='cast';G.ct0=now;G.ctr=[];G.cfrom=null;try{SND.gust()}catch(e){}}
 function castUpd(dt,now){const u=(now-G.ct0)/1000/(window.__cs||1),pl=PAL[G.pi];G.flk=u<.2?-.6*ease(u/.2):u<.55?-.6+.6*ease((u-.2)/.35):0;G.fly2=u<.2?ease(u/.2):u<.55?1-ease((u-.2)/.35):0;
   if(u>=.22&&!G.cfrom){G.cfrom=[G.tip[0]-16*S,G.tip[1]-6*S];try{SND.leap()}catch(e){}for(let i=0;i<14;i++){const a=rnd(-2.6,-.6),v=rnd(80,220)*S;P.push({x:G.cfrom[0],y:G.cfrom[1],vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.3,.6),s:rnd(1,2),c:pl.glow})}}
@@ -2008,19 +2008,19 @@ SIG.kirin={pin:1,init(X,g){X.cl=[...Array(g?10:5)].map((_,i)=>({u:rnd(-.2,1.2),v
 /* ---- Palier VII : sort légendaire (3★) en prise de vue réelle, vidéo dragon_live.mp4 ---- */
 var LIVE={v:{},primed:{},to:0,bad:{}};
 // vidéos de sorts en prise de vue réelle, par palier et par nombre d'étoiles
-var LIVEMAP={6:{3:'dragon_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
+var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
 // réglages par vidéo : vitesse de lecture et durée de la dernière image prolongée
-var LIVECFG={'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
+var LIVECFG={'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
 function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[s]?s:null}
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
-function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
+function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
 function liveStart(src,fb){const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
   try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
   // vidéo muette : le son du jeu reste ouvert (sans la musique) et suit l'image
-  if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true)};sfxLoad('dragon_roar.mp3');
+  if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true),cry:()=>{if(!sfxFile('phenix_cri.mp3',1.1))SND.burst()},cry2:()=>{sfxFile('phenix_cri.mp3',.55)}};sfxLoad(G.pi===7?'phenix_cri.mp3':'dragon_roar.mp3');
     const w=()=>{if(!G.lvid||G.liveSrc!==src||!Q.length)return;while(Q.length&&v.currentTime>=Q[0][0]){try{F[Q.shift()[1]]()}catch(e){}}requestAnimationFrame(w)};requestAnimationFrame(w)}
   const go=v.play();if(go&&go.catch)go.catch(()=>{v.muted=true;const g2=v.play();if(g2&&g2.catch)g2.catch(liveFallback)});
   // la vidéo peut mettre du temps à arriver sur le téléphone : on patiente jusqu'à 12 s (décor affiché) avant de passer au sort dessiné
@@ -2229,7 +2229,7 @@ function updatePhx(dt,now){const X=G.px,sk=G.sk,SC=G.SC,weak=G.power<.5,gold=G.g
   if(X.a>0&&Math.random()<.8){const q=phxPts(X)[Math.random()*22|0];P.push({x:q[0],y:q[1],vx:rnd(-20,20),vy:-rnd(20,70),l:0,m:rnd(.5,1.1),s:rnd(1,2.2),c:Math.random()<.6?'#ffb347':'#ff6a2a'})}}
 function drawFireFeathers(){if(!FEA.length)return;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(const f of FEA){const al=clamp(f.l/.5)*clamp((f.m-f.l)/1.2);ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.a);const s2=f.s;gdraw(f.c,0,0,16*s2,.45*al);
   ctx.strokeStyle=hexA('#fff0d0',.85*al);ctx.lineWidth=1.1*s2;ctx.beginPath();ctx.moveTo(0,-9*s2);ctx.quadraticCurveTo(4*s2,0,0,9*s2);ctx.stroke();ctx.strokeStyle=hexA(f.c,.7*al);ctx.lineWidth=.8*s2;for(let i=-3;i<=3;i++){const yy=i*2.4*s2;ctx.beginPath();ctx.moveTo(1.5*s2,yy);ctx.lineTo(6*s2,yy-3*s2);ctx.moveTo(1*s2,yy);ctx.lineTo(-3.5*s2,yy-3*s2);ctx.stroke()}ctx.restore()}ctx.restore()}
-SPX.phoenix={start:startPhx,update:updatePhx,gold:PXG.end,draw(now,k){const X=G.px;if(!X)return;const gold=G.gold;
+SPX.phoenix={start:(gold,pw)=>{const src=gold&&!G.moon&&!G.day?liveSrc(3):null;if(src){liveStart(src,()=>startPhx(true,G.power));return}startPhx(gold,pw)},update:(dt,now)=>{if(G.lvid)return;updatePhx(dt,now)},gold:PXG.end,draw(now,k){if(G.lvid)return;const X=G.px;if(!X)return;const gold=G.gold;
   if(gold&&k>5.4&&k<8.2){const SC=G.SC,pu=X.em;ctx.save();ctx.globalCompositeOperation='lighter';gdraw('#ff6a2a',SC.x,SC.y+SC.r*.1,SC.r*(.5+.5*pu),.35+.5*pu);gdraw('#ffd27a',SC.x,SC.y+SC.r*.1,SC.r*(.12+.12*pu),.5+.5*pu);ctx.restore()}
   fxFire(X.a>0?X:null,X.I*X.a*X.rev,X.heat||1);
   drawPhoenix(X,X.a*(.6+.4*G.power),gold,now);drawFireFeathers()}};
