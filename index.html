@@ -1295,7 +1295,7 @@ function drawFoxLava(now,k){if(!G.lava)return;const t0=G.lv0,FL2=2.2,fade=clamp(
       ctx.fillStyle='#fff0f6';ctx.beginPath();ctx.arc(0,0,sz*.2,0,TAU);ctx.fill();ctx.restore()}}
   ctx.restore()}
 /* ----- Grand Grimoire : le sort jaillit de la baguette ----- */
-function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!((G.pi===6||G.pi===7)&&G.gold&&liveSrc(3))}
+function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!((G.pi===6||G.pi===7||G.pi===8)&&LIVEMAP[G.pi]&&liveSrc(liveLvl(G.gold,G.power)))}
 function castStart(now){G.state='cast';G.ct0=now;G.ctr=[];G.cfrom=null;try{SND.gust()}catch(e){}}
 function castUpd(dt,now){const u=(now-G.ct0)/1000/(window.__cs||1),pl=PAL[G.pi];G.flk=u<.2?-.6*ease(u/.2):u<.55?-.6+.6*ease((u-.2)/.35):0;G.fly2=u<.2?ease(u/.2):u<.55?1-ease((u-.2)/.35):0;
   if(u>=.22&&!G.cfrom){G.cfrom=[G.tip[0]-16*S,G.tip[1]-6*S];try{SND.leap()}catch(e){}for(let i=0;i<14;i++){const a=rnd(-2.6,-.6),v=rnd(80,220)*S;P.push({x:G.cfrom[0],y:G.cfrom[1],vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.3,.6),s:rnd(1,2),c:pl.glow})}}
@@ -2008,19 +2008,19 @@ SIG.kirin={pin:1,init(X,g){X.cl=[...Array(g?10:5)].map((_,i)=>({u:rnd(-.2,1.2),v
 /* ---- Palier VII : sort légendaire (3★) en prise de vue réelle, vidéo dragon_live.mp4 ---- */
 var LIVE={v:{},primed:{},to:0,bad:{}};
 // vidéos de sorts en prise de vue réelle, par palier et par nombre d'étoiles
-var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
+var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},8:{3:'kirin_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
 // réglages par vidéo : vitesse de lecture et durée de la dernière image prolongée
-var LIVECFG={'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
+var LIVECFG={'kirin_live.mp4':{rate:.8,hold:3.5,fw:3.8,sfx:[[.3,'smoke'],[2.5,'kcri'],[3.2,'hooves'],[4,'fwsnd'],[7.6,'glory']]},'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
 function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[s]?s:null}
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
-function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
+function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3','feu_artifice.mp3'].forEach(sfxLoad);for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
 function liveStart(src,fb){const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
   try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
   // vidéo muette : le son du jeu reste ouvert (sans la musique) et suit l'image
-  if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true),cry:()=>{if(!sfxFile('phenix_cri.mp3',1.1))SND.burst()},cry2:()=>{sfxFile('phenix_cri.mp3',.55)}};sfxLoad(G.pi===7?'phenix_cri.mp3':'dragon_roar.mp3');
+  if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true),cry:()=>{if(!sfxFile('phenix_cri.mp3',1.1))SND.burst()},cry2:()=>{sfxFile('phenix_cri.mp3',.55)},kirin:()=>SND.kirin(true),glory:()=>SND.glory(),kcri:()=>{if(!sfxFile('kirin_cri.mp3',1))SND.kirin(true)},hooves:()=>{if(!sfxFile('kirin_sabots.mp3',.9))hoovesSynth(4.2)},fwsnd:()=>{if(!sfxFile('feu_artifice.mp3',.75))fwSynth=true}};(G.pi===7?['phenix_cri.mp3']:G.pi===8?['kirin_cri.mp3','kirin_sabots.mp3','feu_artifice.mp3']:['dragon_roar.mp3']).forEach(sfxLoad);if(cf.fw){const fw=()=>{if(!G.lvid||G.liveSrc!==src)return;if(v.currentTime>=cf.fw){kfwStart(src);return}requestAnimationFrame(fw)};requestAnimationFrame(fw)}
     const w=()=>{if(!G.lvid||G.liveSrc!==src||!Q.length)return;while(Q.length&&v.currentTime>=Q[0][0]){try{F[Q.shift()[1]]()}catch(e){}}requestAnimationFrame(w)};requestAnimationFrame(w)}
   const go=v.play();if(go&&go.catch)go.catch(()=>{v.muted=true;const g2=v.play();if(g2&&g2.catch)g2.catch(liveFallback)});
   // la vidéo peut mettre du temps à arriver sur le téléphone : on patiente jusqu'à 12 s (décor affiché) avant de passer au sort dessiné
@@ -2035,11 +2035,31 @@ function liveHold(v,sec){if(!G.lvid)return;G.lhold=true;v.style.transition='opac
     for(const p of sp){p.x+=p.vx/60;p.y+=p.vy/60;const a=Math.min(1,t/.6)*(.55+.45*Math.sin(t*3+p.ph));const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*5);const col=p.gold?'255,214,120':'150,255,190';gr.addColorStop(0,`rgba(${col},${.9*a})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(p.x-p.r*5,p.y-p.r*5,p.r*10,p.r*10)}
     requestAnimationFrame(step)};requestAnimationFrame(step);
   clearTimeout(LIVE.ho);LIVE.ho=setTimeout(()=>{liveEnd()},sec*1000)}
-function liveEnd(){G.lhold=false;if(!G.lvid)return;G.lvid=false;liveHide();if(G.state==='spell')showResult()}
+function liveEnd(){G.lhold=false;if(G.kfw){G.kfw.stop=true;G.kfw=null}if(!G.lvid)return;G.lvid=false;liveHide();if(G.state==='spell')showResult()}
 // bruitages enregistrés (fichiers mp3 à côté du jeu), joués par le moteur audio du jeu
 var SFXB={};
 function sfxLoad(f){if(SFXB[f]!==undefined||!A)return;SFXB[f]=null;try{fetch(f).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>A.ac.decodeAudioData(b,ok,ko))).then(buf=>{SFXB[f]=buf}).catch(()=>{SFXB[f]=false})}catch(e){SFXB[f]=false}}
 function sfxFile(f,vol){const b=SFXB[f];if(!A||!b)return false;const s=A.ac.createBufferSource(),g=A.ac.createGain();s.buffer=b;g.gain.value=vol||1;s.connect(g);g.connect(A.master);const r=A.ac.createGain();r.gain.value=.25;g.connect(r).connect(A.rev);s.start(at()+.01);return true}
+// sons de secours (si le fichier enregistré manque)
+var fwSynth=false;
+function hoovesSynth(d){if(!A)return;const t0=at();for(let b=0;b<d/.36;b++)[0,.08,.15].forEach((o,j)=>{const t=t0+b*.36+o,v=.16*(1-b*.36/d*.75);noise(t,.05,v*(j?.8:1),'bandpass',rnd(700,1100),2.5,A.master,.002);osc('sine',rnd(150,190),t,v*.6,.002,.06,A.master)})}
+function fwBoom(far){if(!A)return;const t=at();osc('sine',rnd(55,75),t,.22*far,.01,.8,A.master).frequency.exponentialRampToValueAtTime(30,t+.7);noise(t,.6,.08*far,'lowpass',500,.7,A.rev,.01);for(let i=0;i<12;i++)noise(t+.15+Math.random()*.8,.02,rnd(.02,.05)*far,'highpass',5000,1,A.rev,.001)}
+/* ---- feu d'artifice au loin, par-dessus la vidéo du kirin : fusées qui montent de la mer de nuages ---- */
+function kfwStart(src){if(G.kfw)return;let c=document.getElementById('kfw');if(!c){c=document.createElement('canvas');c.id='kfw';c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;z-index:9;pointer-events:none';document.body.appendChild(c)}
+  const d=Math.min(devicePixelRatio||1,2),w=innerWidth,h=innerHeight;c.width=w*d;c.height=h*d;c.style.transition='opacity .8s';c.style.opacity=1;c.style.display='block';const g=c.getContext('2d'),X=G.kfw={stop:false},Z=Math.min(w/390,h/844);
+  const cov=(fx,fy)=>{const sc=Math.max(w/720,h/1280);return[(w-720*sc)/2+fx*720*sc,(h-1280*sc)/2+fy*1280*sc]};
+  const COL=[['255,140,200','255,220,240'],['255,210,110','255,245,200'],['190,140,255','235,215,255'],['120,220,255','220,245,255'],['255,120,90','255,215,170']];
+  const R=[],B=[];let next=0,t0=performance.now(),last=t0;
+  const step=(now)=>{if(X.stop||G.kfw!==X){c.style.opacity=0;setTimeout(()=>{c.style.display='none'},800);return}const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000;
+    if(t>next){next=t+rnd(.3,.65);const side=Math.random()<.5?rnd(.06,.3):rnd(.7,.94),p=cov(side,rnd(.6,.7)),ty=cov(0,rnd(.14,.4))[1];R.push({x:p[0],y:p[1],ty,vx:rnd(-8,8)*Z,c:COL[Math.random()*COL.length|0],tr:[]})}
+    g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);g.globalCompositeOperation='lighter';
+    for(let i=R.length-1;i>=0;i--){const r=R[i];r.y-=(150+ (r.y-r.ty)*.9)*Z*dt;r.x+=r.vx*dt;r.tr.push([r.x,r.y]);if(r.tr.length>10)r.tr.shift();
+      g.strokeStyle=`rgba(${r.c[1]},.8)`;g.lineWidth=2*Z;g.beginPath();r.tr.forEach((q,j)=>j?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();
+      if(r.y<=r.ty){R.splice(i,1);const n=90,sp=rnd(70,115)*Z;for(let k=0;k<n;k++){const a=rnd(0,TAU),v=sp*Math.sqrt(rnd(.15,1));B.push({x:r.x,y:r.y,px:r.x,py:r.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(1.4,2.2),c:r.c,gl:Math.random()<.35})}B.push({x:r.x,y:r.y,vx:0,vy:0,l:0,m:.35,c:r.c,fl:1});if(fwSynth)setTimeout(()=>{if(G.kfw===X)fwBoom(.7)},rnd(300,700))}}
+    for(let i=B.length-1;i>=0;i--){const q=B[i];q.l+=dt;if(q.l>q.m){B.splice(i,1);continue}const dr=Math.pow(.25,dt);q.vx*=dr;q.vy=q.vy*dr+14*Z*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;const a=1-q.l/q.m;
+      if(q.fl){const rg=g.createRadialGradient(q.x,q.y,0,q.x,q.y,70*Z);rg.addColorStop(0,`rgba(${q.c[1]},${.5*a})`);rg.addColorStop(1,`rgba(${q.c[0]},0)`);g.fillStyle=rg;g.fillRect(q.x-70*Z,q.y-70*Z,140*Z,140*Z);continue}
+      const tw=q.gl&&q.l>q.m*.5?(Math.random()<.5?1:.15):1;g.strokeStyle=`rgba(${q.l<.3?q.c[1]:q.c[0]},${a*tw})`;g.lineWidth=2.2*Z;g.beginPath();g.moveTo(q.px,q.py);g.lineTo(q.x,q.y);g.stroke();g.fillStyle=`rgba(${q.c[1]},${a*tw})`;g.fillRect(q.x-1.2*Z,q.y-1.2*Z,2.4*Z,2.4*Z);q.px=lerp(q.px,q.x,.35);q.py=lerp(q.py,q.y,.35);g.fillStyle=`rgba(${q.c[0]},${.22*a})`;g.fillRect(q.x-3*Z,q.y-3*Z,6*Z,6*Z)}
+    requestAnimationFrame(step)};requestAnimationFrame(step)}
 function liveSkip(){if(G.lvid&&performance.now()-G.liveT0>1500){clearTimeout(LIVE.ho);liveEnd()}}
 function liveFallback(soft){if(!G.lvid)return;const src=G.liveSrc;G.lvid=false;if(soft!==true)LIVE.bad[src]=true;liveHide();G.hush=false;G.hushM=false;try{schedule()}catch(e){}G.sk=0;if(G.liveFb)G.liveFb()}
 function liveLvl(gold,pw){return gold?3:pw>=.5?2:1}
@@ -2371,7 +2391,7 @@ function drawKirinSpell(now,k){const pl=PAL[G.pi],gold=G.gold,weak=G.power<.5,co
   if(G.ka>0){const lines=kirinLines(G.ph,G.run,k),rev=clamp(k/1.4)*(weak?.8:1),a=G.ka*(.6+.4*G.power);const sl=drawAnimal(lines,rev,a,col,gc);
     if(rev>.9){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=2;i<6;i++){const h=sl[i][3];gdraw(gold?'#ffd27a':'#ff8ac0',h[0],h[1],12*S*G.asc,a);gdraw('#ffffff',h[0],h[1],3*S*G.asc,a)}const hn=animalXY(155,7);gdraw('#ffffff',hn[0],hn[1],8*S*G.asc,a);gdraw(gc,hn[0],hn[1],22*S*G.asc,a*.6);const e=animalXY(175,43);gdraw('#ffd27a',e[0],e[1],6*S*G.asc,a);ctx.restore()}}
   if(PET.length){ctx.save();ctx.globalCompositeOperation='lighter';for(const f of PET){const al=clamp(f.l/.4)*clamp((f.m-f.l)/1.2);ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.a);const s2=f.s*(.8+.2*Math.sin(f.l*4+f.ph));ctx.fillStyle=hexA('#ffd27a',.7*al);ctx.beginPath();ctx.moveTo(0,6*s2);ctx.lineTo(-7*s2,-4*s2);ctx.quadraticCurveTo(0,-9*s2,7*s2,-4*s2);ctx.closePath();ctx.fill();ctx.strokeStyle=hexA('#fff3c8',.6*al);ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(0,6*s2);ctx.lineTo(0,10*s2);ctx.stroke();ctx.restore()}ctx.restore()}}
-SPX.kirin={start:startKirin,update:updateKirin,draw:drawKirinSpell,gold:KRG.end};
+SPX.kirin={start:(gold,pw)=>{const src=!G.moon&&!G.day&&realP()?liveSrc(liveLvl(gold,pw)):null;if(src){liveStart(src,()=>startKirin(gold,G.power));return}startKirin(gold,pw)},update:(dt,now)=>{if(G.lvid)return;updateKirin(dt,now)},draw:(now,k)=>{if(G.lvid)return;drawKirinSpell(now,k)},gold:KRG.end};
 SPELL_END.kirin=6.2;
 
 /* ================= PALIER 10 · L'ARBRE-MONDE · Le Cœur de la forêt ================= */
@@ -3908,7 +3928,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='102';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='104';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
