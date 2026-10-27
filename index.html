@@ -1702,7 +1702,7 @@ SPELL_END.dragon=6.3;
 /* ---- Palier VII : décor en prise de vue réelle (vidéo en boucle serre_live.mp4) ---- */
 var BGV={ok:true};
 // paliers en prise de vue réelle : photo de fond (+ vidéo en boucle facultative)
-var REALP={6:{img:'serre_live.jpg',vid:'serre_live.mp4'},7:{img:'grande_live.jpg'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
+var REALP={6:{img:'serre_live.jpg',vid:'serre_live.mp4'},7:{img:'grande_live.jpg'},8:{img:'pont_live.jpg'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
 function bgvEl(){rhLoad();const R=REALP[G.pi];if(R.d)return R.d;const d=document.createElement('div');d.className='bgv';d.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none;background:#020806 center/cover no-repeat';
   const im=new Image();im.onload=()=>{R.iok=true;d.style.backgroundImage=`url(${R.img})`};im.onerror=()=>{R.bad=true;BGK=''};im.src=R.img;
   const v=document.createElement('video');v.muted=true;v.loop=true;v.preload='auto';v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('webkit-playsinline','');
@@ -2328,6 +2328,18 @@ function kirinBridge(dt,sk){const KB=kBridge(),ab=.2,feet=a=>80*G.SC.r*1.4/100*a
     if(Math.random()<dt*3)kLan(rnd(0,W),H*rnd(.66,.9))}
   G.ka=sk<T4-.4?1:clamp(1-(sk-(T4-.4))/.5);if(sk>T4-.2&&!G.kb.g){G.kb.g=1;spark(G.ap[0],G.ap[1],'#ffd27a',50,320*S);try{SND.glory()}catch(e){}}
   for(let i=KLAN.length-1;i>=0;i--){const L=KLAN[i];L.t+=dt;L.y+=L.vy*dt;L.x+=Math.cos(L.t*.9+L.sw)*L.sa*dt;if(L.y<-40)KLAN.splice(i,1)}}
+// décor réaliste : le pont part en perspective vers le fond (photo 768×1376, plein écran recadré)
+function pontXY(fx,fy){const sc=Math.max(W/768,H/1376);return[(W-768*sc)/2+fx*768*sc,(H-1376*sc)/2+fy*1376*sc,sc]}
+function kirinBridgeReal(dt,sk){const T1=1.1,T2=2.2,T3=7.8,T4=8.9,a0=.34,K=6,feet=a=>80*G.SC.r*1.4/100*a,dep=t=>1/(1+K*t),deckY=t=>.47+(.86-.47)*dep(t);
+  if(sk<T1){G.run=false;G.arot=-.3*Math.sin(Math.PI*clamp((sk-.2)/.85))}
+  else if(sk<T2){G.run=true;G.arot=0;G.ph+=dt*11;if(!G.kb){G.kb={p0:G.ap.slice(),a0:G.asc};SND.leap()}const t=ease(clamp((sk-T1)/(T2-T1))),q=pontXY(.5,deckY(0));
+    G.ap=[lerp(G.kb.p0[0],q[0],t),lerp(G.kb.p0[1],q[1]-feet(a0),t)-Math.sin(t*Math.PI)*H*.06];G.asc=lerp(G.kb.a0,a0,t)}
+  else if(sk<T3){G.run=true;G.ph+=dt*10;const t=(sk-T2)/(T3-T2),d=dep(t),a=a0*d,q=pontXY(.5,deckY(t));G.ap=[q[0],q[1]-feet(a)+Math.sin(G.ph*2)*1.5*S*d];G.asc=a;
+    if(!G.kb.n||sk>G.kb.n){G.kb.n=sk+rnd(.14,.24)*(1+t);[-1,1].forEach(sd=>{if(Math.random()<.75){const w=pontXY(.5+sd*.17*d*1.6,deckY(t)-.02*d);KLAN.push({x:w[0]+rnd(-6,6)*S*d,y:w[1],t:0,vy:-rnd(26,44)*S*(.5+.6*d),sw:rnd(0,TAU),sa:rnd(5,14)*S*d,s:rnd(.9,1.3)*S*(.45+1.4*d),fl:rnd(0,TAU)})}});if(Math.random()<.5)try{celesta(at(),[81,86,88,90,93][Math.random()*5|0],.35,A.rev)}catch(e){}}
+    if(Math.random()<dt*2)kLan(rnd(0,W),H*rnd(.45,.62))}
+  else if(sk<T4){G.run=true;G.ph+=dt*13;if(!G.kb.p3){G.kb.p3=G.ap.slice();G.kb.a3=G.asc;SND.leap()}const t=ease(clamp((sk-T3)/(T4-T3)));G.ap=[lerp(G.kb.p3[0],W*.62,t),lerp(G.kb.p3[1],H*.16,t)];G.asc=lerp(G.kb.a3,.05,t);if(Math.random()<dt*3)kLan(rnd(0,W),H*rnd(.45,.62))}
+  G.ka=sk<T4-.4?1:clamp(1-(sk-(T4-.4))/.5);if(sk>T4-.2&&!G.kb.g){G.kb.g=1;spark(G.ap[0],G.ap[1],'#ffd27a',50,320*S);try{SND.glory()}catch(e){}}
+  for(let i=KLAN.length-1;i>=0;i--){const L=KLAN[i];L.t+=dt;L.y+=L.vy*dt;L.x+=Math.cos(L.t*.9+L.sw)*L.sa*dt;if(L.y<-40)KLAN.splice(i,1)}}
 function drawKLan(now){const fade=G.gold?1:clamp((G.sk-9.6)/1.2);ctx.save();for(const L of KLAN){const a=clamp(L.t/.6)*(1-fade),s=L.s*(1-Math.max(0,(H*.6-L.y)/H)*.45);if(a<=0)continue;const f=.85+.15*Math.sin(now*.012+L.fl);
     ctx.globalCompositeOperation='lighter';gdraw('#ffa640',L.x,L.y,26*s*f,.55*a);ctx.globalCompositeOperation='source-over';
     ctx.fillStyle=`rgba(255,${Math.round(150+50*f)},80,${.92*a})`;ctx.beginPath();ctx.moveTo(L.x-5*s,L.y-7*s);ctx.lineTo(L.x+5*s,L.y-7*s);ctx.lineTo(L.x+4*s,L.y+6*s);ctx.lineTo(L.x-4*s,L.y+6*s);ctx.closePath();ctx.fill();
@@ -2338,7 +2350,7 @@ function startKirin(gold,pw){G.abase*=.66;G.asc=G.abase;G.ph=0;G.run=false;G.kt=
 function updateKirin(dt,now){const sk=G.sk,SC=G.SC,weak=G.power<.5,gold=G.gold,hz=H*.56;const prev=[G.ap[0],G.ap[1]];
   const rear=(t0,d,amp)=>{G.arot=-amp*Math.sin(Math.PI*clamp((sk-t0)/d))};
   if(weak){rear(.3,1.2,.18);G.ka=sk>1.7?clamp(1-(sk-1.7)/1.2)*(.6+.4*Math.sin(now*.05)):1;return}
-  if(!gold){kirinBridge(dt,sk)}
+  if(!gold){if(realP())kirinBridgeReal(dt,sk);else kirinBridge(dt,sk)}
   else{const Q=[[SC.x,SC.y+22*S],[W*.84,H*.66],[W*.5,H*.72],[W*.14,H*.56],[W*.16,H*.34],[W*.36,H*.28]],sp=sunPos();
     if(sk<1.6){rear(.25,1.25,.4);G.run=false;G.asc=G.abase}
     else if(sk<8){if(!G.ksr){G.ksr=true;RK.t.sun=1;RK.t.path=1;setTimeout(()=>{if(G.state==='spell')SND.sunrise()},200)}G.run=true;G.arot=0;G.ph+=dt*11;const u=(sk-1.6)/6.4;G.ap=kPos(Q,u*(1.15-.15*u));G.asc=G.abase*.85}
@@ -3896,7 +3908,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='101';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='102';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
