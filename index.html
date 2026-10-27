@@ -2010,15 +2010,18 @@ var LIVE={v:{},primed:{},to:0,bad:{}};
 // vidéos de sorts en prise de vue réelle, par palier et par nombre d'étoiles
 var LIVEMAP={6:{3:'dragon_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
 // réglages par vidéo : vitesse de lecture et durée de la dernière image prolongée
-var LIVECFG={'dragon_live.mp4':{rate:.8,hold:3},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
+var LIVECFG={'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
 function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[s]?s:null}
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
-function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
+function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
 function liveStart(src,fb){const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
   try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
+  // vidéo muette : le son du jeu reste ouvert (sans la musique) et suit l'image
+  if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true)};sfxLoad('dragon_roar.mp3');
+    const w=()=>{if(!G.lvid||G.liveSrc!==src||!Q.length)return;while(Q.length&&v.currentTime>=Q[0][0]){try{F[Q.shift()[1]]()}catch(e){}}requestAnimationFrame(w)};requestAnimationFrame(w)}
   const go=v.play();if(go&&go.catch)go.catch(()=>{v.muted=true;const g2=v.play();if(g2&&g2.catch)g2.catch(liveFallback)});
   // la vidéo peut mettre du temps à arriver sur le téléphone : on patiente jusqu'à 12 s (décor affiché) avant de passer au sort dessiné
   clearTimeout(LIVE.to);const chk=()=>{if(!G.lvid||G.liveSrc!==src||v.currentTime>=.05)return;if((performance.now()-G.liveT0)/1000>12){liveFallback(true);return}if(v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}LIVE.to=setTimeout(chk,1000)};LIVE.to=setTimeout(chk,2500)}
@@ -2033,6 +2036,10 @@ function liveHold(v,sec){if(!G.lvid)return;G.lhold=true;v.style.transition='opac
     requestAnimationFrame(step)};requestAnimationFrame(step);
   clearTimeout(LIVE.ho);LIVE.ho=setTimeout(()=>{liveEnd()},sec*1000)}
 function liveEnd(){G.lhold=false;if(!G.lvid)return;G.lvid=false;liveHide();if(G.state==='spell')showResult()}
+// bruitages enregistrés (fichiers mp3 à côté du jeu), joués par le moteur audio du jeu
+var SFXB={};
+function sfxLoad(f){if(SFXB[f]!==undefined||!A)return;SFXB[f]=null;try{fetch(f).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>A.ac.decodeAudioData(b,ok,ko))).then(buf=>{SFXB[f]=buf}).catch(()=>{SFXB[f]=false})}catch(e){SFXB[f]=false}}
+function sfxFile(f,vol){const b=SFXB[f];if(!A||!b)return false;const s=A.ac.createBufferSource(),g=A.ac.createGain();s.buffer=b;g.gain.value=vol||1;s.connect(g);g.connect(A.master);const r=A.ac.createGain();r.gain.value=.25;g.connect(r).connect(A.rev);s.start(at()+.01);return true}
 function liveSkip(){if(G.lvid&&performance.now()-G.liveT0>1500){clearTimeout(LIVE.ho);liveEnd()}}
 function liveFallback(soft){if(!G.lvid)return;const src=G.liveSrc;G.lvid=false;if(soft!==true)LIVE.bad[src]=true;liveHide();G.hush=false;G.hushM=false;try{schedule()}catch(e){}G.sk=0;if(G.liveFb)G.liveFb()}
 function liveLvl(gold,pw){return gold?3:pw>=.5?2:1}
@@ -3872,7 +3879,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='96';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='99';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
