@@ -1295,7 +1295,7 @@ function drawFoxLava(now,k){if(!G.lava)return;const t0=G.lv0,FL2=2.2,fade=clamp(
       ctx.fillStyle='#fff0f6';ctx.beginPath();ctx.arc(0,0,sz*.2,0,TAU);ctx.fill();ctx.restore()}}
   ctx.restore()}
 /* ----- Grand Grimoire : le sort jaillit de la baguette ----- */
-function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!((G.pi===6||G.pi===7||G.pi===8)&&LIVEMAP[G.pi]&&liveSrc(liveLvl(G.gold,G.power)))}
+function wandCastOn(){return G.pi>=5&&!G.moon&&!G.day&&!G.train&&!((G.pi===5||G.pi===6||G.pi===7||G.pi===8)&&LIVEMAP[G.pi]&&liveSrc(liveLvl(G.gold,G.power)))}
 function castStart(now){G.state='cast';G.ct0=now;G.ctr=[];G.cfrom=null;try{SND.gust()}catch(e){}}
 function castUpd(dt,now){const u=(now-G.ct0)/1000/(window.__cs||1),pl=PAL[G.pi];G.flk=u<.2?-.6*ease(u/.2):u<.55?-.6+.6*ease((u-.2)/.35):0;G.fly2=u<.2?ease(u/.2):u<.55?1-ease((u-.2)/.35):0;
   if(u>=.22&&!G.cfrom){G.cfrom=[G.tip[0]-16*S,G.tip[1]-6*S];try{SND.leap()}catch(e){}for(let i=0;i<14;i++){const a=rnd(-2.6,-.6),v=rnd(80,220)*S;P.push({x:G.cfrom[0],y:G.cfrom[1],vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.3,.6),s:rnd(1,2),c:pl.glow})}}
@@ -2008,15 +2008,21 @@ SIG.kirin={pin:1,init(X,g){X.cl=[...Array(g?10:5)].map((_,i)=>({u:rnd(-.2,1.2),v
 /* ---- Palier VII : sort légendaire (3★) en prise de vue réelle, vidéo dragon_live.mp4 ---- */
 var LIVE={v:{},primed:{},to:0,bad:{}};
 // vidéos de sorts en prise de vue réelle, par palier et par nombre d'étoiles
-var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},8:{1:'kirin1_live.jpg',2:'kirin2_live.mp4',3:'kirin_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
+var LIVEMAP={5:{3:'hibou_live.mp4'},6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},8:{1:'kirin1_live.jpg',2:'kirin2_live.mp4',3:'kirin_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
 // réglages par vidéo : vitesse de lecture et durée de la dernière image prolongée
-var LIVECFG={'kirin1_live.jpg':{dur:5,hold:2,cx:.62,cy:.6,draw:{trait:'kirin1_trait.png',cut:'kirin1_cut.png',x:150,y:520,t0:.5,t1:3.2,r:58,path:[[275,60],[300,118],[340,112],[395,65],[402,130],[362,200],[312,192],[290,140],[300,240],[352,280],[385,350],[345,430],[332,520],[332,612],[300,612],[300,480],[252,420],[205,460],[232,540],[240,600],[160,600],[150,480],[132,420],[80,470],[112,512],[130,430],[150,330],[220,282],[290,250]]},sfx:[[.5,'draw'],[3.2,'reveal'],[3.35,'kcri']]},'kirin2_live.mp4':{rate:.85,hold:3,sfx:[[.9,'smoke'],[1.4,'lights'],[4.5,'shoot']]},'kirin_live.mp4':{rate:.8,hold:3.5,fw:3.8,sfx:[[.3,'smoke'],[2.5,'kcri'],[3.2,'hooves'],[4,'fwsnd'],[7.6,'glory']]},'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
+var LIVECFG={'hibou_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3,'lights'],[7,'shoot']]},'kirin1_live.jpg':{dur:5,hold:2,cx:.62,cy:.6,draw:{trait:'kirin1_trait.png',cut:'kirin1_cut.png',x:150,y:520,t0:.5,t1:3.2,r:58,path:[[275,60],[300,118],[340,112],[395,65],[402,130],[362,200],[312,192],[290,140],[300,240],[352,280],[385,350],[345,430],[332,520],[332,612],[300,612],[300,480],[252,420],[205,460],[232,540],[240,600],[160,600],[150,480],[132,420],[80,470],[112,512],[130,430],[150,330],[220,282],[290,250]]},sfx:[[.5,'draw'],[3.2,'reveal'],[3.35,'kcri']]},'kirin2_live.mp4':{rate:.85,hold:3,sfx:[[.9,'smoke'],[1.4,'lights'],[4.5,'shoot']]},'kirin_live.mp4':{rate:.8,hold:3.5,fw:3.8,sfx:[[.3,'smoke'],[2.5,'kcri'],[3.2,'hooves'],[4,'fwsnd'],[7.6,'glory']]},'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
 function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[s]?s:null}
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
 function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;if(isStill(src)){stillEl(src);continue}const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
+// téléphone tourné à l'horizontale : la vidéo reste entière au centre, les côtés sont remplis par la même image agrandie et floue
+function liveLand(){return innerWidth>innerHeight*1.05}
+function liveBack(el){let c=document.getElementById('lbk');if(!c){c=document.createElement('canvas');c.id='lbk';c.width=80;c.height=45;c.style.cssText='position:fixed;left:-6%;top:-6%;width:112%;height:112%;z-index:7;pointer-events:none;filter:blur(16px) brightness(.55) saturate(1.25);display:none;background:#000';document.body.appendChild(c)}
+  const g=c.getContext('2d');LIVE.bk=el;const step=()=>{if(LIVE.bk!==el)return;const shown=el.style.display!=='none',on=G.lvid&&shown&&liveLand();el.style.objectFit=on?'contain':'cover';el.style.background=on?'transparent':'#000';
+    if(on){c.style.display='block';c.style.opacity=el.style.opacity||1;const iw=el.videoWidth||el.naturalWidth,ih=el.videoHeight||el.naturalHeight;if(iw&&ih){const sh=iw*45/80;try{g.drawImage(el,0,Math.max(0,(ih-sh)/2),iw,Math.min(ih,sh),0,0,80,45)}catch(e){}}}else c.style.display='none';
+    if(!G.lvid&&!shown){c.style.display='none';LIVE.bk=null;el.style.objectFit='cover';el.style.background='#000';return}requestAnimationFrame(step)};requestAnimationFrame(step)}
 function isStill(src){return /\.(jpg|jpeg|png|webp)$/i.test(src)}
 function stillEl(src){let im=LIVE.v[src];if(im)return im;im=new Image();im.decoding='async';im.src=src;im.className='live';im.pause=()=>{};
   im.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;display:none';
@@ -2025,7 +2031,7 @@ function stillEl(src){let im=LIVE.v[src];if(im)return im;im=new Image();im.decod
 function liveStill(src,fb){const cf=LIVECFG[src]||{},im=stillEl(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=false;try{schedule()}catch(e){}
   if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);
   const F={draw:()=>sndDraw(2.7),reveal:()=>{SND.ignite()},smoke:()=>{SND.whoosh(1);SND.ignite()},kcri:()=>{if(!sfxFile('kirin_cri.mp3',1))SND.kirin(true)},lights:()=>sndLights(),glory:()=>SND.glory()};
-  const go=()=>{if(!G.lvid||G.liveSrc!==src)return;clearTimeout(LIVE.to);im.style.transition='none';im.style.transform='scale(1.14)';im.style.filter='brightness(.22) blur(8px) saturate(.5)';im.style.opacity=0;im.style.display='block';void im.offsetWidth;
+  const go=()=>{if(!G.lvid||G.liveSrc!==src)return;clearTimeout(LIVE.to);im.style.transition='none';im.style.transform='scale(1.14)';im.style.filter='brightness(.22) blur(8px) saturate(.5)';im.style.opacity=0;im.style.display='block';liveBack(im);void im.offsetWidth;
     const D=cf.draw;if(D){[D.trait,D.cut].forEach(stillImg);im.style.filter='brightness(.1) blur(5px) saturate(.4)';im.style.transform='scale(1)';void im.offsetWidth;im.style.transition='opacity .8s ease-out, filter 1.6s ease-out, transform 8s cubic-bezier(.2,.6,.3,1)';requestAnimationFrame(()=>{im.style.opacity=1});setTimeout(()=>{if(G.lvid&&G.liveSrc===src)im.style.filter='brightness(1) blur(0px) saturate(1)'},(D.t1+.5)*1000)}
     else{im.style.transition='opacity 1s ease-out, filter 2.8s ease-out .3s, transform 7.5s cubic-bezier(.2,.6,.3,1)';requestAnimationFrame(()=>{im.style.opacity=1;im.style.filter='brightness(1) blur(0px) saturate(1)';im.style.transform='scale(1.02)'})}
     (cf.sfx||[]).forEach(([t,k])=>setTimeout(()=>{if(G.lvid&&G.liveSrc===src)try{F[k]()}catch(e){}},t*1000));stillFx(src,cf);
@@ -2051,7 +2057,7 @@ function stillDraw(g,t,D,map,Z,w,h){const tr=STI[D.trait],cu=STI[D.cut];if(!tr||
   if(D.sp)for(let i=D.sp.length-1;i>=0;i--){const p=D.sp[i];p.l+=1/60;if(p.l>.7){D.sp.splice(i,1);continue}p.x+=p.vx/60;p.y+=p.vy/60;p.vy+=40*Z/60;g.fillStyle=`rgba(255,226,150,${1-p.l/.7})`;g.fillRect(p.x-1.3*Z,p.y-1.3*Z,2.6*Z,2.6*Z)}}
 function stillFx(src,cf){let c=document.getElementById('lsf');if(!c){c=document.createElement('canvas');c.id='lsf';c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;z-index:9;pointer-events:none';document.body.appendChild(c)}
   const d=Math.min(devicePixelRatio||1,2),w=innerWidth,h=innerHeight,im=LIVE.v[src];c.width=w*d;c.height=h*d;c.style.transition='opacity .6s';c.style.opacity=1;c.style.display='block';const g=c.getContext('2d'),t0=performance.now(),Z=Math.min(w/390,h/844);
-  const iw=im.naturalWidth||768,ih=im.naturalHeight||1376,sc=Math.max(w/iw,h/ih),hx=(w-iw*sc)/2+(cf.cx||.5)*iw*sc,hy=(h-ih*sc)/2+(cf.cy||.55)*ih*sc;
+  const iw=im.naturalWidth||768,ih=im.naturalHeight||1376,sc=(liveLand()?Math.min:Math.max)(w/iw,h/ih),hx=(w-iw*sc)/2+(cf.cx||.5)*iw*sc,hy=(h-ih*sc)/2+(cf.cy||.55)*ih*sc;
   const map=(ix,iy)=>[(w-iw*sc)/2+ix*sc,(h-ih*sc)/2+iy*sc,sc],D=cf.draw?Object.assign({},cf.draw,{mk:null,full:0,sp:null}):null,dl=D?D.t1-1:0;
   const M=[...Array(D?0:14)].map((_,i)=>({x:rnd(-.2,1.2)*w,y:rnd(.3,1)*h,r:rnd(120,260)*Z,vx:(i%2?1:-1)*rnd(25,60)*Z}));
   const S=[...Array(cf.sparks||24)].map(()=>({a:rnd(0,TAU),r:rnd(20,140)*Z,y:rnd(0,1),v:rnd(18,42)*Z,s:rnd(1,2.6)*Z,ph:rnd(0,6.3),gold:Math.random()<.7}));
@@ -2067,7 +2073,7 @@ function stillFx(src,cf){let c=document.getElementById('lsf');if(!c){c=document.
     const sa=Math.max(0,Math.min(1,(t-1.4)/.6));if(sa>0)for(const p of S){const yy=hy+90*Z-((p.y*200*Z+(t-1.4)*p.v)%(260*Z)),xx=hx+Math.cos(p.a+t*.4)*p.r,a=sa*(.5+.5*Math.sin(t*4+p.ph))*Math.min(1,(hy+90*Z-yy)/(40*Z))*Math.max(0,1-(hy+90*Z-yy)/(260*Z)),col=p.gold?'255,214,120':'170,255,200',gr=g.createRadialGradient(xx,yy,0,xx,yy,p.s*5);gr.addColorStop(0,`rgba(${col},${.9*a})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(xx-p.s*5,yy-p.s*5,p.s*10,p.s*10)}}
     requestAnimationFrame(step)};requestAnimationFrame(step)}
 function liveStart(src,fb){if(isStill(src))return liveStill(src,fb);const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
-  try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
+  try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});liveBack(v);v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
   // vidéo muette : le son du jeu reste ouvert (sans la musique) et suit l'image
   if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true),cry:()=>{if(!sfxFile('phenix_cri.mp3',1.1))SND.burst()},cry2:()=>{sfxFile('phenix_cri.mp3',.55)},kirin:()=>SND.kirin(true),glory:()=>SND.glory(),kcri:()=>{if(!sfxFile('kirin_cri.mp3',1))SND.kirin(true)},hooves:()=>{if(!sfxFile('kirin_sabots.mp3',.9))hoovesSynth(4.2)},fwsnd:()=>{},lights:()=>sndLights(),shoot:()=>sndShoot()};(G.pi===7?['phenix_cri.mp3']:G.pi===8?['kirin_cri.mp3','kirin_sabots.mp3']:['dragon_roar.mp3']).forEach(sfxLoad);if(cf.fw){const fw=()=>{if(!G.lvid||G.liveSrc!==src)return;if(v.currentTime>=cf.fw){kfwStart(src);return}requestAnimationFrame(fw)};requestAnimationFrame(fw)}
     const w=()=>{if(!G.lvid||G.liveSrc!==src||!Q.length)return;while(Q.length&&v.currentTime>=Q[0][0]){try{F[Q.shift()[1]]()}catch(e){}}requestAnimationFrame(w)};requestAnimationFrame(w)}
@@ -2100,7 +2106,7 @@ function fwWhistle(){if(!A)return;const t=at(),o=osc('sine',rnd(900,1300),t,.022
 /* ---- feu d'artifice au loin, par-dessus la vidéo du kirin : fusées qui montent de la mer de nuages ---- */
 function kfwStart(src){if(G.kfw)return;let c=document.getElementById('kfw');if(!c){c=document.createElement('canvas');c.id='kfw';c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;z-index:9;pointer-events:none';document.body.appendChild(c)}
   const d=Math.min(devicePixelRatio||1,2),w=innerWidth,h=innerHeight;c.width=w*d;c.height=h*d;c.style.transition='opacity .8s';c.style.opacity=1;c.style.display='block';const g=c.getContext('2d'),X=G.kfw={stop:false},Z=Math.min(w/390,h/844);
-  const cov=(fx,fy)=>{const sc=Math.max(w/720,h/1280);return[(w-720*sc)/2+fx*720*sc,(h-1280*sc)/2+fy*1280*sc]};
+  const cov=(fx,fy)=>{const sc=(liveLand()?Math.min:Math.max)(w/720,h/1280);return[(w-720*sc)/2+fx*720*sc,(h-1280*sc)/2+fy*1280*sc]};
   const COL=[['255,140,200','255,220,240'],['255,210,110','255,245,200'],['190,140,255','235,215,255'],['120,220,255','220,245,255'],['255,120,90','255,215,170']];
   const R=[],B=[];let next=0,t0=performance.now(),last=t0;
   const step=(now)=>{if(X.stop||G.kfw!==X){c.style.opacity=0;setTimeout(()=>{c.style.display='none'},800);return}const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000;
@@ -2554,6 +2560,8 @@ function drawTreeSpell(now,k){const gold=G.gold,weak=G.power<.5,end=gold?TRG.end
   if(PET.length){ctx.save();ctx.globalCompositeOperation='lighter';for(const f of PET){const al=clamp(f.l/.4)*clamp((f.m-f.l)/1.2);ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.a);const s2=f.s;for(let j=0;j<5;j++){ctx.rotate(TAU/5);ctx.fillStyle=hexA(f.pink?'#ffc0e8':'#d8ffb0',.45*al);ctx.beginPath();ctx.ellipse(0,-4*s2,2*s2,4*s2,0,0,TAU);ctx.fill()}gdraw('#ffd27a',0,0,5*s2,al);ctx.restore()}ctx.restore()}
   if(gold&&k>15.6&&k<20.4){const al=clamp((k-15.6)/.8)*clamp((20.4-k)/.9);ctx.save();ctx.globalAlpha=al;ctx.textAlign='center';ctx.shadowColor='#ffb347';ctx.shadowBlur=24;ctx.fillStyle='#fff6dc';let fs=Math.round(25*S);ctx.font=`700 ${fs}px "Cinzel Decorative",serif`;
     const y=H*.57;ctx.shadowBlur=0;const bg=ctx.createRadialGradient(W/2,y+fs,0,W/2,y+fs,W*.6);bg.addColorStop(0,'rgba(0,0,0,.65)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=bg;ctx.fillRect(0,y-fs*2,W,fs*6);ctx.shadowBlur=24;ctx.fillStyle='#fff6dc';ctx.fillText('Le Grand Grimoire',W/2,y);ctx.fillText('est accompli',W/2,y+fs*1.25);ctx.shadowBlur=0;ctx.fillStyle='#ffd27a';ctx.font=`italic 600 ${Math.round(18*S)}px "Cormorant Garamond",serif`;ctx.fillText('les neuf esprits veillent sur l\'Arbre-monde',W/2,y+fs*2.5);ctx.restore()}}
+// VI · hibou : vidéo en prise de vue réelle pour le sort légendaire
+SPX.owl={start:(gold,pw)=>{const src=gold&&!G.moon&&!G.day&&realP()?liveSrc(3):null;if(src)liveStart(src,()=>startOwl(true,G.power))},update:(dt,now)=>{if(G.lvid)return;updateOwl(dt,now)},draw:(now,k)=>{if(G.lvid)return;drawOwlSpell(now,k)},gold:OWG.end};
 SPX.tree={start:startTree,update:updateTree,draw:drawTreeSpell,gold:TRG.end};
 SPELL_END.tree=7.2;
 SPX.tree.start=((orig)=>(gold,pw)=>{const src=realP()&&!G.moon&&!G.day?liveSrc(liveLvl(gold,pw)):null;if(src){liveStart(src,()=>orig(gold,G.power));return}orig(gold,pw)})(SPX.tree.start);
@@ -3984,7 +3992,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='110';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='112';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
