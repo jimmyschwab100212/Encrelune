@@ -2008,16 +2008,44 @@ SIG.kirin={pin:1,init(X,g){X.cl=[...Array(g?10:5)].map((_,i)=>({u:rnd(-.2,1.2),v
 /* ---- Palier VII : sort légendaire (3★) en prise de vue réelle, vidéo dragon_live.mp4 ---- */
 var LIVE={v:{},primed:{},to:0,bad:{}};
 // vidéos de sorts en prise de vue réelle, par palier et par nombre d'étoiles
-var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},8:{2:'kirin2_live.mp4',3:'kirin_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
+var LIVEMAP={6:{3:'dragon_live.mp4'},7:{3:'phenix_live.mp4'},8:{1:'kirin1_live.jpg',2:'kirin2_live.mp4',3:'kirin_live.mp4'},9:{1:'arbre1_live.mp4',2:'arbre2_live.mp4',3:'arbre3_live.mp4'}};
 // réglages par vidéo : vitesse de lecture et durée de la dernière image prolongée
-var LIVECFG={'kirin2_live.mp4':{rate:.85,hold:3,sfx:[[.9,'smoke'],[1.4,'lights'],[4.5,'shoot']]},'kirin_live.mp4':{rate:.8,hold:3.5,fw:3.8,sfx:[[.3,'smoke'],[2.5,'kcri'],[3.2,'hooves'],[4,'fwsnd'],[7.6,'glory']]},'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
+var LIVECFG={'kirin1_live.jpg':{dur:3.8,hold:2,cx:.62,cy:.6,sfx:[[.2,'smoke'],[1.5,'kcri']]},'kirin2_live.mp4':{rate:.85,hold:3,sfx:[[.9,'smoke'],[1.4,'lights'],[4.5,'shoot']]},'kirin_live.mp4':{rate:.8,hold:3.5,fw:3.8,sfx:[[.3,'smoke'],[2.5,'kcri'],[3.2,'hooves'],[4,'fwsnd'],[7.6,'glory']]},'phenix_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[3.2,'cry'],[6.5,'cry2']]},'dragon_live.mp4':{rate:.8,hold:3,sfx:[[.3,'smoke'],[4.6,'roar'],[9.6,'thunder']]},'arbre1_live.mp4':{rate:.85,hold:2.6},'arbre2_live.mp4':{rate:.85,hold:2.6}};
 function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[s]?s:null}
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
-function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;const v=liveVid(src);
+function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;if(isStill(src)){stillEl(src);continue}const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
-function liveStart(src,fb){const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
+function isStill(src){return /\.(jpg|jpeg|png|webp)$/i.test(src)}
+function stillEl(src){let im=LIVE.v[src];if(im)return im;im=new Image();im.decoding='async';im.src=src;im.className='live';im.pause=()=>{};
+  im.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;display:none';
+  im.addEventListener('click',liveSkip);im.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});document.body.appendChild(im);LIVE.v[src]=im;return im}
+// sort en image réaliste animée : brume qui se lève, lueur dorée autour de la créature, zoom lent, étincelles
+function liveStill(src,fb){const cf=LIVECFG[src]||{},im=stillEl(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=false;try{schedule()}catch(e){}
+  if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);
+  const F={smoke:()=>{SND.whoosh(1);SND.ignite()},kcri:()=>{if(!sfxFile('kirin_cri.mp3',1))SND.kirin(true)},lights:()=>sndLights(),glory:()=>SND.glory()};
+  const go=()=>{if(!G.lvid||G.liveSrc!==src)return;clearTimeout(LIVE.to);im.style.transition='none';im.style.transform='scale(1.14)';im.style.filter='brightness(.22) blur(8px) saturate(.5)';im.style.opacity=0;im.style.display='block';void im.offsetWidth;
+    im.style.transition='opacity 1s ease-out, filter 2.8s ease-out .3s, transform 7.5s cubic-bezier(.2,.6,.3,1)';requestAnimationFrame(()=>{im.style.opacity=1;im.style.filter='brightness(1) blur(0px) saturate(1)';im.style.transform='scale(1.02)'});
+    (cf.sfx||[]).forEach(([t,k])=>setTimeout(()=>{if(G.lvid&&G.liveSrc===src)try{F[k]()}catch(e){}},t*1000));stillFx(src,cf);
+    clearTimeout(LIVE.ho);LIVE.ho=setTimeout(()=>{if(G.lvid&&G.liveSrc===src)liveHold(im,cf.hold||2.6)},(cf.dur||4.5)*1000)};
+  if(im.complete&&im.naturalWidth)go();else{im.onload=go;clearTimeout(LIVE.to);LIVE.to=setTimeout(()=>{if(G.lvid&&G.liveSrc===src&&!im.naturalWidth)liveFallback(true)},8000)}}
+function stillFx(src,cf){let c=document.getElementById('lsf');if(!c){c=document.createElement('canvas');c.id='lsf';c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;z-index:9;pointer-events:none';document.body.appendChild(c)}
+  const d=Math.min(devicePixelRatio||1,2),w=innerWidth,h=innerHeight,im=LIVE.v[src];c.width=w*d;c.height=h*d;c.style.transition='opacity .6s';c.style.opacity=1;c.style.display='block';const g=c.getContext('2d'),t0=performance.now(),Z=Math.min(w/390,h/844);
+  const iw=im.naturalWidth||768,ih=im.naturalHeight||1376,sc=Math.max(w/iw,h/ih),hx=(w-iw*sc)/2+(cf.cx||.5)*iw*sc,hy=(h-ih*sc)/2+(cf.cy||.55)*ih*sc;
+  const M=[...Array(14)].map((_,i)=>({x:rnd(-.2,1.2)*w,y:rnd(.3,1)*h,r:rnd(120,260)*Z,vx:(i%2?1:-1)*rnd(25,60)*Z}));
+  const S=[...Array(cf.sparks||24)].map(()=>({a:rnd(0,TAU),r:rnd(20,140)*Z,y:rnd(0,1),v:rnd(18,42)*Z,s:rnd(1,2.6)*Z,ph:rnd(0,6.3),gold:Math.random()<.7}));
+  const step=()=>{if(!G.lvid||G.liveSrc!==src){c.style.opacity=0;setTimeout(()=>{c.style.display='none'},600);return}const t=(performance.now()-t0)/1000;g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);
+    // brume qui se dissipe vers les côtés
+    const ma=Math.max(0,1-t/3.2);if(ma>0){g.globalCompositeOperation='source-over';for(const m of M){m.x+=m.vx/60;const gr=g.createRadialGradient(m.x,m.y,0,m.x,m.y,m.r);gr.addColorStop(0,`rgba(200,214,230,${.42*ma})`);gr.addColorStop(1,'rgba(200,214,230,0)');g.fillStyle=gr;g.fillRect(m.x-m.r,m.y-m.r,m.r*2,m.r*2)}}
+    g.globalCompositeOperation='lighter';
+    // lueur dorée qui naît autour de la créature au moment du cri
+    const ha=Math.max(0,Math.min(1,(t-1.2)/.8))*(.75+.25*Math.sin(t*2.4));if(ha>0){const R=(150+30*Math.sin(t*1.7))*Z,gr=g.createRadialGradient(hx,hy,0,hx,hy,R);gr.addColorStop(0,`rgba(255,220,140,${.2*ha})`);gr.addColorStop(.5,`rgba(255,190,90,${.08*ha})`);gr.addColorStop(1,'rgba(255,190,90,0)');g.fillStyle=gr;g.fillRect(hx-R,hy-R,R*2,R*2)
+      if(cf.ring&&t<2.4){const fa=1-(t-1.2)/1.2,fr=(60+(t-1.2)*420)*Z;g.strokeStyle=`rgba(255,235,180,${.5*fa})`;g.lineWidth=3*Z;g.beginPath();g.arc(hx,hy,fr,0,TAU);g.stroke()}}
+    // étincelles qui montent autour d'elle
+    const sa=Math.max(0,Math.min(1,(t-1.4)/.6));if(sa>0)for(const p of S){const yy=hy+90*Z-((p.y*200*Z+(t-1.4)*p.v)%(260*Z)),xx=hx+Math.cos(p.a+t*.4)*p.r,a=sa*(.5+.5*Math.sin(t*4+p.ph))*Math.min(1,(hy+90*Z-yy)/(40*Z))*Math.max(0,1-(hy+90*Z-yy)/(260*Z)),col=p.gold?'255,214,120':'170,255,200',gr=g.createRadialGradient(xx,yy,0,xx,yy,p.s*5);gr.addColorStop(0,`rgba(${col},${.9*a})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(xx-p.s*5,yy-p.s*5,p.s*10,p.s*10)}
+    requestAnimationFrame(step)};requestAnimationFrame(step)}
+function liveStart(src,fb){if(isStill(src))return liveStill(src,fb);const v=liveVid(src);G.lvid=true;G.liveSrc=src;G.liveFb=fb;G.liveT0=performance.now();G.hush=true;G.hushM=true;try{schedule()}catch(e){}
   try{v.currentTime=0}catch(e){}const cf=LIVECFG[src]||{};try{v.preservesPitch=true;v.webkitPreservesPitch=true;v.playbackRate=cf.rate||1}catch(e){}v.style.transition='opacity .6s';v.style.transform='';v.muted=false;v.style.display='block';requestAnimationFrame(()=>{v.style.opacity=1});v.onended=()=>{if(cf.hold)liveHold(v,cf.hold);else liveEnd()};
   // vidéo muette : le son du jeu reste ouvert (sans la musique) et suit l'image
   if(cf.sfx){G.hushM=false;try{schedule()}catch(e){}const Q=cf.sfx.slice(),F={smoke:()=>{SND.whoosh(1);SND.ignite()},roar:()=>{if(!sfxFile('dragon_roar.mp3',1.15)){SND.roar(true);SND.dragon(true)}},thunder:()=>SND.thunder(true),cry:()=>{if(!sfxFile('phenix_cri.mp3',1.1))SND.burst()},cry2:()=>{sfxFile('phenix_cri.mp3',.55)},kirin:()=>SND.kirin(true),glory:()=>SND.glory(),kcri:()=>{if(!sfxFile('kirin_cri.mp3',1))SND.kirin(true)},hooves:()=>{if(!sfxFile('kirin_sabots.mp3',.9))hoovesSynth(4.2)},fwsnd:()=>{},lights:()=>sndLights(),shoot:()=>sndShoot()};(G.pi===7?['phenix_cri.mp3']:G.pi===8?['kirin_cri.mp3','kirin_sabots.mp3']:['dragon_roar.mp3']).forEach(sfxLoad);if(cf.fw){const fw=()=>{if(!G.lvid||G.liveSrc!==src)return;if(v.currentTime>=cf.fw){kfwStart(src);return}requestAnimationFrame(fw)};requestAnimationFrame(fw)}
@@ -3935,7 +3963,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='108';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='109';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
