@@ -2512,7 +2512,7 @@ SPX.tree.draw=((orig)=>(now,k)=>{if(G.lvid||!G.tree)return;return orig(now,k)})(
 /* ----- écrans ----- */
 const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 function showResult(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;if(G.moon)return moonResult();if(G.day)return dayEnd();$('bNext').hidden=false;$('bRetry').textContent='Réessayer';const r=G.res||{stars:0,fid:0,stab:0,total:0};G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;const pi=G.pi;
-  if(G.replay){G.replay=false;showGrim();return}
+  if(G.replay){G.replay=false;if(G.voir){G.voir=false;showMap();return}showGrim();return}
   if(!G.skipped&&G.res){const l=spLvl();if(l>=2){if(!SAVE.seen||typeof SAVE.seen!=='object')SAVE.seen={};SAVE.seen[pi+':'+l]=1}}
   if(r.stars>SAVE.stars[pi])SAVE.stars[pi]=r.stars;
   const b=SAVE.best[pi];let rec=false;
@@ -3113,11 +3113,14 @@ function showGrim(){usePal5(null);G={state:'map',pi:0,strokes:[],moonB:0};buildB
   PAL.slice(0,10).forEach((p,i)=>{if(!p.sig)return;const b=SAVE.best[i];h+=`<div class="gs${b?'':' lock'}"><canvas width="152" height="152" data-th="${i}"></canvas><div><div class="nm">${p.name}</div><div class="rm">${b?'<span class="gold">'+'★'.repeat(b.st)+'☆'.repeat(3-b.st)+'</span> · record '+Math.round(b.t*100)+' %':'Pas encore invoqué'}</div>${b?`<button class="btn mini" data-r="${i}">✦ Relancer le sort</button>`:''}</div></div>`});
   h+='<div style="text-align:center"><button class="link" data-back="1">Retour aux paliers</button></div>';$('grimPanel').innerHTML=h;
   $('grimPanel').querySelectorAll('[data-th]').forEach(c=>thumb(c,+c.dataset.th));$('grim').hidden=false}
+// aperçu d'un sort sans le réussir : adresse du jeu + ?voir=9 (palier) et &etoiles=2 (3 par défaut). Rien n'est enregistré.
+const VOIR=(()=>{try{const q=new URLSearchParams(location.search),v=+q.get('voir');return v>=1&&v<=10?{pi:v-1,st:Math.min(3,Math.max(1,+q.get('etoiles')||3))}:null}catch(e){return null}})();
+function voir(i,st){startPalier(i);G.replay=true;G.voir=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=PAL[i].sig.map(q=>q.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;const v=st===3?.96:st===2?.7:.45;setTimeout(()=>evaluate({st,f:v,s:v,t:v}),700)}
 function replay(i){const b=SAVE.best[i];if(!b)return;startPalier(i);G.replay=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=b.k.map(s=>s.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;setTimeout(()=>evaluate(b),700)}
 $('mapPanel').addEventListener('click',e=>{const c=e.target.closest('[data-p]');if(c){SND.click();startPalier(+c.dataset.p);return}if(e.target.closest('[data-buy]')){SND.click();showBuy();return}if(e.target.closest('[data-unl]')){SND.click();SAVE.allOpen=!SAVE.allOpen;save();showMap();return}if(e.target.closest('[data-g]')){SND.click();showGrim();return}if(e.target.closest('[data-sv]')){SND.click();showSav();return}if(e.target.closest('[data-t]')){SND.click();showTrain();return}if(e.target.closest('[data-du]')){SND.click();showDuel();return}if(e.target.closest('[data-men]')){SND.click();showMen();return}if(e.target.closest('[data-dprev]')){SND.click();startDay(true);return}if(e.target.closest('[data-day]')){SND.click();startDay(false);return}if(e.target.closest('[data-mprev]')){SND.click();startMoon(true);return}if(e.target.closest('[data-moon]')){SND.click();startMoon(false);return}if(e.target.closest('[data-rit]')){SND.click();SAVE.rit=SAVE.rit===false;save();showMap()}});
 $('savPanel').addEventListener('click',savClick);
 $('grimPanel').addEventListener('click',e=>{const tp=e.target.closest('[data-tp]');if(tp){SND.click();startTrain(+tp.dataset.tp);return}const r=e.target.closest('[data-r]');if(r){SND.click();replay(+r.dataset.r);return}if(e.target.closest('[data-back]')){SND.click();showMap()}});
-$('bStart').addEventListener('click',()=>{audioInit();SND.click();showMap()});
+$('bStart').addEventListener('click',()=>{audioInit();SND.click();if(VOIR){voir(VOIR.pi,VOIR.st);return}showMap()});
 $('bRetry').addEventListener('click',()=>{SND.click();if(G.dayRes){startDay(G.dayRes.preview);return}if(G.moonRes){startMoon(G.moonRes.preview);return}startPalier(G.pi)});
 $('bNext').addEventListener('click',()=>{SND.click();if(G.dayRes){saveVideo();return}if(!prem(G.pi+1)){showBuy();return}startPalier(G.pi+1)});$('buyGo').addEventListener('click',()=>{SND.click();doBuy(false)});$('buyRes').addEventListener('click',()=>{SND.click();doBuy(true)});$('buyNo').addEventListener('click',()=>{SND.click();$('buy').hidden=true});
 $('bMap').addEventListener('click',()=>{SND.click();showMap()});
@@ -3930,7 +3933,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='106';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='107';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
