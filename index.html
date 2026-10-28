@@ -1702,7 +1702,7 @@ SPELL_END.dragon=6.3;
 /* ---- Palier VII : décor en prise de vue réelle (vidéo en boucle serre_live.mp4) ---- */
 var BGV={ok:true};
 // paliers en prise de vue réelle : photo de fond (+ vidéo en boucle facultative)
-var REALP={6:{img:'serre_live.jpg',vid:'serre_live.mp4'},7:{img:'grande_live.jpg'},8:{img:'pont_live.jpg'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
+var REALP={5:{img:'tour_live.jpg'},6:{img:'serre_live.jpg',vid:'serre_live.mp4'},7:{img:'grande_live.jpg'},8:{img:'pont_live.jpg'},9:{img:'foret_live.jpg',vid:'foret_live.mp4'}};
 function bgvEl(){rhLoad();const R=REALP[G.pi];if(R.d)return R.d;const d=document.createElement('div');d.className='bgv';d.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none;background:#020806 center/cover no-repeat';
   const im=new Image();im.onload=()=>{R.iok=true;d.style.backgroundImage=`url(${R.img})`};im.onerror=()=>{R.bad=true;BGK=''};im.src=R.img;
   const v=document.createElement('video');v.muted=true;v.loop=true;v.preload='auto';v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('webkit-playsinline','');
