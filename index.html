@@ -231,7 +231,7 @@ const PAL=[
    sig:[circ(0,0,1),[...qb([0,-.72],[-.22,-.36],[-.1,-.22]),...qb([-.1,-.22],[0,-.12],[.1,-.22]).slice(1),...qb([.1,-.22],[.22,-.36],[0,-.72]).slice(1)],
      [[-.8,0],[-.56,-.3],[-.48,-.04],[-.28,-.24],[-.18,.06],[0,.16],[.18,.06],[.28,-.24],[.48,-.04],[.56,-.3],[.8,0]],qb([0,.28],[-.42,.46],[-.16,.78])],
    tip:'Le cercle, la flamme, les ailes, puis la queue.'},
-  {name:'Le Kirin',inc:'Kirin, per nubes, curre !',room:'Le Pont suspendu',prem:1,ink:'#fff3e0',glow:'#ff8ac0',animal:'kirin',tol:1.05,
+  {name:'Le Kirin',inc:'Kirin, per nubes, curre !',room:'Le Pont suspendu',prem:1,ink:'#fff3e0',glow:'#ff8ac0',animal:'kirin',tol:1.05,th3:.67,
    sig:[circ(0,0,1),Array.from({length:37},(_,i)=>{const t=i/36;return[-.62+1.24*t,.42-.16*Math.abs(Math.sin(t*3*Math.PI))]}),[[-.1,.16],[0,-.74],[.1,.16]],circ(0,-.08,.27,40)],
    tip:'Le cercle, le nuage, la corne, puis le soleil.'},
   {name:"L'Arbre-monde",inc:'Arbor mundi, floresce !',room:'Le Cœur de la forêt',prem:1,ink:'#eaffd8',glow:'#9cff6a',animal:'tree',tol:1.08,
@@ -970,7 +970,7 @@ function scoreV2(strokes,pi){SCK._u=pi>=4||!!PAL[pi].u;const sig=PAL[pi].sig,tol
     const MI=sig.map(cinfo);best.pm.forEach((j,i)=>{let pf=1;best.pm.forEach((k,i2)=>{if(i2===i||k===j||!MI[k].round)return;const ex=Math.max(...sig[j].map(q=>Math.hypot(q[0]-MI[k].c[0],q[1]-MI[k].c[1])))/MI[k].r;if(ex>1.03||ex<.88)return;const dk=cinfo(NS[i2]),rp=radProfile(NS[i2],dk.c),pen=Math.max(...NS[i].map(q=>{const dx=q[0]-dk.c[0],dy=q[1]-dk.c[1];return Math.hypot(dx,dy)/rp(Math.atan2(dy,dx))}))-1;pf=Math.min(pf,.35+.65*clamp(1-(pen-SCK.crFree)/(SCK.crZero-SCK.crFree)))});C[i][j].cr=pf;C[i][j].f*=pf});
     const fs=best.pm.map((j,i)=>C[i][j].f),wm=best.sm/w.reduce((a,b)=>a+b,0),mn=Math.min(...fs);mnF=mn;fid=wm*.65+mn*.35;detail=best.pm.map((j,i)=>({m:j,...C[i][j]}))}
   let js=0,jl=0;strokes.forEach(st=>{const l=pathLen(st);js+=jitter(st)*l;jl+=l});const jit=js/(jl||1),stab=clamp(1-(jit-.5)/(1.3*tol));
-  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=SCK.th3?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
+  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=(PAL[pi]&&PAL[pi].th3||SCK.th3)?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
 function evaluate(rb){if(G.state!=='wait')return;let sc=score(G.strokes,G.pi);if(rb)sc=Object.assign(sc,{stars:rb.st,fid:rb.f,stab:rb.s,total:rb.t});const mn=Math.min(W,H*.62)*.24;
   if(!rb&&sc.r<mn){msg('Trace plus grand !',1800);G.strokes=[];G.sinfo=[];inkDirty=true;G.state='draw';return}
   G.rule=null;if(!rb&&!G.duel){try{G.rule=ruleCheck(G.strokes,G.pi,sc)}catch(e){G.rule=null}if(G.rule&&G.rule.broken&&sc.stars===3){sc.stars=2;sc.ruleCap=true}}
@@ -3928,7 +3928,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='104';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='105';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
