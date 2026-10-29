@@ -224,7 +224,7 @@ const PAL=[
   {name:'Le Hibou des étoiles',inc:'Noctua, stellas aperi !',room:"La Tour aux étoiles",prem:1,ink:'#eef2ff',glow:'#8aa8ff',animal:'owl',tol:1.2,
    sig:[circ(0,0,1),[[-.5,-.64],[-.36,-.4],[-.52,-.16],[-.5,.14],[-.34,.36],[0,.46],[.34,.36],[.5,.14],[.52,-.16],[.36,-.4],[.5,-.64],[.2,-.49],[0,-.46],[-.2,-.49],[-.5,-.64]],circ(-.21,-.1,.16,36),circ(.21,-.1,.16,36),qb([-.58,.62],[0,.48],[.58,.62],24)],
    tip:'Le cercle, la tête et ses aigrettes, les deux yeux, puis la branche.'},
-  {name:'Le Dragon de jade',inc:'Draco, pluvia, surge !',room:'La Serre',prem:1,ink:'#dcffe9',glow:'#3ee0a0',animal:'dragon',tol:1.6,
+  {name:'Le Dragon de jade',inc:'Draco, pluvia, surge !',room:'La Serre',prem:1,ink:'#dcffe9',glow:'#3ee0a0',animal:'dragon',tol:1.6,mn2:.55,
    sig:[circ(0,0,1),Array.from({length:41},(_,i)=>{const t=i/40;return[-.66+1.32*t,.04-.32*Math.sin(t*TAU)]}),circ(.36,-.46,.13,32),[[.06,.46],[-.16,.6],[.1,.66],[-.08,.84]]],
    tip:"Le cercle, le corps du dragon, la perle, puis l'éclair."},
   {name:'Le Phénix',inc:'Phoenix, flamma, renascere !',room:'La Grande Salle',prem:1,ink:'#fff0d0',glow:'#ff8a3a',animal:'phoenix',tol:1.13,
@@ -970,7 +970,7 @@ function scoreV2(strokes,pi){SCK._u=pi>=4||!!PAL[pi].u;const sig=PAL[pi].sig,tol
     const MI=sig.map(cinfo);best.pm.forEach((j,i)=>{let pf=1;best.pm.forEach((k,i2)=>{if(i2===i||k===j||!MI[k].round)return;const ex=Math.max(...sig[j].map(q=>Math.hypot(q[0]-MI[k].c[0],q[1]-MI[k].c[1])))/MI[k].r;if(ex>1.03||ex<.88)return;const dk=cinfo(NS[i2]),rp=radProfile(NS[i2],dk.c),pen=Math.max(...NS[i].map(q=>{const dx=q[0]-dk.c[0],dy=q[1]-dk.c[1];return Math.hypot(dx,dy)/rp(Math.atan2(dy,dx))}))-1;pf=Math.min(pf,.35+.65*clamp(1-(pen-SCK.crFree)/(SCK.crZero-SCK.crFree)))});C[i][j].cr=pf;C[i][j].f*=pf});
     const fs=best.pm.map((j,i)=>C[i][j].f),wm=best.sm/w.reduce((a,b)=>a+b,0),mn=Math.min(...fs);mnF=mn;fid=wm*.65+mn*.35;detail=best.pm.map((j,i)=>({m:j,...C[i][j]}))}
   let js=0,jl=0;strokes.forEach(st=>{const l=pathLen(st);js+=jitter(st)*l;jl+=l});const jit=js/(jl||1),stab=clamp(1-(jit-.5)/(1.3*tol));
-  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=(PAL[pi]&&PAL[pi].th3||SCK.th3)?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
+  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=(PAL[pi]&&PAL[pi].th3||SCK.th3)?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(PAL[pi]&&PAL[pi].mn2&&mnF<PAL[pi].mn2)stars=Math.min(stars,1);/* palier VII : un trait raté (éclair droit, perle mal placée…) empêche de passer */if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
 function evaluate(rb){if(G.state!=='wait')return;let sc=score(G.strokes,G.pi);if(rb)sc=Object.assign(sc,{stars:rb.st,fid:rb.f,stab:rb.s,total:rb.t});const mn=Math.min(W,H*.62)*.24;
   if(!rb&&sc.r<mn){msg('Trace plus grand !',1800);G.strokes=[];G.sinfo=[];inkDirty=true;G.state='draw';return}
   G.rule=null;if(!rb&&!G.duel){try{G.rule=ruleCheck(G.strokes,G.pi,sc)}catch(e){G.rule=null}if(G.rule&&G.rule.broken&&sc.stars===3){sc.stars=2;sc.ruleCap=true}}
@@ -1084,7 +1084,7 @@ function update(dt,now){
   if(G.state==='bloom'&&G.gold&&Math.random()<.7){const SC=G.SC;P.push({x:SC.x+rnd(-1,1)*SC.r*.35,y:SC.y,vx:0,vy:-rnd(250,500)*S,l:0,m:rnd(.8,1.4),s:rnd(1.2,2.6),c:'#ffd27a'})}
   if(G.state==='bloom'&&k>(G.gold?2.5:1.35)){if(wandCastOn())castStart(now);else castEnd(now)}
   if(G.state==='cast')castUpd(dt,now);
-  let pdt=dt;if(G.state==='spell'){const ts=G.slow>0?.3:1;G.slow=Math.max(0,(G.slow||0)-dt);pdt=dt*ts;G.sdt=pdt;G.st=(G.st||0)+pdt;sigAdvance(pdt);if(!G.lvid&&G.sk>(G.power<.5?(G.anim==='stag'&&!G.fail?8.2:G.anim==='whale'&&!G.fail?6.4:3.8):G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)+(G.bx||0)))showResult()}
+  let pdt=dt;if(G.state==='spell'){const ts=G.slow>0?.3:1;G.slow=Math.max(0,(G.slow||0)-dt);pdt=dt*ts;G.sdt=pdt;G.st=(G.st||0)+pdt;sigAdvance(pdt);if(!G.lvid&&G.sk>(G.power<.5?(G.anim==='stag'&&!G.fail?8.2:G.anim==='whale'&&!G.fail?6.4:G.anim==='dragon'&&G.jd&&!G.fail?6.6:3.8):G.gold?goldEnd():SPELL_END[G.anim]+(G.jx||0)+(G.bx||0)))showResult()}
   {const wg=G.anim==='whale'&&G.state==='spell',on=G.gold&&(G.state==='bloom'||(G.state==='spell'&&(wg?G.sk>WG.cut&&G.sk<WG.end-2:G.sk<goldEnd()-.8)));G.lb=lerp(G.lb||0,on?1:0,1-Math.pow(.03,dt))}
   if(G.state==='fizzle'&&k>2){if(G.moon)moonRetry();else showResult()}
   if(G.flash)G.flash=Math.max(0,G.flash-dt*2.2);if(G.moonB)G.moonB=Math.max(0,G.moonB-dt*.2);if(G.shake)G.shake=Math.max(0,G.shake-dt*3);if(G.zoom)G.zoom=Math.max(0,G.zoom-dt*1.4);
@@ -2178,17 +2178,17 @@ function jdBuild(){const SC=G.SC,cx=SC.x,cy=SC.y,R=SC.r,K=[],B=G.drBorn;
 function jdP(t){const K=G.jd.K;t=clamp(t,K[0][0],K[K.length-1][0]);let i=0;while(i<K.length-2&&K[i+1][0]<t)i++;
   const p0=K[Math.max(0,i-1)],p1=K[i],p2=K[i+1],p3=K[Math.min(K.length-1,i+2)],u=(t-p1[0])/((p2[0]-p1[0])||1),u2=u*u,u3=u2*u;
   const f=(a,b,c,d)=>.5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u2+(-a+3*b-3*c+d)*u3);return[f(p0[1],p1[1],p2[1],p3[1]),f(p0[2],p1[2],p2[2],p3[2])]}
-function startJade2(pw){G.jd={K:jdBuild(),splash:false,rip:[],flare:0,born:!!G.drBorn};setTimeout(()=>{if(G.state==='spell')SND.dragon(false)},250);
+function startJade2(pw){G.jd={K:jdBuild(),splash:false,rip:[],flare:0,born:!!G.drBorn,lite:pw<.5};setTimeout(()=>{if(G.state==='spell')SND.dragon(false)},250);
   const SC=G.SC,O=G.drBorn?G.drBorn.p:[SC.x,SC.y];for(let i=0;i<(G.drBorn?24:70);i++){const a=rnd(0,TAU),v=rnd(80,320)*S;P.push({x:O[0],y:O[1],vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.6,1.4),s:rnd(1,2.4),c:'#5affc0',g:30})}}
 function jdUpdate(dt){const D=G.jd,t=G.sk,J=G.jx||0;
   if(t<4.85+J){const h=jdP(t);if(Math.random()<.9)for(let i=0;i<3;i++){const b=jdP(t-rnd(0,.9));P.push({x:b[0]+rnd(-6,6)*S,y:b[1]+rnd(-6,6)*S,vx:rnd(-20,20)*S,vy:rnd(10,60)*S,l:0,m:rnd(.6,1.3),s:rnd(.8,1.8),c:Math.random()<.3?'#ffffff':'#5affc0',g:60})}}
   if(!D.splash&&t>=4.85+J){D.splash=true;const pd=cmap(542,1674);SND.close&&SND.close();G.shake=.35;
-    for(let i=0;i<120;i++){const a=rnd(-Math.PI*.95,-Math.PI*.05),v=rnd(120,520)*S;P.push({x:pd[0]+rnd(-40,40)*S,y:pd[1],vx:Math.cos(a)*v*.8,vy:Math.sin(a)*v,l:0,m:rnd(.9,1.8),s:rnd(1.2,2.8),c:Math.random()<.25?'#ffffff':'#5affc0',g:520*S})}
+    for(let i=0;i<(D.lite?60:120);i++){const a=rnd(-Math.PI*.95,-Math.PI*.05),v=rnd(120,520)*S*(D.lite?.75:1);P.push({x:pd[0]+rnd(-40,40)*S,y:pd[1],vx:Math.cos(a)*v*.8,vy:Math.sin(a)*v,l:0,m:rnd(.9,1.8),s:rnd(1.2,2.8),c:Math.random()<.25?'#ffffff':'#5affc0',g:520*S})}
     for(let i=0;i<4;i++)D.rip.push(t+i*.22)}
   D.flare=lerp(D.flare,t>2.4&&t<4.9+J?1:0,1-Math.pow(.05,dt))}
 function drawJade(now,k){const D=G.jd,t=k,J=G.jx||0,N=64,len=1.05,fade=clamp((4.95+J-t)/.25),grow=D.born?.55+.45*ease(clamp(t/.5)):clamp(t/.6);ctx.save();ctx.globalCompositeOperation='lighter';
   // lumière jetée sur le décor : les lanternes s'embrasent, une lueur suit le dragon
-  const L1=cmap(179,842),L2=cmap(898,842);[L1,L2].forEach((L,i)=>{const f=D.flare*(.7+.3*Math.sin(now*.012+i*2));gdraw('#5affc0',L[0],L[1],110*S*L[2]/.4*(.6+.4*f),.55*f);gdraw('#ffffff',L[0],L[1],14*S,.5*f)});
+  const L1=cmap(179,842),L2=cmap(898,842);[L1,L2].forEach((L,i)=>{const f=D.flare*(D.lite?.55:1)*(.7+.3*Math.sin(now*.012+i*2));gdraw('#5affc0',L[0],L[1],110*S*L[2]/.4*(.6+.4*f),.55*f);gdraw('#ffffff',L[0],L[1],14*S,.5*f)});
   if(fade>0&&t<4.95+J){const h=jdP(t),g=ctx.createRadialGradient(h[0],h[1],0,h[0],h[1],260*S);g.addColorStop(0,`rgba(60,255,170,${.16*fade})`);g.addColorStop(1,'rgba(60,255,170,0)');ctx.fillStyle=g;ctx.fillRect(h[0]-260*S,h[1]-260*S,520*S,520*S)}
   // l'étang s'illumine après la plongée
   if(D.splash){const pd=cmap(542,1674),q=clamp(1-(t-4.85-J)/1.6);const g=ctx.createRadialGradient(pd[0],pd[1],0,pd[0],pd[1],230*S);g.addColorStop(0,`rgba(90,255,190,${.45*q})`);g.addColorStop(1,'rgba(90,255,190,0)');ctx.fillStyle=g;ctx.save();ctx.translate(pd[0],pd[1]);ctx.scale(1,.32);ctx.translate(-pd[0],-pd[1]);ctx.fillRect(pd[0]-230*S,pd[1]-230*S,460*S,460*S);ctx.restore();
@@ -2196,7 +2196,7 @@ function drawJade(now,k){const D=G.jd,t=k,J=G.jx||0,N=64,len=1.05,fade=clamp((4.
   if(fade<=0||t<(D.born?0:.02)){ctx.restore();return}
   // corps : ruban de lumière qui s'affine vers la queue
   const pts=[];for(let i=0;i<N;i++){const s=i/(N-1),tt=t-s*len*(D.born?1:grow);pts.push(jdP(tt))}
-  const wd=i=>{const s=i/(N-1);return (18*S)*Math.pow(1-s,.7)*(s<.08?.55+5.6*s:1)*(.9+.1*Math.sin(now*.01-i*.5))};
+  const wd=i=>{const s=i/(N-1);return (18*S*(D.lite?.72:1))*Math.pow(1-s,.7)*(s<.08?.55+5.6*s:1)*(.9+.1*Math.sin(now*.01-i*.5))};
   for(let i=N-1;i>=0;i-=2)gdraw('#3effa8',pts[i][0],pts[i][1],wd(i)*3.2,.22*fade);
   for(let pass=0;pass<2;pass++){ctx.strokeStyle=pass?`rgba(235,255,245,${.85*fade})`:`rgba(80,255,180,${.55*fade})`;ctx.lineCap='round';
     for(let i=1;i<N;i++){ctx.lineWidth=wd(i)*(pass?.42:1.25);ctx.beginPath();ctx.moveTo(pts[i-1][0],pts[i-1][1]);ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke()}}
@@ -2215,7 +2215,7 @@ function drawJade(now,k){const D=G.jd,t=k,J=G.jx||0,N=64,len=1.05,fade=clamp((4.
   ctx.strokeStyle=`rgba(230,255,240,${.85*fade})`;ctx.lineWidth=2.2*S;[-1,1].forEach(sd=>{ctx.beginPath();ctx.moveTo(-hs*.3,sd*hs*.4);ctx.quadraticCurveTo(-hs*1.3,sd*hs*1.4,-hs*2.3,sd*hs*1.1);ctx.stroke()});
   ctx.lineWidth=1.3*S;[-1,1].forEach(sd=>{ctx.beginPath();ctx.moveTo(hs*1.6,sd*hs*.25);for(let j=1;j<=8;j++){const x=hs*1.6-j*hs*.55,y=sd*(hs*.3+j*hs*.18)+Math.sin(now*.008+j*.9+sd)*hs*.35;ctx.lineTo(x,y)}ctx.stroke()});
   gdraw('#ffffff',hs*.55,-hs*.2,hs*.7,.9*fade);ctx.restore();ctx.restore()}
-SPX.dragon.start=((orig)=>(gold,pw)=>{if(!gold&&pw>=.5&&real6()&&!liveSrc(2)){startJade2(pw);return}orig(gold,pw)})(SPX.dragon.start);
+SPX.dragon.start=((orig)=>(gold,pw)=>{if(!gold&&real6()&&(pw<.5||!liveSrc(2))){startJade2(pw);return}orig(gold,pw)})(SPX.dragon.start);/* 1★ : Esprit de jade modeste (demande de Jimmy 29 oct.) */
 SPX.dragon.update=((orig)=>(dt,now)=>{if(G.jd){jdUpdate(dt);return}orig(dt,now)})(SPX.dragon.update);
 SPX.dragon.draw=((orig)=>(now,k)=>{if(G.jd)return drawJade(now,k);return orig(now,k)})(SPX.dragon.draw);
 
