@@ -1869,7 +1869,8 @@ SIG.wolf={init(X,g){X.hw=[];X.nh=0;X.gw=[];X.mt=[];X.wind=0;X.fg=0;X.fr=[];const
       if(g&&X.k>=1){const e=X.on?ease(clamp(X.u/.3)):X.rel;ctx.strokeStyle=hexA('#ffffff',.85*e*I);ctx.lineWidth=3*S;ctx.beginPath();ctx.arc(M[0],M[1],mr*1.02,0,TAU);ctx.stroke();gdraw('#c9a8ff',M[0],M[1],mr*3.2,.5*e*I);const ba=st*.6;gdraw('#ffffff',M[0]+Math.cos(ba)*mr,M[1]+Math.sin(ba)*mr,mr*.9,.9*e*I);
         // rideaux d'aurore violette
         const gr=ctx.createLinearGradient(0,0,0,H*.42);gr.addColorStop(0,hexA('#7a5cff',.0));gr.addColorStop(.35,hexA('#b06aff',.16*I*e));gr.addColorStop(.75,hexA('#5affc8',.1*I*e));gr.addColorStop(1,'rgba(90,255,200,0)');ctx.fillStyle=gr;
-        for(let i=0;i<56;i++){const x=i/56*W,h=H*(.24+.12*Math.sin(i*.31+st*.9)+.05*Math.sin(i*.13-st*1.7)),top=H*(.03+.04*Math.sin(i*.2+st*.5));ctx.globalAlpha=.6+.4*Math.sin(i*.7+st*2);ctx.fillRect(x,top,W/56+1,h)}ctx.globalAlpha=1}
+        /* aurore retirée du 3★ (demande de Jimmy 29 oct.) */
+        for(let i=0;i<0;i++){const x=i/56*W,h=H*(.24+.12*Math.sin(i*.31+st*.9)+.05*Math.sin(i*.13-st*1.7)),top=H*(.03+.04*Math.sin(i*.2+st*.5));ctx.globalAlpha=.6+.4*Math.sin(i*.7+st*2);ctx.fillRect(x,top,W/56+1,h)}ctx.globalAlpha=1}
       // givre qui monte du sol
       const fg=X.fg*I;if(fg>.02)for(const segs of X.fr)for(const s of segs){const f=clamp((fg-s[4]*.7)/.35);if(f<=0)continue;ctx.strokeStyle=hexA('#e6dcff',.55*fg);ctx.lineWidth=(s[4]?1:1.8)*S;ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(lerp(s[0],s[2],f),lerp(s[1],s[3],f));ctx.stroke();if(!s[4])gdraw('#c9b8ff',lerp(s[0],s[2],f),lerp(s[1],s[3],f),8*S,.5*fg)}
       return}
