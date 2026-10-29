@@ -1522,10 +1522,10 @@ function runeRings(x0,y0,r0,now,a,cnt){ctx.save();ctx.globalCompositeOperation='
     if(i%3===0)ctx.arc(0,0,4*u,0,TAU);else if(i%3===1){ctx.moveTo(-5*u,0);ctx.lineTo(5*u,0);ctx.moveTo(0,-4*u);ctx.lineTo(0,4*u)}else{ctx.moveTo(-4*u,-4*u);ctx.lineTo(0,4*u);ctx.lineTo(4*u,-4*u)}ctx.stroke();ctx.restore()}}ctx.restore()}
 function drawLegendBack(now,b,sk,SC){const inB=G.state==='bloom',end=SPELL_END[G.anim]+2;
   const dk=inB?.55*b:.55*clamp(1-(sk-.3)/1.4);if(dk>0){ctx.fillStyle=`rgba(2,1,8,${dk})`;ctx.fillRect(-20,-20,W+40,H+40)}
-  if(!inB&&G.anim!=='stag'&&G.anim!=='fox'&&G.anim!=='wolf'){const a=clamp(sk/1.2)*clamp((end-sk)/1.2);if(a>0)aurora(now,a)}
-  const pa=inB?ease(clamp((b-.15)/.6)):clamp(1-sk/1.4);if(pa>0&&!(G.anim==='wolf'&&!inB))pillar(SC.x,SC.y,SC.r*(.16+.2*pa),pa);
+  if(!inB&&G.anim!=='stag'&&G.anim!=='fox'&&G.anim!=='wolf'&&G.anim!=='birds'){const a=clamp(sk/1.2)*clamp((end-sk)/1.2);if(a>0)aurora(now,a)}
+  const pa=inB?ease(clamp((b-.15)/.6)):clamp(1-sk/1.4);if(pa>0&&!((G.anim==='wolf'||G.anim==='birds')&&!inB))pillar(SC.x,SC.y,SC.r*(.16+.2*pa),pa);
   const ra=inB?clamp(b/.7):clamp(1-sk/.8);if(ra>0)runeRings(SC.x,SC.y,SC.r,now,ra,3);
-  if(!inB&&G.ap&&G.anim!=='stag'&&G.anim!=='fox'&&G.anim!=='wolf'){const a=clamp(sk/.6)*clamp((end-1.5-sk)/1);if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';const n=14,[x,y]=G.ap;for(let i=0;i<n;i++){const an=i/n*TAU+now*.00045,l=SC.r*3*(G.asc||1),gr=ctx.createLinearGradient(x,y,x+Math.cos(an)*l,y+Math.sin(an)*l);gr.addColorStop(0,hexA('#ffd27a',.3*a));gr.addColorStop(1,'rgba(255,210,122,0)');ctx.strokeStyle=gr;ctx.lineWidth=(8+10*(i%2))*S;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(an)*l,y+Math.sin(an)*l);ctx.stroke()}ctx.restore()}}}
+  if(!inB&&G.ap&&G.anim!=='stag'&&G.anim!=='fox'&&G.anim!=='wolf'&&G.anim!=='birds'){const a=clamp(sk/.6)*clamp((end-1.5-sk)/1);if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';const n=14,[x,y]=G.ap;for(let i=0;i<n;i++){const an=i/n*TAU+now*.00045,l=SC.r*3*(G.asc||1),gr=ctx.createLinearGradient(x,y,x+Math.cos(an)*l,y+Math.sin(an)*l);gr.addColorStop(0,hexA('#ffd27a',.3*a));gr.addColorStop(1,'rgba(255,210,122,0)');ctx.strokeStyle=gr;ctx.lineWidth=(8+10*(i%2))*S;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(an)*l,y+Math.sin(an)*l);ctx.stroke()}ctx.restore()}}}
 function drawLegendFront(now,k,END){const fade=clamp((END-k)/1);
   if(G.anim==='birds'){const a=clamp((k-2)/.6)*clamp((4.3-k)/.4);if(a>0){const fl=Math.sin(k*3.6),sc=W*.46;BIGBIRD.forEach(l=>inkStroke(l.map(([x,y])=>[W/2+x*sc,H*.33+(y-Math.abs(x)*.28*fl)*sc]),'#ffffff','#ffd27a',a*.55,1,1.5))}}
   if(G.anim==='stag'){for(const v of VINES){const g=ease(clamp((k-v.t0)/1.1)),a=fade;if(a<=0||g<=0)continue;const pts=[];for(let i=0;i<=22;i++){const t=i/22*g;pts.push([v.x+Math.sin(t*9+v.ph)*14*S*v.sd*t,v.y-v.h*t])}
@@ -1829,14 +1829,14 @@ SIG.birds={init(X,g){const n=g?8:5,cs=['#ffd27a','#ffb347','#fff3c8','#ffe0a0','
     if(X.on){FL.forEach(f=>f.fl=Math.max(f.fl||0,.5+.6*X.u));if(A&&G.st>X.nc){X.nc=G.st+rnd(.3,.75);try{chirp(at(),.9,A.music)}catch(e){}}}
     if(g&&Math.random()<(X.on?.6:.25)*X.I)sgAdd(X,{k:'fe',z:1,x:rnd(0,W),y:-10,vx:rnd(-15,15),vy:rnd(40,80)*S,l:0,m:rnd(4,6),s:rnd(.8,1.3)*S,a:rnd(0,TAU),va:rnd(-1.5,1.5),sw:30*S,sf:1.8,ph:rnd(0,TAU),c:'#ffd27a'})},
   draw(X,now,L){const I=X.I,g=G.gold;
-    if(L==='back'){if(g){// grandes ailes de lumière portées par la nuée
+    if(L==='back'){if(g){const I=X.I*.4;/* 3★ : ailes de lumière et rayons de fenêtre adoucis pour que l'oiseau se lise (demande de Jimmy 29 oct.) */// grandes ailes de lumière portées par la nuée
         const fc=[W/2+G.bfx,H*.33+G.bfy],fl=Math.sin(G.st*3.6),sp=W*.44*G.bfs;for(const sd of [1,-1])for(let j=0;j<9;j++){const an=-.12-j*.1-fl*.42,dx=Math.cos(an)*sd,dy=Math.sin(an),L2=sp*(1-j*.055),sx=fc[0]+sd*W*.03,sy=fc[1]+4*S,ex=sx+dx*L2,ey=sy+dy*L2+j*6*S,cx=sx+dx*L2*.5-dy*sd*L2*.1*0,cy=sy+dy*L2*.5-L2*.1;
           ctx.strokeStyle=hexA('#ffb347',.16*I);ctx.lineWidth=(10-j*.7)*S;ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo(cx,cy,ex,ey);ctx.stroke();ctx.strokeStyle=hexA('#fff3c8',.32*I);ctx.lineWidth=1.4*S;ctx.stroke();gdraw('#ffd27a',ex,ey,16*S,.5*I)}
         const wn=BGD.win||[W/2,H*.25];for(let i=0;i<7;i++){const a=Math.PI*.35+i*.09+Math.sin(G.st*.4+i)*.04,l=H*.9,gr=ctx.createLinearGradient(wn[0],wn[1],wn[0]+Math.cos(a)*l,wn[1]+Math.sin(a)*l);gr.addColorStop(0,hexA('#ffe6a8',.16*I));gr.addColorStop(1,'rgba(255,230,168,0)');ctx.strokeStyle=gr;ctx.lineWidth=(18+i%3*12)*S;ctx.beginPath();ctx.moveTo(wn[0],wn[1]);ctx.lineTo(wn[0]+Math.cos(a)*l,wn[1]+Math.sin(a)*l);ctx.stroke()}}
       return}
-    for(const r of X.rb){sgTrail(r.h,r.c,16*S,.2*I);sgTrail(r.h,r.c,6*S,.45*I);sgTrail(r.h,'#ffffff',2.4*S,.8*I);if(r.h[0]){gdraw(r.c,r.h[0][0],r.h[0][1],28*S,.8*I);gdraw('#ffffff',r.h[0][0],r.h[0][1],5*S,I)}}
+    {const J=I*(g?.4:1);for(const r of X.rb){sgTrail(r.h,r.c,16*S,.2*J);sgTrail(r.h,r.c,6*S,.45*J);sgTrail(r.h,'#ffffff',2.4*S,.8*J);if(r.h[0]){gdraw(r.c,r.h[0][0],r.h[0][1],28*S,.8*J);gdraw('#ffffff',r.h[0][0],r.h[0][1],5*S,J)}}}
     for(const f of X.vf){const al=clamp(f.l/.4)*clamp((f.m-f.l)/.8)*I;sgFeather(f.x,f.yy,f.a,f.s,f.c,al)}
-    if(X.cv>.05&&X.c){gdraw('#ffd27a',X.c[0],X.c[1],W*.3*X.cv,.35*X.cv*I);gdraw('#ffffff',X.c[0],X.c[1],40*S*X.cv,.6*X.cv*I)}}};
+    if(X.cv>.05&&X.c){const K=g?.3:1;gdraw('#ffd27a',X.c[0],X.c[1],W*.3*X.cv,.35*X.cv*I*K);gdraw('#ffffff',X.c[0],X.c[1],40*S*X.cv,.6*X.cv*I*K)}}};
 /* ---------- II · Le Cerf de lune : le patronus d'argent ---------- */
 function sgTree(g){const tips=[[2,4],[4,3],[6,4],[3,2],[7,2]],segs=[],md=g?5:4,len0=H*(g?.072:.065);
   const grow=(x,y,a,l,d,t0)=>{const x1=x+Math.cos(a)*l,y1=y+Math.sin(a)*l,du=1/(md+1);segs.push({x0:x,y0:y,x1,y1,t0,t1:t0+du*rnd(.8,1.1),d});if(d<md){const n=d===0&&g?3:2;for(let i=0;i<n;i++){const na=lerp(a+(i-(n-1)/2)*rnd(.5,.8)+rnd(-.15,.15),-Math.PI/2,.12);grow(x1,y1,na,l*rnd(.62,.78),d+1,t0+du)}}};
