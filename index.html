@@ -170,6 +170,7 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
   <p id="rMsg"></p>
   <div class="btns"><button class="btn sec" id="bRetry">Réessayer</button><button class="btn" id="bNext">Palier suivant</button></div>
   <button class="btn sec mini" id="bCard" hidden style="margin-top:12px">📜 Ma carte de résultat</button>
+  <button class="btn sec mini" id="bVid" hidden style="margin-top:8px">🎬 Partager la vidéo du sort</button>
   <button class="link" id="bMap">Tous les paliers</button>
 </div></div>
 
@@ -984,7 +985,8 @@ function evaluate(rb){if(G.state!=='wait')return;let sc=score(G.strokes,G.pi);if
   if(G.moon){moonAfterEval(sc);return}
   if(G.gold&&!rb&&!G.replay&&SAVE.rit!==false&&PAL[G.pi].inc){startIncant();return}
   goCharge()}
-function goCharge(){G.state='charge';G.t0=performance.now();G.spT0=G.t0;SFX.list=[];SFX.on=!(G.day||G.moon||G.duel||G.train);if(G.fail)SND.dud();else SND.ignite()}
+function shareRecOn(){return !(G.day||G.moon||G.duel||G.train||G.ff||G.replay||G.fail||G.el)}
+function goCharge(){G.state='charge';G.t0=performance.now();G.spT0=G.t0;SFX.list=[];SFX.on=!(G.day||G.moon||G.duel||G.train);G.vidRes=null;G.shHold=false;if(shareRecOn())recStart();if(G.fail)SND.dud();else SND.ignite()}
 
 // ——— Incantation (mode rituel) ———
 const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;let REC=null,incTry=0;const IN_FRAME=(()=>{try{return window.top!==window.self}catch(e){return true}})();let srDead=!SRC||IN_FRAME;
@@ -1065,7 +1067,7 @@ function drawAnimal(lines,rev,a,col,gc){const sl=lines.map(l=>l.map(([x,y])=>ani
 
 /* ----- boucle ----- */
 let last=performance.now();
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);if(G.state==='pcard'||G.state==='pwait')drawShareCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
 const SPELL_END={spirit:8.5,lune:12,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
 function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?12.4:G.anim==='fox'?11.9:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
 function update(dt,now){
@@ -1077,6 +1079,7 @@ function update(dt,now){
   if(G.state==='duSeal'&&k>1.7){duNext();return}
   if(G.state==='mseal'&&k>2.2)moonNext();
   if(G.state==='dcard'&&k>2.8){G.state='dwait';recStop(dayResult)}
+  if(G.state==='pcard'&&k>2.8){G.state='pwait';const R=RECV;recStop(()=>{G.vidRes=R&&R.blob?{blob:R.blob,ext:R.ext}:null;if(G.state==='pwait'){G.state='spell';showResult0()}})}
   if(G.state==='intro'&&!G.rck){G.rck=1;if(ruleCardNeeded())showRuleCard()}
   if(G.state==='intro'&&k>introT()){G.state='draw';msg(PAL[G.pi].tip,2600)}
   if(G.state==='charge'){if(G.fail&&k>1.1){G.state='fizzle';G.t0=now;SND.fizzle();G.cs.forEach(c=>{for(let i=0;i<c.p.length;i+=6)P.push({x:c.p[i][0],y:c.p[i][1],vx:rnd(-20,20),vy:rnd(-60,-10),l:0,m:rnd(.8,1.6),s:rnd(4,9),c:'#6a6070',smoke:1})})}
@@ -2609,7 +2612,9 @@ SPX.tree.draw=((orig)=>(now,k)=>{if(G.lvid||!G.tree)return;return orig(now,k)})(
 
 /* ----- écrans ----- */
 const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
-function showResult(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;if(G.moon)return moonResult();if(G.day)return dayEnd();$('bNext').hidden=false;$('bRetry').textContent='Réessayer';const r=G.res||{stars:0,fid:0,stab:0,total:0};G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;const pi=G.pi;
+function shHook(){if(!RECV||G.shHold||!shareRecOn()||G.state==='pcard'||G.state==='pwait')return false;G.shHold=true;G.state='pcard';G.t0=performance.now();$('quit').hidden=true;$('redo').hidden=true;G.hush=false;G.hushM=false;SND.star(2);return true}
+function showResult(){if(shHook())return;showResult0()}
+function showResult0(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;$('bVid').hidden=true;if(G.moon)return moonResult();if(G.day)return dayEnd();$('bNext').hidden=false;$('bRetry').textContent='Réessayer';const r=G.res||{stars:0,fid:0,stab:0,total:0};G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;const pi=G.pi;
   if(G.replay){G.replay=false;if(G.voir){G.voir=false;showMap();return}showGrim();return}
   if(!G.skipped&&G.res){const l=spLvl();if(l>=2){if(!SAVE.seen||typeof SAVE.seen!=='object')SAVE.seen={};SAVE.seen[pi+':'+l]=1}}
   if(r.stars>SAVE.stars[pi])SAVE.stars[pi]=r.stars;
@@ -2623,7 +2628,7 @@ function showResult(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;if(G.moon)
   {const box=$('rDiag');let dg=null;try{dg=diagSeal(G.strokes,pi,G.res)}catch(e){}box.hidden=!dg;if(dg){const st=dg.strong,full=st&&/^(Excellent|Toutes|Ta main)/.test(st);
     $('rStrong').innerHTML=st?'<span class="lb">'+(full?'Bilan':'Point fort')+'</span>'+duEsc(st):'';$('rFix').innerHTML=dg.main?'<span class="lb">À revoir</span>'+duEsc(dg.main.msg):'';try{diagThumb($('rTh'),G.strokes,pi,dg)}catch(e){box.hidden=true}}}
   if(G.rule&&G.rule.broken){$('rFix').innerHTML='<span class="lb">Rituel</span>'+duEsc(G.rule.msgs[0]);$('rDiag').hidden=false}
-  G.cardRec=rec;$('bCard').hidden=!(r.stars>=1);
+  G.cardRec=rec;$('bCard').hidden=!(r.stars>=1);{const vb=$('bVid');vb.hidden=!(G.vidRes&&G.vidRes.blob&&r.stars>=1);vb.textContent='🎬 Partager la vidéo du sort'}
   if(r.ruleCap)$('rMsg').textContent='Le rituel n’a pas été respecté : 2 étoiles au maximum. Respecte-le pour le sort légendaire.';
   const sp=[...$('rStars').children];sp.forEach(s=>s.className='');sp.forEach((s,i)=>setTimeout(()=>{s.className=i<r.stars?'on':'off';if(i<r.stars)SND.star(i)},350+i*380));
   const nx=$('bNext');nx.disabled=!(SAVE.stars[pi]>=2);nx.textContent=pi<PAL.length-1?'Palier suivant':'Grimoire accompli ✦';if(pi>=PAL.length-1)nx.disabled=true;if(!nx.disabled&&!prem(pi+1))nx.textContent='Débloquer le Grand Grimoire · 4,99 €';
@@ -2930,6 +2935,19 @@ function drawDayCard(now){const k=G.state==='dcard'?clamp((now-G.t0)/1000/.6):1,
   ctx.font=`${Math.round(46*S)}px serif`;for(let i=0;i<3;i++){const on=i<r.stars;ctx.fillStyle=on?'#ffd27a':'rgba(255,255,255,.18)';ctx.shadowColor='rgba(255,200,90,.9)';ctx.shadowBlur=on?16*S:0;ctx.fillText('★',cx+(i-1)*50*S,cy+R+62*S)}ctx.shadowBlur=0;
   ctx.fillStyle='#ffffff';ctx.font=`700 ${Math.round(40*S)}px "Cinzel Decorative",serif`;ctx.fillText(Math.round(r.total*100)+' %',cx,cy+R+112*S);
   ctx.fillStyle='rgba(243,230,200,.75)';ctx.font=`italic 600 ${Math.round(18*S)}px "Cormorant Garamond",serif`;ctx.fillText((r.stars>=2?'a invoqué '+G.day.cre.nm+(r.stars===3?' dorée':''):'')+' · Bats mon score ✦',cx,cy+R+146*S);ctx.restore()}
+function drawShareCard(now){const k=G.state==='pcard'?clamp((now-G.t0)/1000/.6):1,r=G.res||{stars:0,total:0},pl=PAL[G.pi];ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=k;
+  ctx.fillStyle='rgba(6,4,14,.74)';ctx.fillRect(0,0,W,H);const cx=W/2,cy=H*.42,R=Math.min(W*.24,H*.13);ctx.textAlign='center';
+  ctx.fillStyle='#ffd27a';ctx.font=`700 ${Math.round(30*S)}px "Cinzel Decorative",serif`;ctx.shadowColor='rgba(255,190,90,.7)';ctx.shadowBlur=18*S;ctx.fillText('Encrelune',cx,H*.16);ctx.shadowBlur=0;
+  ctx.fillStyle='#f3e6c8';ctx.font=`italic 600 ${Math.round(19*S)}px "Cormorant Garamond",serif`;ctx.fillText(pl.name,cx,H*.16+30*S);
+  if(r.r&&G.strokes.length)G.strokes.forEach(st=>inkStroke(st.map(([x,y])=>[cx+(x-r.cx)/r.r*R,cy+(y-r.cy)/r.r*R]),pl.ink,pl.glow,k,.2,.8));
+  ctx.font=`${Math.round(46*S)}px serif`;for(let i=0;i<3;i++){const on=i<r.stars;ctx.fillStyle=on?'#ffd27a':'rgba(255,255,255,.18)';ctx.shadowColor='rgba(255,200,90,.9)';ctx.shadowBlur=on?16*S:0;ctx.fillText('★',cx+(i-1)*50*S,cy+R+62*S)}ctx.shadowBlur=0;
+  ctx.fillStyle='#ffffff';ctx.font=`700 ${Math.round(40*S)}px "Cinzel Decorative",serif`;ctx.fillText(Math.round(r.total*100)+' %',cx,cy+R+112*S);
+  ctx.fillStyle='rgba(243,230,200,.8)';ctx.font=`italic 600 ${Math.round(18*S)}px "Cormorant Garamond",serif`;ctx.fillText('Peux-tu faire mieux ? Trace ton sceau ✦',cx,cy+R+146*S);ctx.restore()}
+async function vidShare(){const v=G.vidRes;if(!v||!v.blob)return;const b=$('bVid'),pl=PAL[G.pi],st=(G.res&&G.res.stars)||0,fn=`encrelune-palier-${G.pi+1}-${st}etoiles.${v.ext}`,say=t=>{b.textContent=t;setTimeout(()=>{if(!b.hidden)b.textContent='🎬 Partager la vidéo du sort'},2600)};
+  try{const file=new File([v.blob],fn,{type:v.blob.type||('video/'+v.ext)});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Encrelune',text:`${pl.name} · ${'★'.repeat(st)} · Encrelune`});say('Vidéo partagée ✓');return}}catch(e){if(e&&e.name==='AbortError')return}
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:v.blob});say('Vidéo enregistrée ✓')}catch(e){if(!e||e.code!=='declined')say('Impossible ici')}return}
+  try{const u=URL.createObjectURL(v.blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),6e4);say('Vidéo téléchargée ✓')}catch(e){say('Impossible ici')}}
 // enregistrement vidéo du sort
 let RECV=null;
 function recStart(){RECV=null;try{if(!window.MediaRecorder||!cv.captureStream)return;const w=720,h=Math.round(720*H/W/2)*2,rc=document.createElement('canvas');rc.width=w;rc.height=h;const rx=rc.getContext('2d'),vs=rc.captureStream(30),tr=[...vs.getVideoTracks()];let d=null;
@@ -2937,7 +2955,8 @@ function recStart(){RECV=null;try{if(!window.MediaRecorder||!cv.captureStream)re
   const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
   const mr=new MediaRecorder(new MediaStream(tr),mt?{mimeType:mt,videoBitsPerSecond:5e6}:undefined),ch=[];const R={mr,rc,rx,d,ch,blob:null,ext:((mr.mimeType||mt||'')+'').includes('mp4')?'mp4':'webm'};
   mr.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};mr.onstop=()=>{if(ch.length)R.blob=new Blob(ch,{type:mr.mimeType||mt||'video/webm'});const cb=R.done;R.done=null;cb&&cb()};mr.start(1000);RECV=R}catch(e){console.warn('rec',e);RECV=null}}
-function recFrame(){if(RECV&&RECV.mr.state==='recording')try{RECV.rx.drawImage(cv,0,0,RECV.rc.width,RECV.rc.height)}catch(e){}}
+function recFrame(){if(RECV&&RECV.mr.state==='recording')try{const R=RECV,w=R.rc.width,h=R.rc.height;R.rx.drawImage(cv,0,0,w,h);
+  if(G.lvid&&G.liveSrc&&LIVE&&LIVE.v[G.liveSrc]){const v=LIVE.v[G.liveSrc];if(v.readyState>=2&&v.videoWidth&&v.currentTime>.05){const a=clamp((performance.now()-G.liveT0)/600),vw=v.videoWidth,vh=v.videoHeight,q=Math.max(w/vw,h/vh);R.rx.save();R.rx.globalAlpha=a;R.rx.drawImage(v,(vw-w/q)/2,(vh-h/q)/2,w/q,h/q,0,0,w,h);R.rx.restore()}}}catch(e){}}
 function recStop(cb){const R=RECV;if(!R||R.mr.state==='inactive'){cb&&cb();return}let fired=false;const f=()=>{if(fired)return;fired=true;cb&&cb()};R.done=f;try{R.mr.stop()}catch(e){f()}setTimeout(f,2500);try{A.master.disconnect(R.d)}catch(e){}}
 function recAbort(){const R=RECV;RECV=null;if(R){R.done=null;try{R.mr.stop()}catch(e){}try{A.master.disconnect(R.d)}catch(e){}}}
 async function saveVideo(){const v=G.dayRes&&G.dayRes.blob;if(!v)return;const fn=`encrelune-${G.dayRes.key}.${G.dayRes.ext}`;let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){}
@@ -3248,7 +3267,7 @@ $('bStart').addEventListener('click',()=>{audioInit();SND.click();if(VOIR){voir(
 $('bRetry').addEventListener('click',()=>{SND.click();if(G.dayRes){startDay(G.dayRes.preview);return}if(G.moonRes){startMoon(G.moonRes.preview);return}startPalier(G.pi)});
 $('bNext').addEventListener('click',()=>{SND.click();if(G.dayRes){saveVideo();return}if(!prem(G.pi+1)){showBuy();return}startPalier(G.pi+1)});$('buyGo').addEventListener('click',()=>{SND.click();doBuy(false)});$('buyRes').addEventListener('click',()=>{SND.click();doBuy(true)});$('buyNo').addEventListener('click',()=>{SND.click();$('buy').hidden=true});
 $('bMap').addEventListener('click',()=>{SND.click();showMap()});
-$('bCard').addEventListener('click',()=>{SND.click();showCard()});
+$('bCard').addEventListener('click',()=>{SND.click();showCard()});$('bVid').addEventListener('click',()=>{SND.click();vidShare()});
 $('cardSave').addEventListener('click',()=>{SND.click();saveCard()});
 $('cardClose').addEventListener('click',()=>{SND.click();$('card').hidden=true});
 $('card').addEventListener('click',e=>{const b=e.target.closest('[data-cf]');if(b){SND.click();showCard(b.dataset.cf)}});
