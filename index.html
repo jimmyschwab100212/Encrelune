@@ -753,7 +753,7 @@ function drawAmbient(t,dt){ctx.save();ctx.globalCompositeOperation='lighter';
     if(BGD.plat){const [px,py,rx,ry]=BGD.plat;for(let i=0;i<5;i++){const a=t*.0004*(i%2?-1:1)+i*1.26,k=[1,.78,.56,.78,1][i];gdraw(i%2?'#ffd27a':'#7af0ff',px+Math.cos(a)*rx*k,py+Math.sin(a)*ry*k,7*S,.8)}}
     if(BGD.ringP){const [x,y,r]=BGD.ringP;gdraw('#ffd8b0',x,y,r*2.6,.08+.04*Math.sin(t*.001))}}
   if(G.pi!==2)for(const m of MOTES){m.y-=m.v*dt;m.x+=Math.sin(t*.0005+m.ph)*.2;if(m.y<0){m.y=H;m.x=Math.random()*W}ctx.fillStyle=`rgba(255,220,170,${.12+.1*Math.sin(t*.002+m.ph)})`;ctx.fillRect(m.x,m.y,1.4,1.4)}
-  if(BGD.moon&&G.moonB>0){const [mx,my,mr]=BGD.moon;gdraw('#dfe8ff',mx,my,mr*7,G.moonB*.8)}
+  if(BGD.moon&&G.moonB>0){const [mx,my,mr]=BGD.moon;gdraw('#dfe8ff',mx,my,mr*(G.anim==='wolf'&&G.gold?3:7),G.moonB*(G.anim==='wolf'&&G.gold?.12:.8))}
   ctx.restore()}
 
 /* ================= MAINS ================= */
