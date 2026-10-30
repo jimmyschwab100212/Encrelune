@@ -171,6 +171,7 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
   <div class="btns"><button class="btn sec" id="bRetry">Réessayer</button><button class="btn" id="bNext">Palier suivant</button></div>
   <button class="btn sec mini" id="bCard" hidden style="margin-top:12px">📜 Ma carte de résultat</button>
   <button class="btn sec mini" id="bVid" hidden style="margin-top:8px">🎬 Partager la vidéo du sort</button>
+  <button class="btn sec mini" id="bDef" hidden style="margin-top:8px">⚔️ Défier un ami</button>
   <button class="link" id="bMap">Tous les paliers</button>
 </div></div>
 
@@ -1081,7 +1082,7 @@ function update(dt,now){
   if(G.state==='dcard'&&k>2.8){G.state='dwait';recStop(dayResult)}
   if(G.state==='pcard'&&k>2.8){G.state='pwait';const R=RECV;recStop(()=>{G.vidRes=R&&R.blob?{blob:R.blob,ext:R.ext}:null;if(G.state==='pwait'){G.state='spell';showResult0()}})}
   if(G.state==='intro'&&!G.rck){G.rck=1;if(ruleCardNeeded())showRuleCard()}
-  if(G.state==='intro'&&k>introT()){G.state='draw';msg(PAL[G.pi].tip,2600)}
+  if(G.state==='intro'&&k>introT()){G.state='draw';const d=defOn(G.pi);msg(d?`Défi d’un ami : fais plus de ${d.score} % !`:PAL[G.pi].tip,d?3800:2600)}
   if(G.state==='charge'){if(G.fail&&k>1.1){G.state='fizzle';G.t0=now;SND.fizzle();G.cs.forEach(c=>{for(let i=0;i<c.p.length;i+=6)P.push({x:c.p[i][0],y:c.p[i][1],vx:rnd(-20,20),vy:rnd(-60,-10),l:0,m:rnd(.8,1.6),s:rnd(4,9),c:'#6a6070',smoke:1})})}
     else if(!G.fail&&k>1.05){G.state='bloom';G.t0=now;SND.bloom();if(G.gold)SND.legend()}}
   if(G.state==='bloom'&&G.gold&&Math.random()<.7){const SC=G.SC;P.push({x:SC.x+rnd(-1,1)*SC.r*.35,y:SC.y,vx:0,vy:-rnd(250,500)*S,l:0,m:rnd(.8,1.4),s:rnd(1.2,2.6),c:'#ffd27a'})}
@@ -2614,7 +2615,7 @@ SPX.tree.draw=((orig)=>(now,k)=>{if(G.lvid||!G.tree)return;return orig(now,k)})(
 const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 function shHook(){if(!RECV||G.shHold||!shareRecOn()||G.state==='pcard'||G.state==='pwait')return false;G.shHold=true;G.state='pcard';G.t0=performance.now();$('quit').hidden=true;$('redo').hidden=true;G.hush=false;G.hushM=false;SND.star(2);return true}
 function showResult(){if(shHook())return;showResult0()}
-function showResult0(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;$('bVid').hidden=true;if(G.moon)return moonResult();if(G.day)return dayEnd();$('bNext').hidden=false;$('bRetry').textContent='Réessayer';const r=G.res||{stars:0,fid:0,stab:0,total:0};G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;const pi=G.pi;
+function showResult0(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;$('bVid').hidden=true;$('bDef').hidden=true;if(G.moon)return moonResult();if(G.day)return dayEnd();$('bNext').hidden=false;$('bRetry').textContent='Réessayer';const r=G.res||{stars:0,fid:0,stab:0,total:0};G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;const pi=G.pi;
   if(G.replay){G.replay=false;if(G.voir){G.voir=false;showMap();return}showGrim();return}
   if(!G.skipped&&G.res){const l=spLvl();if(l>=2){if(!SAVE.seen||typeof SAVE.seen!=='object')SAVE.seen={};SAVE.seen[pi+':'+l]=1}}
   if(r.stars>SAVE.stars[pi])SAVE.stars[pi]=r.stars;
@@ -2629,11 +2630,13 @@ function showResult0(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;$('bVid')
     $('rStrong').innerHTML=st?'<span class="lb">'+(full?'Bilan':'Point fort')+'</span>'+duEsc(st):'';$('rFix').innerHTML=dg.main?'<span class="lb">À revoir</span>'+duEsc(dg.main.msg):'';try{diagThumb($('rTh'),G.strokes,pi,dg)}catch(e){box.hidden=true}}}
   if(G.rule&&G.rule.broken){$('rFix').innerHTML='<span class="lb">Rituel</span>'+duEsc(G.rule.msgs[0]);$('rDiag').hidden=false}
   G.cardRec=rec;$('bCard').hidden=!(r.stars>=1);{const vb=$('bVid');vb.hidden=!(G.vidRes&&G.vidRes.blob&&r.stars>=1);vb.textContent='🎬 Partager la vidéo du sort'}
+  {const b=$('bDef'),d=defOn(pi),pct=Math.round(r.total*100);b.hidden=!(r.stars>=1);b.textContent=d?'⚔️ Renvoyer le défi':'⚔️ Défier un ami';
+    if(d){const w=r.stars>=1&&pct>d.score;$('rMsg').textContent=w?`Défi relevé ! Tu bats ton ami : ${pct} % contre ${d.score} %.`:r.stars>=1&&pct===d.score?`Égalité parfaite avec ton ami : ${pct} %. Il t’en faut un de plus !`:`Pas encore… il te faut plus de ${d.score} % pour gagner le défi.`}}
   if(r.ruleCap)$('rMsg').textContent='Le rituel n’a pas été respecté : 2 étoiles au maximum. Respecte-le pour le sort légendaire.';
   const sp=[...$('rStars').children];sp.forEach(s=>s.className='');sp.forEach((s,i)=>setTimeout(()=>{s.className=i<r.stars?'on':'off';if(i<r.stars)SND.star(i)},350+i*380));
   const nx=$('bNext');nx.disabled=!(SAVE.stars[pi]>=2);nx.textContent=pi<PAL.length-1?'Palier suivant':'Grimoire accompli ✦';if(pi>=PAL.length-1)nx.disabled=true;if(!nx.disabled&&!prem(pi+1))nx.textContent='Débloquer le Grand Grimoire · 4,99 €';
   $('result').hidden=false}
-function showMap(){if(SFX.list.length)sfxCut();duStop();liveHide();usePal5(null);recAbort();G={state:'map',pi:0,strokes:[],moonB:0};buildBG(0);['title','result','grim','trn','inc','duel','sav','rule','card'].forEach(id=>$(id).hidden=true);$('quit').hidden=true;$('redo').hidden=true;
+function showMap(){DF=null;if(SFX.list.length)sfxCut();duStop();liveHide();usePal5(null);recAbort();G={state:'map',pi:0,strokes:[],moonB:0};buildBG(0);['title','result','grim','trn','inc','duel','sav','rule','card'].forEach(id=>$(id).hidden=true);$('quit').hidden=true;$('redo').hidden=true;
   const tot=SAVE.stars.reduce((a,b)=>a+b,0);let h=`<h2>Les Paliers</h2><p class="hint">★ ${tot} / 30 · il faut 2 étoiles pour avancer</p>${dayCard()}${moonCard()}<button class="btn sec wide" data-g="1">📖 Mon grimoire</button><button class="btn sec wide" data-sv="1">💾 Ma sauvegarde</button><button class="btn sec wide" data-t="1">✍️ Entraînement</button><button class="btn sec mini tog" data-rit="1">🎙 Mode rituel : ${SAVE.rit===false?'désactivé':'activé'}</button><p class="hint" style="margin:6px 0 14px;font-size:14px">${SAVE.rit===false?'Le sort part dès que le sceau est tracé.':'Sceau parfait (3 étoiles) : prononce la formule pour libérer le sort légendaire.'}</p>`;
   PAL.forEach((p,i)=>{if(i===5)h+=`<div class="sep">Le Grand Grimoire<small>${RELEASE?(SAVE.premium?'débloqué ✓':'5 paliers premium · 4,99 € les cinq'):'5 paliers premium · 4,99 € les cinq · ouverts pour les tests'}</small></div>`;
     const reach=!!p.sig&&(i===0||SAVE.stars[i-1]>=2||(!RELEASE&&!!SAVE.allOpen)),open=reach&&prem(i),buy=reach&&!open,st=SAVE.stars[i];
@@ -3258,12 +3261,26 @@ function showGrim(){usePal5(null);G={state:'map',pi:0,strokes:[],moonB:0};buildB
   $('grimPanel').querySelectorAll('[data-th]').forEach(c=>thumb(c,+c.dataset.th));$('grim').hidden=false}
 // aperçu d'un sort sans le réussir : adresse du jeu + ?voir=9 (palier) et &etoiles=2 (3 par défaut). Rien n'est enregistré.
 const VOIR=(()=>{try{const q=new URLSearchParams(location.search),v=+q.get('voir');return v>=1&&v<=10?{pi:v-1,st:Math.min(3,Math.max(1,+q.get('etoiles')||3))}:null}catch(e){return null}})();
+// défi entre amis (sans serveur) : lien ?defi=DEF1-xxx qui porte le palier et le score à battre
+const DEF_URL='https://jimmyschwab100212.github.io/Encrelune/';
+function defEnc(pi,sc){const n=pi*101+Math.max(1,Math.min(100,sc|0));return 'DEF1-'+n.toString(36).toUpperCase().padStart(2,'0')+((n*7+13)%36).toString(36).toUpperCase()}
+function defDec(c){const m=/^DEF1-([0-9A-Z]{2})([0-9A-Z])$/i.exec(String(c||'').trim());if(!m)return null;const n=parseInt(m[1],36);if(((n*7+13)%36).toString(36).toUpperCase()!==m[2].toUpperCase())return null;const pi=Math.floor(n/101),sc=n%101;return pi<10&&sc>=1&&PAL[pi]&&PAL[pi].sig?{pi,score:sc}:null}
+let DF=(()=>{try{return defDec(new URLSearchParams(location.search).get('defi'))}catch(e){return null}})();
+function defOn(pi){return DF&&DF.pi===pi?DF:null}
+async function defShare(){const r=G.res||{},pi=G.pi,pct=Math.round((r.total||0)*100),d=defOn(pi),pl=PAL[pi],b=$('bDef'),lab=d?'⚔️ Renvoyer le défi':'⚔️ Défier un ami',say=t=>{b.textContent=t;setTimeout(()=>{if(!b.hidden)b.textContent=lab},2600)};
+  const url=DEF_URL+'?defi='+defEnc(pi,pct),t=(d&&pct>d.score?`J’ai battu ton score au palier ${pi+1} (${pl.name}) sur Encrelune : ${pct} % contre ${d.score} % ! Prends ta revanche ✦`:`Je viens de faire ${pct} % au palier ${pi+1} (${pl.name}) sur Encrelune. Tu peux faire mieux ? ✦`)+' '+url;
+  try{if(navigator.share){await navigator.share({title:'Encrelune',text:t});say('Défi envoyé ✓');return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(t);say('Lien copié ✓ Colle-le à ton ami');return}catch(e){}
+  say('Impossible ici')}
+function defGo(){const d=DF;if(!d)return false;if(!prem(d.pi)){DF=null;showMap();setTimeout(()=>msg('Ce défi est dans le Grand Grimoire',3200),50);return true}startPalier(d.pi);return true}
 function voir(i,st){startPalier(i);G.replay=true;G.voir=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=PAL[i].sig.map(q=>q.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;const v=st===3?.96:st===2?.7:.45;setTimeout(()=>evaluate({st,f:v,s:v,t:v}),700)}
 function replay(i){const b=SAVE.best[i];if(!b)return;startPalier(i);G.replay=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=b.k.map(s=>s.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;setTimeout(()=>evaluate(b),700)}
 $('mapPanel').addEventListener('click',e=>{const c=e.target.closest('[data-p]');if(c){SND.click();startPalier(+c.dataset.p);return}if(e.target.closest('[data-buy]')){SND.click();showBuy();return}if(e.target.closest('[data-unl]')){SND.click();SAVE.allOpen=!SAVE.allOpen;save();showMap();return}if(e.target.closest('[data-g]')){SND.click();showGrim();return}if(e.target.closest('[data-sv]')){SND.click();showSav();return}if(e.target.closest('[data-t]')){SND.click();showTrain();return}if(e.target.closest('[data-du]')){SND.click();showDuel();return}if(e.target.closest('[data-men]')){SND.click();showMen();return}if(e.target.closest('[data-dprev]')){SND.click();startDay(true);return}if(e.target.closest('[data-day]')){SND.click();startDay(false);return}if(e.target.closest('[data-mprev]')){SND.click();startMoon(true);return}if(e.target.closest('[data-moon]')){SND.click();startMoon(false);return}if(e.target.closest('[data-rit]')){SND.click();SAVE.rit=SAVE.rit===false;save();showMap()}});
 $('savPanel').addEventListener('click',savClick);
 $('grimPanel').addEventListener('click',e=>{const tp=e.target.closest('[data-tp]');if(tp){SND.click();startTrain(+tp.dataset.tp);return}const r=e.target.closest('[data-r]');if(r){SND.click();replay(+r.dataset.r);return}if(e.target.closest('[data-back]')){SND.click();showMap()}});
-$('bStart').addEventListener('click',()=>{audioInit();SND.click();if(VOIR){voir(VOIR.pi,VOIR.st);return}showMap()});
+if(DF)$('bStart').insertAdjacentHTML('beforebegin',`<p class="hint" style="color:#ffd27a;margin:0 0 10px">⚔️ Un ami te défie : fais plus de ${DF.score} % au palier ${DF.pi+1} · ${PAL[DF.pi].name}</p>`);
+$('bStart').addEventListener('click',()=>{audioInit();SND.click();if(VOIR){voir(VOIR.pi,VOIR.st);return}if(defGo())return;showMap()});
+$('bDef').addEventListener('click',()=>{SND.click();defShare()});
 $('bRetry').addEventListener('click',()=>{SND.click();if(G.dayRes){startDay(G.dayRes.preview);return}if(G.moonRes){startMoon(G.moonRes.preview);return}startPalier(G.pi)});
 $('bNext').addEventListener('click',()=>{SND.click();if(G.dayRes){saveVideo();return}if(!prem(G.pi+1)){showBuy();return}startPalier(G.pi+1)});$('buyGo').addEventListener('click',()=>{SND.click();doBuy(false)});$('buyRes').addEventListener('click',()=>{SND.click();doBuy(true)});$('buyNo').addEventListener('click',()=>{SND.click();$('buy').hidden=true});
 $('bMap').addEventListener('click',()=>{SND.click();showMap()});
