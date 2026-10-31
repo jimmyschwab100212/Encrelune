@@ -1887,7 +1887,7 @@ SIG.stag={pin:1,init(X,g){X.pg=[];X.mist=[...Array(g?22:14)].map(()=>({a:rnd(0,T
 function sgPack(n,sky){const out=[],xs=sky?[.24,.76,.5,.36]:[.13,.87,.28,.72],base=G.SC.r*1.4/100;for(let i=0;i<n;i++){const x=xs[i%xs.length]*W;out.push({x,y:sky?H*(.2+.05*(i%2)):H*(.62+.04*(i%2)),sc:base*(sky?.42:rnd(.36,.46)),fl:x<W/2?-1:1,t0:0,nh:0,sky:!!sky})}return out}
 SIG.wolf={init(X,g){X.hw=[];X.nh=0;X.gw=[];X.mt=[];X.wind=0;X.fg=0;X.fr=[];const n=g?14:8;for(let i=0;i<n;i++){const x=(i+.5)/n*W+rnd(-.3,.3)*W/n,segs=[],L2=H*rnd(.1,g?.26:.18),a=-Math.PI/2+rnd(-.35,.35);const yb=H*.69,x1=x+Math.cos(a)*L2,y1=yb+Math.sin(a)*L2;segs.push([x,yb,x1,y1,0]);
       for(let k=1;k<5;k++){const f=k/5,bx=lerp(x,x1,f),by=lerp(yb,y1,f),bl=L2*.28*(1-f*.6);for(const sd of [1,-1])segs.push([bx,by,bx+Math.cos(a+sd*1.05)*bl,by+Math.sin(a+sd*1.05)*bl,f])}X.fr.push(segs)}},
-  hold(X,on){const g=G.gold;if(on){try{SND.wolf()}catch(e){}X.gw=X.k===0?sgPack(g?4:2,false):sgPack(4,true);X.gw.forEach((w,i)=>w.t0=X.k===0?.6+i*.7:i*.4);return}
+  hold(X,on){const g=G.gold;if(on){try{SND.wolf()}catch(e){}X.gw=X.k===0?sgPack(g?4:2,false):[];/* plus de loups d'étoiles en plus : le loup principal en constellation suffit (demande de Jimmy, 31 oct.) */X.gw.forEach((w,i)=>w.t0=X.k===0?.6+i*.7:i*.4);return}
     for(const w of X.gw)spark(w.x,w.sky?w.y:w.y-90*w.sc,'#efe6ff',20,200*S);try{SND.wolf()}catch(e){}},
   climax(X){try{SND.wolf()}catch(e){}},
   idle(X){const t=G.hd;if(X.k===0&&X.ap){G.ap=[X.ap[0],X.ap[1]+Math.sin(t*1.5)*2*S]}
