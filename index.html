@@ -2130,7 +2130,9 @@ function liveStart(src,fb){if(isStill(src))return liveStill(src,fb);const v=live
     const w=()=>{if(!G.lvid||G.liveSrc!==src||!Q.length)return;while(Q.length&&v.currentTime>=Q[0][0]){try{F[Q.shift()[1]]()}catch(e){}}requestAnimationFrame(w)};requestAnimationFrame(w)}
   const go=v.play();if(go&&go.catch)go.catch(()=>{v.muted=true;const g2=v.play();if(g2&&g2.catch)g2.catch(liveFallback)});
   // la vidéo peut mettre du temps à arriver sur le téléphone : on patiente jusqu'à 12 s (décor affiché) avant de passer au sort dessiné
-  clearTimeout(LIVE.to);const chk=()=>{if(!G.lvid||G.liveSrc!==src||v.currentTime>=.05)return;if((performance.now()-G.liveT0)/1000>12){liveFallback(true);return}if(v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}LIVE.to=setTimeout(chk,1000)};LIVE.to=setTimeout(chk,2500)}
+  clearTimeout(LIVE.to);let lt=-1,lw=performance.now();/* surveillance : vidéo qui ne démarre pas (5 s) ou qui se fige en cours de route (bug « on ne voit pas le sort ») */
+  const chk=()=>{if(!G.lvid||G.liveSrc!==src||v.ended||G.lhold)return;const now=performance.now(),ct=v.currentTime;if(ct>lt+.01){lt=ct;lw=now}const still=(now-lw)/1000;
+    if(ct<.05&&(now-G.liveT0)/1000>5){liveFallback(true);return}if(ct>=.05&&still>4){liveEnd();return}if(still>1.2&&(v.paused||v.readyState<3)){const p=v.play();if(p&&p.catch)p.catch(()=>{})}LIVE.to=setTimeout(chk,500)};LIVE.to=setTimeout(chk,1500)}
 function liveHide(){if(!LIVE)return;clearTimeout(LIVE.to);for(const k in LIVE.v){const v=LIVE.v[k];if(v.style.display==='none')continue;v.onended=null;try{v.pause()}catch(e){}v.style.opacity=0;setTimeout(()=>{if(!(G.lvid&&G.liveSrc===k))v.style.display='none'},650)}}
 // fin prolongée : la dernière image reste, avance doucement, et des spores lumineuses flottent par-dessus
 function liveHold(v,sec){if(!G.lvid)return;G.lhold=true;v.style.transition='opacity .6s, transform '+(sec+.6)+'s ease-out';requestAnimationFrame(()=>{v.style.transform='scale(1.045)'});
