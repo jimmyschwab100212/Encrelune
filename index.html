@@ -875,7 +875,7 @@ addEventListener('resize',resize);
 function restPos(){return[W*.64,H-SB-262*S]}
 function cardPos(){return[78*S,H-SB-92*S]}
 function ghostLines(){const b=SAVE.best[G.pi];if(!b||!b.k)return null;const m=Math.min(W,H),cx=b.pos[0]*W,cy=b.pos[1]*H,r=b.pos[2]*m;return b.k.map(s=>s.map(([x,y])=>[cx+x*r,cy+y*r]))}
-function startPalier(pi){if(SFX.list.length)sfxCut();liveHide();usePal5(null);recAbort();G={state:'intro',pi,rep:2,strokes:[],sinfo:[],t0:performance.now(),moonB:0,tip:restPos(),live:1,msg:null,zoom:0};cur=null;P=[];BIRDS=[];BLOOMS=[];RINGS=[];RIPS=[];WAVES=[];CONST=null;VINES=[];METS=[];ORBS=[];PLAN=[];STARS2=[];SHOOT=[];FEA=[];buildBG(pi);G.ghost=ghostLines();inkDirty=true;
+function startPalier(pi){try{liveWarm(pi)}catch(e){}if(SFX.list.length)sfxCut();liveHide();usePal5(null);recAbort();G={state:'intro',pi,rep:2,strokes:[],sinfo:[],t0:performance.now(),moonB:0,tip:restPos(),live:1,msg:null,zoom:0};cur=null;P=[];BIRDS=[];BLOOMS=[];RINGS=[];RIPS=[];WAVES=[];CONST=null;VINES=[];METS=[];ORBS=[];PLAN=[];STARS2=[];SHOOT=[];FEA=[];buildBG(pi);G.ghost=ghostLines();inkDirty=true;
   stopRec();['title','map','result','grim','inc','trn','duel','rule','card'].forEach(id=>$(id).hidden=true);$('quit').hidden=false;$('redo').hidden=false;updRep()}
 // passer un sort déjà vu : un toucher pendant le sort mène directement au résultat (le résultat est enregistré comme d'habitude)
 function spLvl(){return G.fail?0:G.gold?3:(G.power||0)<.5?1:2}
@@ -2066,6 +2066,8 @@ function liveSrc(lv){const m=LIVEMAP[G.pi];const s=m&&m[lv];return s&&!LIVE.bad[
 function liveVid(src){if(LIVE.v[src])return LIVE.v[src];const v=document.createElement('video');v.src=src;v.preload='auto';if(REALP[G.pi]&&REALP[G.pi].img)v.poster=REALP[G.pi].img;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.className='live';
   v.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:8;opacity:0;transition:opacity .6s;display:none';
   v.addEventListener('error',()=>{LIVE.bad[src]=true;if(G.lvid&&G.liveSrc===src)liveFallback()});v.addEventListener('click',liveSkip);document.body.appendChild(v);LIVE.v[src]=v;return v}
+/* télécharge à l'avance les vidéos du palier dès son ouverture (cache du navigateur), pour qu'elles soient prêtes au moment du sort */
+function liveWarm(pi){const m=LIVEMAP[pi];if(!m||!window.fetch)return;LIVE.warm=LIVE.warm||{};for(const lv in m){const src=m[lv];if(LIVE.warm[src]||isStill(src))continue;LIVE.warm[src]=1;fetch(src).then(r=>r.blob()).catch(()=>{LIVE.warm[src]=0})}}
 function livePrime(){const m=LIVEMAP[G.pi];if(!m)return;if(G.pi===6)sfxLoad('dragon_roar.mp3');if(G.pi===7)sfxLoad('phenix_cri.mp3');if(G.pi===8)['kirin_cri.mp3','kirin_sabots.mp3'].forEach(sfxLoad);for(const lv in m){const src=m[lv];if(LIVE.primed[src]||LIVE.bad[src])continue;LIVE.primed[src]=true;if(isStill(src)){stillEl(src);continue}const v=liveVid(src);
   try{v.muted=true;const p=v.play();if(p&&p.then)p.then(()=>{if(!(G.lvid&&G.liveSrc===src)){v.pause();v.currentTime=0}}).catch(()=>{});else v.pause()}catch(e){}}}
 // téléphone tourné à l'horizontale : la vidéo reste entière au centre, les côtés sont remplis par la même image agrandie et floue
