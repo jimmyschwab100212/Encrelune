@@ -2661,25 +2661,31 @@ function vxCol(n){return VXC[((n||1)-1)%VXC.length]}
 const VXP=[[12,5,.9],[10,3,.85],[14,5,.8],[9,4,.95],[16,7,.85],[11,3,.8],[13,6,.9],[15,4,.75],[18,7,.8],[17,5,.85]];
 function vxPath(n){const [R,r,dd]=VXP[((n||1)-1)%VXP.length],g=(a,b)=>b?g(b,a%b):a,loops=r/g(R,r),T=TAU*loops,M=Math.round(240*loops),mk=d=>{const Q=[];for(let q=0;q<=M;q++){const t=q/M*T;Q.push([(R-r)*Math.cos(t)+d*r*Math.cos((R-r)/r*t),(R-r)*Math.sin(t)-d*r*Math.sin((R-r)/r*t)])}return Q};
   const P=mk(dd),B=[mk(dd*.86),mk(dd*.72),mk(dd*.58)];let mx=0;P.forEach(p=>mx=Math.max(mx,Math.hypot(...p)));[P,...B].forEach(Q=>Q.forEach(p=>{p[0]/=mx;p[1]/=mx}));const tips=[];for(let q=1;q<P.length-1;q++){const a=Math.hypot(...P[q-1]),b=Math.hypot(...P[q]),c=Math.hypot(...P[q+1]);if(b>=a&&b>c&&b>.9)tips.push(q)}return{P,B,tips}}
-SPELL_END.vortex=5.6;
-function vxT(){const V=G.vx;return V.weak?{d0:.25,d1:2.3,frac:.62}:V.gold?{d0:.3,d1:3.9}:{d0:.3,d1:3.4}}
-function vxTip(){if(G.anim!=='vortex'||G.state!=='spell'||!G.vx)return null;const V=G.vx,T=vxT(),sk=G.sk||0;if(sk<T.d0-.5||sk>T.d1+.15)return null;
+SPELL_END.vortex=6.6;
+function vxT(){const V=G.vx;return V.weak?{d0:.25,d1:2.3,frac:.62}:V.gold?{d0:.3,d1:3.9,L0:4.5,L1:5.3,B:5.75,E:7.8}:{d0:.3,d1:3.4,L0:3.8,L1:4.5,B:4.85,E:6.6}}
+function vxTip(){if(G.anim!=='vortex'||G.state!=='spell'||!G.vx)return null;const V=G.vx,T=vxT(),sk=G.sk||0;if(T.L0&&sk>T.L0-.45&&sk<T.L0+.2){const u=clamp((sk-T.L0+.45)/.65);return{p:[V.cx+W*.04*(1-u),V.cy+V.R*.55-u*V.R*1.1],on:false,i:V.n}}if(sk<T.d0-.5||sk>T.d1+.15)return null;
   const u=clamp((sk-T.d0)/(T.d1-T.d0)),e=u*u*(3-2*u),i=Math.min(V.P.length-1,Math.floor(e*(T.frac||1)*(V.P.length-1)));return{p:vxXY(V.P[i],1),on:sk>=T.d0,i}}
 function vxXY(p,sc,rot){const V=G.vx,a=rot||0,x=p[0]*V.R*(sc||1),y=p[1]*V.R*(sc||1);return[V.cx+x*Math.cos(a)-y*Math.sin(a),V.cy+x*Math.sin(a)+y*Math.cos(a)]}
-SPX.vortex={gold:7.6,start(gold,pw){const n=SPI?SPI.tour:1,{P,B,tips}=vxPath(n),c=gold?['#f2c25c','#fff0c8']:vxCol(n);
+SPX.vortex={gold:7.8,start(gold,pw){const n=SPI?SPI.tour:1,{P,B,tips}=vxPath(n),c=gold?['#f2c25c','#fff0c8']:vxCol(n);
     G.vx={P,B,tips,c,c2:vxCol(n),gold,weak:pw<.5,n:0,cx:G.SC.x,cy:G.SC.y,R:Math.min(W*.42,H*.27),bl:{},rot:0};try{SND.gust()}catch(e){}},
   update(dt,now){const V=G.vx;if(!V)return;const sk=G.sk||0,T=vxT(),h=vxTip();
     if(h&&h.on){const prev=V.n;V.n=Math.max(V.n,h.i);if(Math.random()<.8)P.push({x:G.tip[0],y:G.tip[1],vx:rnd(-30,30)*S,vy:rnd(10,60)*S,l:0,m:rnd(.5,1.1),s:rnd(1,2.2),c:Math.random()<.5?V.c[0]:'#ffffff',g:30});
       V.tips.forEach((ti,k)=>{if(ti>prev&&ti<=V.n&&!V.bl[ti]){V.bl[ti]=sk;try{SND.stroke(k)}catch(e){}spark(...vxXY(V.P[ti],1),V.c[1],8,120*S)}})}
     if(sk>T.d1)V.rot+=dt*(V.gold?.22:.16)*clamp((sk-T.d1)/1);
-    if(V.gold&&!V.star&&sk>6.1){V.star=sk;const sp=[W/2,H*.13];spark(sp[0],sp[1],'#ffd27a',60,380*S);spark(sp[0],sp[1],'#ffffff',30,240*S);WAVES.push({x:sp[0],y:sp[1],r:30*S,t:0,col:'#ffd27a'});try{SND.perfect()}catch(e){}}},
-  draw(now,k){const V=G.vx;if(!V)return;const sk=G.sk||0,T=vxT(),END=V.gold?7.6:V.weak?3.8:5.6,fade=clamp((END-sk)/(V.weak?.8:1.2));
+    if(T.L0&&!V.lau&&sk>T.L0){V.lau=1;try{SND.gust()}catch(e){}}
+    if(T.L1&&!V.star&&sk>T.L1){V.star=sk;try{SND.stroke(4)}catch(e){}}
+    if(T.B&&!V.fs&&sk>T.B){const sx=W/2,sy=H*.15,n=V.gold?26:16;V.fs=[];for(let q=0;q<n;q++){const an=q/n*TAU+rnd(-.12,.12),sp=rnd(430,820)*S;
+        V.fs.push({x:sx,y:sy,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp*.85,tr:[],c:q%3===0?'#ffffff':q%3===1?V.c[0]:V.c[1],w:rnd(1.8,3),d:rnd(0,.18)})}
+      spark(sx,sy,V.c[1],40,260*S);WAVES.push({x:sx,y:sy,r:24*S,t:0,col:V.c[0]});try{V.gold?SND.perfect():SND.star(2)}catch(e){}}
+    if(V.fs)for(const f of V.fs){if(sk-T.B<f.d)continue;f.tr.push([f.x,f.y]);if(f.tr.length>30)f.tr.shift();f.vy+=70*S*dt;f.vx*=1-.12*dt;f.vy*=1-.12*dt;if(Math.random()<.35)P.push({x:f.x,y:f.y,vx:rnd(-20,20)*S,vy:rnd(0,30)*S,l:0,m:rnd(.3,.7),s:rnd(.8,1.6),c:f.c,g:20});f.x+=f.vx*dt;f.y+=f.vy*dt}},
+  draw(now,k){const V=G.vx;if(!V)return;const sk=G.sk||0,T=vxT(),END=V.gold?7.8:V.weak?3.8:6.6,fade=clamp((END-sk)/(V.weak?.8:1.2));
     // 3★ : repli en médaillon qui monte au ciel (5.0 → 6.1)
-    const up=V.gold?ease(clamp((sk-5)/1.1)):0,sc=1-.82*up,cx0=V.cx,cy0=V.cy;if(up>0){V.cx=lerp(cx0,W/2,up);V.cy=lerp(cy0,H*.13,up)}
+    const up=T.L0?clamp((sk-T.L0)/(T.L1-T.L0)):0,ue=up*up*(3-2*up),sc=1-.9*ue,cx0=V.cx,cy0=V.cy;if(up>0){V.cx=lerp(cx0,W/2,ue);V.cy=lerp(cy0,H*.15,ue)-Math.sin(up*Math.PI)*H*.04;V.rot+=0}
+    const spinUp=up>0?ue*TAU*1.5:0;
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';
     const curve=(n,scl,rot,col,a,Q,thin)=>{Q=Q||V.P;if(n<2||a<=0)return;for(const [lw,al,cl] of (thin?[[3,.12,col],[.8,.55,col]]:[[7,.15,col],[1.9,.8,col],[.7,.95,'#ffffff']])){ctx.strokeStyle=hexA(cl,al*a);ctx.lineWidth=lw*S*Math.max(.5,scl);ctx.beginPath();for(let q=0;q<=n;q++){const [x,y]=vxXY(Q[q],scl,rot);q?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}};
     {const vg2=clamp(sk/.6)*fade*(V.weak?.25:.42);if(vg2>0){ctx.globalCompositeOperation='source-over';const gr=ctx.createRadialGradient(V.cx,V.cy,0,V.cx,V.cy,Math.max(W,H)*.75);gr.addColorStop(0,`rgba(3,2,10,${vg2})`);gr.addColorStop(1,`rgba(3,2,10,${vg2*.55})`);ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='lighter'}}
-    const alive=clamp((sk-T.d1)/.6),a=fade*(V.weak?.7:1)*(V.star?clamp(1-(sk-V.star)/.5):1);
+    const alive=clamp((sk-T.d1)/.6),a=(V.weak?fade*.7:1)*(V.star?clamp(1-(sk-V.star)/.35):1),R0=V.rot;V.rot+=spinUp;
     if(!V.weak)V.B.forEach((Q,bi)=>curve(V.n,sc,V.rot,bi%2?V.c[1]:V.c[0],a*(.8-bi*.15),Q,true));curve(V.n,sc,V.rot,V.c[0],a);
     if(V.gold)curve(V.n,sc*.42,-V.rot*1.6,'#ffe9b0',a*.75,null,true);   // le tracé miroir du 3★
     // lumière qui court le long de la rosace une fois dessinée
@@ -2688,9 +2694,15 @@ SPX.vortex={gold:7.6,start(gold,pw){const n=SPI?SPI.tour:1,{P,B,tips}=vxPath(n),
     for(const ti of V.tips){const t0=V.bl[ti];if(t0==null)continue;const b=ease(clamp((sk-t0)/.6)),[x,y]=vxXY(V.P[ti],sc,V.rot),ang=Math.atan2(y-V.cy,x-V.cx),rr=(V.weak?5:9)*S*b*Math.max(.4,sc);
       ctx.save();ctx.translate(x,y);ctx.rotate(ang+sk*.6);for(let p=0;p<5;p++){ctx.rotate(TAU/5);ctx.fillStyle=hexA(V.c[1],.5*a*b);ctx.beginPath();ctx.ellipse(rr*.9,0,rr,rr*.42,0,0,TAU);ctx.fill()}ctx.restore();gdraw('#ffffff',x,y,4*S*b,a);gdraw(V.c[0],x,y,16*S*b,.35*a)}
     if(V.gold){gdraw(V.c[0],V.cx,V.cy,V.R*sc*.35,.12*a*alive)}
+    if(up>0&&!V.star){gdraw(V.c[1],V.cx,V.cy,V.R*sc*.6,.35*ue);gdraw('#ffffff',V.cx,V.cy,10*S*ue,.8*ue)}   // la rosace se condense en étoile en montant
+    V.rot=R0;
     // l'étoile finale (3★), sans éblouissement
-    if(V.star){const e=clamp((sk-V.star)/.4),f=fade,sx=W/2,sy=H*.13,L2=(26+14*Math.sin(sk*3))*S*e;gdraw('#ffd27a',sx,sy,60*S*e,.45*f);ctx.strokeStyle=hexA('#fff4d6',.8*f);ctx.lineWidth=1.6*S;
-      ctx.beginPath();for(let q=0;q<4;q++){const an=q*Math.PI/2+.2;ctx.moveTo(sx,sy);ctx.lineTo(sx+Math.cos(an)*L2*1.6,sy+Math.sin(an)*L2*1.6)}ctx.stroke();gdraw('#ffffff',sx,sy,8*S*e,f)}
+    // l'étoile : elle pulse, grossit un instant, puis éclate
+    if(V.star&&sk<T.B+.25){const e=ease(clamp((sk-V.star)/.25)),ex=clamp(1-(sk-T.B)/.25),pu=1+.25*Math.sin((sk-V.star)*22),sx=W/2,sy=H*.15,L2=(18+22*clamp((sk-V.star)/(T.B-V.star)))*S*e*pu;
+      gdraw(V.c[0],sx,sy,55*S*e,.5*ex);ctx.strokeStyle=hexA(V.c[1],.85*ex);ctx.lineWidth=1.5*S;ctx.beginPath();for(let q=0;q<8;q++){const an=q*Math.PI/4+sk*.5,l=q%2?L2*.55:L2*1.5;ctx.moveTo(sx,sy);ctx.lineTo(sx+Math.cos(an)*l,sy+Math.sin(an)*l)}ctx.stroke();gdraw('#ffffff',sx,sy,9*S*e*pu,ex)}
+    // les étoiles filantes
+    if(V.fs){const ff=clamp((T.E-sk)/1.1);for(const f of V.fs){const L=f.tr.length;if(L<2)continue;for(let q=1;q<L;q++){const u=q/L;ctx.strokeStyle=hexA(q>L-4?'#ffffff':f.c,.9*u*u*ff);ctx.lineWidth=f.w*S*(.3+u*1.2);ctx.beginPath();ctx.moveTo(f.tr[q-1][0],f.tr[q-1][1]);ctx.lineTo(f.tr[q][0],f.tr[q][1]);ctx.stroke()}
+      gdraw(f.c,f.x,f.y,15*S,.55*ff);gdraw('#ffffff',f.x,f.y,4.5*S,ff)}}
     V.cx=cx0;V.cy=cy0;ctx.restore()}};
 
 
