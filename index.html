@@ -1072,7 +1072,7 @@ function drawAnimal(lines,rev,a,col,gc){const sl=lines.map(l=>l.map(([x,y])=>ani
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);if(G.state==='pcard'||G.state==='pwait')drawShareCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
 const SPELL_END={spirit:8.5,lune:12,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
-function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?12.4:G.anim==='fox'?11.9:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
+function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?(G.gold?15.8:12.4):G.anim==='fox'?11.9:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
 function update(dt,now){
   {const v=!!(G.train&&G.state==='draw');if(v!==tDemoV){tDemoV=v;$('tDemo').hidden=!v}}
   if(G.ff){ffUpdate(dt,now);return}
@@ -1095,7 +1095,7 @@ function update(dt,now){
   if(G.state==='fizzle'&&k>2){if(G.moon)moonRetry();else showResult()}
   if(G.flash)G.flash=Math.max(0,G.flash-dt*2.2);if(G.moonB)G.moonB=Math.max(0,G.moonB-dt*.2);if(G.shake)G.shake=Math.max(0,G.shake-dt*3);if(G.zoom)G.zoom=Math.max(0,G.zoom-dt*1.4);
   for(const f of FL)if(f.fl)f.fl=Math.max(0,f.fl-dt*.6);
-  const tgt=cur?cur.pts[cur.pts.length-1]:restPos();if(!G.tip)G.tip=restPos();if(cur){G.tip=[tgt[0],tgt[1]]}else{G.tip[0]=lerp(G.tip[0],tgt[0],1-Math.pow(.002,dt));G.tip[1]=lerp(G.tip[1],tgt[1],1-Math.pow(.002,dt))}
+  const hT=!cur&&stagHeartTip(),tgt=cur?cur.pts[cur.pts.length-1]:hT?hT.p:restPos();if(!G.tip)G.tip=restPos();if(cur||(hT&&hT.on)){G.tip=[tgt[0],tgt[1]]}else{G.tip[0]=lerp(G.tip[0],tgt[0],1-Math.pow(.002,dt));G.tip[1]=lerp(G.tip[1],tgt[1],1-Math.pow(.002,dt))}
   for(let i=P.length-1;i>=0;i--){const p=P[i];p.l+=pdt;if(p.l>p.m){P.splice(i,1);continue}p.x+=p.vx*pdt;p.y+=p.vy*pdt;p.vy+=(p.g||0)*pdt;p.vx*=.98;p.vy*=.98}
   for(let i=WAVES.length-1;i>=0;i--){WAVES[i].t+=pdt;if(WAVES[i].t>1)WAVES.splice(i,1)}
   if(G.state==='spell'){updateSpell(pdt,now);sigUpdate(pdt,now)}}
@@ -1177,7 +1177,7 @@ function startSpell(){const pl=PAL[G.pi],SC=G.SC,pw=G.power,gold=G.moon?!!G.gold
   FL.forEach(f=>f.fl=Math.max(f.fl||0,.8*pw));SND.gust();
   if(gold&&(G.anim==='stag'||G.anim==='fox')){SND.perfect();G.shake=.3;WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.2,t:-.3,col:'#ffd27a'})}else if(gold){G.slow=1.7;G.shake=1.2;SND.perfect();spark(SC.x,SC.y,'#ffffff',90,620*S);WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.3,t:-.3,col:'#ffd27a'},{x:SC.x,y:SC.y,r:SC.r*.4,t:-.45,col:'#ff9ad8'});FL.forEach(f=>f.fl=1.5);for(let i=0;i<150;i++)P.push({x:rnd(0,W),y:rnd(-H*.1,H*.6),vx:rnd(-10,10),vy:rnd(20,70),l:0,m:rnd(3,6),s:rnd(1,2.6),c:Math.random()<.8?'#ffd27a':'#ffffff'})}
   if(G.anim==='birds'){G.bx=0;G.ba=0;G.rg=null;if(!gold&&pw>=.5){G.bx=3.8;const r0=Math.min(W*.13,70);G.rg=[{x:W*.24,y:H*.4,r:r0,h:0},{x:W*.76,y:H*.5,r:r0,h:0},{x:W*.5,y:H*.3,r:r0*1.15,h:0}]}const n=gold?96:Math.round(10+44*pw),ww=Math.min(W*.66,360),tg=gold?cloud(BIGBIRD,n):null;for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rnd(140,340)*S;BIRDS.push({x:SC.x+Math.cos(a)*SC.r*.2,y:SC.y+Math.sin(a)*SC.r*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ph:Math.random()*TAU,fr:rnd(10,15),s:rnd(.7,1.35)*S,age:-Math.random()*.6,gold:gold&&Math.random()<.65,tx:tg?tg[i%tg.length][0]:0,ty:tg?tg[i%tg.length][1]:0,th:Math.random()*TAU,R:rnd(40,125)*S,dir:Math.random()<.8?1:-1,ox:rnd(-.3,.3)*ww,oy:rnd(-50,40)*S,depth:0,lag:rnd(0,.14),rx:rnd(-.45,.45),ry:rnd(-.45,.45),hi:i/n})}SND.birds(n)}
-  if(G.anim==='fox'){G.lava=null;G.lv0=null;G.bl=0;G.fld=null}if(G.anim==='stag'){SND.stag();G.hp2=0;G.lv=null;G.tree=null;G.gfy=null;G.cr=null;G.lit=(!gold&&pw>=.5)?new Set():null;if(G.lit){FL.forEach(f=>{f.fl=0});try{SND.snuff()}catch(e){}}G.gz=null;G.gw=null;G.grass=null;G.bk=null;G.fw=null;G.rbs=null;G.lie=null;G.hp=0;G.fl0=0;G.su=null;G.rr=0;G.bw=0;G.bx=(!gold&&pw>=.5)?2.4:0}if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
+  if(G.anim==='fox'){G.lava=null;G.lv0=null;G.bl=0;G.fld=null}if(G.anim==='stag'){SND.stag();G.hp2=0;G.hrt=null;G.hok=0;G.lv=null;G.tree=null;G.gfy=null;G.cr=null;G.lit=(!gold&&pw>=.5)?new Set():null;if(G.lit){FL.forEach(f=>{f.fl=0});try{SND.snuff()}catch(e){}}G.gz=null;G.gw=null;G.grass=null;G.bk=null;G.fw=null;G.rbs=null;G.lie=null;G.hp=0;G.fl0=0;G.su=null;G.rr=0;G.bw=0;G.bx=(!gold&&pw>=.5)?2.4:0}if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
 /* ----- Palier 2 : le galop des livres (2★) et la constellation (3★) ----- */
 const STAG_TIPS=[[64,1],[81,25],[46,7],[75,9],[44,3],[27,26],[30,15]];
 function stagPath(u){const cx=W/2,cy=G.ay0-H*.02,rx=W*.32,ry=H*.09,th=Math.PI/2+u*2.5*Math.PI;return{x:cx+rx*Math.cos(th),y:cy+ry*Math.sin(th)-u*H*.08,f:.74+.26*Math.sin(th)}}
@@ -1195,6 +1195,18 @@ function stagRun(dt,now,sk){const T0=2.25,T1=6.25,SC=G.SC;
 function stagPose(ph,run,lie,fawn){const ls=stagLines(ph,run),dy=46*lie;
   const out=ls.map((l,i)=>{if(i>=1&&i<=4&&lie>0){const L0=l[0],a=(i>=3?1.5:-1.5)*lie,sc=1-.4*lie,c=Math.cos(a),s=Math.sin(a);return l.map(p=>{const vx=(p[0]-L0[0])*sc,vy=(p[1]-L0[1])*sc;return[L0[0]+vx*c-vy*s,L0[1]+dy+vx*s+vy*c]})}return l.map(([x,y])=>[x,y+dy])});
   return fawn?out.slice(0,7):out}
+/* ----- Palier 2, 3★ : une fois le cerf et ses deux faons réunis, la baguette trace un cœur (demande de Jimmy) ----- */
+const STH={t0:11.5,d:1.9,out:14.8};
+function stagHeartXY(u){const t=u*TAU,x=16*Math.pow(Math.sin(t),3),y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)),k=Math.min(W*.0115,H*.0075);return[W*.5+x*k,G.ay0-H*.165+y*k]}
+function stagHeartTip(){if(!G.gold||G.anim!=='stag'||G.state!=='spell'||!G.fw)return null;const sk=G.sk;if(sk<STH.t0-.7||sk>STH.t0+STH.d)return null;const u=clamp((sk-STH.t0)/STH.d),e=u<.5?2*u*u:1-2*(1-u)*(1-u);return{p:stagHeartXY(e),on:sk>=STH.t0,e}}
+function stagHeartUpd(){const h=stagHeartTip();if(h&&h.on){(G.hrt=G.hrt||[]).push(stagHeartXY(h.e));if(Math.random()<.7)spark(G.tip[0],G.tip[1],'#ffc9dc',1,70)}
+  if(!G.hok&&G.sk>STH.t0+STH.d){G.hok=1;const c=stagHeartXY(.5);const m=[W*.5,(stagHeartXY(0)[1]+c[1])/2];spark(m[0],m[1],'#ffd27a',40,300*S);spark(m[0],m[1],'#ffb3c8',30,240*S);try{[0,4,7,12].forEach((d,i)=>harp(at()+i*.16,pen(62,d)+12,.7))}catch(e){}}}
+function drawStagHeart(now,k,fa){const P=G.hrt;if(!P||P.length<2)return;const done=k>STH.t0+STH.d,pu=done?clamp((k-STH.t0-STH.d)/.5):0,bt=done?1+.05*Math.sin((k-STH.t0-STH.d)*6)*(1-clamp((k-STH.t0-STH.d-1)/.8)):1;
+  const c=[W*.5,(stagHeartXY(0)[1]+stagHeartXY(.5)[1])/2];ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(c[0],c[1]);ctx.scale(bt,bt);ctx.translate(-c[0],-c[1]);
+  if(pu>0)gdraw('#ff9ec0',c[0],c[1],W*.24,.35*pu*fa);ctx.lineCap=ctx.lineJoin='round';
+  const path=()=>{ctx.beginPath();P.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]))};
+  for(const [lw,col,al] of [[16*S,'#ff9ec0',.18],[7*S,'#ffd27a',.45],[2.6*S,'#fff4f8',.95]]){ctx.strokeStyle=hexA(col,al*fa*(1+.3*pu));ctx.lineWidth=lw;path();ctx.stroke()}
+  ctx.restore()}
 function stagGold(dt,now,sk){const cx=W*.58,gy=G.ay0+H*.05;G.ph+=dt*12;
   if(!G.fw){G.fw=[{sd:-1,t0:4.2,ph:0},{sd:1,t0:5.3,ph:1.3}].map(f=>Object.assign(f,{x:f.sd<0?-W*.15:W*1.15,yy:gy+H*.075,lie:0,asc:.4,aflip:f.sd<0?-1:1,run:false,th:0,hop:0}));
     G.lv=[];G.tree=null;G.grass=[]}
@@ -1215,7 +1227,7 @@ function stagGold(dt,now,sk){const cx=W*.58,gy=G.ay0+H*.05;G.ph+=dt*12;
       const bound=Math.abs(Math.sin(sk*3.2+i*1.7));f.yy=ey+Math.sin(f.th)*ry-bound*bound*22*S;f.run=true;f.ph+=dt*12;f.lie=0}
     else{const side=i===0?-1:1,tx=cx+side*W*.21,ty=gy+H*.06,u=clamp((sk-end)/1.1);if(f.lx==null){f.lx=f.x;f.ly=f.yy}const e=ease(u);f.x=lerp(f.lx,tx,e);f.yy=lerp(f.ly,ty,e);f.run=u<.75;if(f.run)f.ph+=dt*10;f.aflip=f.lx<tx?-1:1;if(u>=.75)f.aflip=side<0?-1:1;f.lie=ease(clamp((sk-end-.9)/.7))}});
   if(sk>4.2&&!G.hp){G.hp=1;try{[0,4,7].forEach((d,i)=>harp(at()+i*.2,pen(62,d)+12,.6))}catch(e){}}
-  if(sk>5.3&&!G.hp2){G.hp2=1;try{[2,7,11].forEach((d,i)=>harp(at()+i*.2,pen(62,d)+12,.6))}catch(e){}}}
+  if(sk>5.3&&!G.hp2){G.hp2=1;try{[2,7,11].forEach((d,i)=>harp(at()+i*.2,pen(62,d)+12,.6))}catch(e){}}stagHeartUpd()}
 function drawStagTree(now,k,fa){const T=G.tree;if(!T)return;const g=ease(clamp((k-T.t0)/1.6)),t=now/1000;if(g<=0)return;let seed=7;const rn=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
   const tips=[];ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
   const br=(x,y,ang,len,d)=>{const L=len*clamp(g*1.8-d*.22),x2=x+Math.cos(ang)*L,y2=y+Math.sin(ang)*L;if(L<=0)return;
@@ -1237,9 +1249,9 @@ function drawStagFX(now,k){const t=now/1000;ctx.save();ctx.globalCompositeOperat
       [-1,1].forEach(d=>{ctx.fillStyle=hexA(b.c,.55*a);ctx.strokeStyle=hexA('#ffffff',.9*a);ctx.lineWidth=1.2*S;ctx.beginPath();ctx.moveTo(0,s*.35);ctx.lineTo(d*s*sp,s*.15*sp+s*.25*(1-sp));ctx.lineTo(d*s*sp,-s*.55);ctx.lineTo(0,-s*.35);ctx.closePath();ctx.fill();ctx.stroke()});
       ctx.strokeStyle=hexA('#ffffff',.5*a*op);ctx.lineWidth=.8*S;for(let j=1;j<3;j++)[-1,1].forEach(d=>{ctx.beginPath();ctx.moveTo(d*s*.2,-s*.32+j*s*.2);ctx.lineTo(d*s*.8*sp,-s*.42+j*s*.2);ctx.stroke()});ctx.restore()}
     if(G.su>0&&G.su<1.5){const n=40;ctx.strokeStyle=hexA('#d6efff',.25*fa);ctx.lineWidth=3*S;ctx.setLineDash([2*S,10*S]);ctx.beginPath();for(let i=0;i<=n;i++){const p=stagPath(G.su+i/n*(1-G.su));const y=p.y+stagFoot(p.f)+4*S;i?ctx.lineTo(p.x,y):ctx.moveTo(p.x,y)}ctx.stroke();ctx.setLineDash([])}}
-  if(G.gold&&G.fw){const fa=clamp(1-(k-11.7)/.6);ctx.restore();drawStagTree(now,k,fa);drawStagLeaves(now,fa);
+  if(G.gold&&G.fw){const fa=clamp(1-(k-STH.out)/.6);ctx.restore();drawStagTree(now,k,fa);drawStagLeaves(now,fa);
     if(false){ctx.save();ctx.globalCompositeOperation='lighter';for(const r of G.rbs){const dt2=k-r.t0;if(dt2<0)continue;const x=(r.dir>0?-40*S:W+40*S)+r.dir*(r.v*dt2-r.off);if(x<-60*S||x>W+60*S)continue;const hop=Math.abs(Math.sin(dt2*7+r.ph));drawRabbit(x,r.y-hop*16*S,r.s,hop,r.dir,.95*fa)}ctx.restore()}
-    const sv=[G.ap,G.asc,G.aflip,G.arot,G.asy];for(const f of G.fw){if(f.x<-W*.3||f.x>W*1.3)continue;G.ap=[f.x,f.yy];G.asc=f.asc;G.aflip=f.aflip;G.arot=0;G.asy=1;drawAnimal(stagPose(f.ph,f.run,f.lie,true),1,fa*.95,'#ffffff','#ffd27a')}[G.ap,G.asc,G.aflip,G.arot,G.asy]=sv;return}
+    const sv=[G.ap,G.asc,G.aflip,G.arot,G.asy];for(const f of G.fw){if(f.x<-W*.3||f.x>W*1.3)continue;G.ap=[f.x,f.yy];G.asc=f.asc;G.aflip=f.aflip;G.arot=0;G.asy=1;drawAnimal(stagPose(f.ph,f.run,f.lie,true),1,fa*.95,'#ffffff','#ffd27a')}[G.ap,G.asc,G.aflip,G.arot,G.asy]=sv;drawStagHeart(now,k,fa);return}
   ctx.restore()}
 /* ----- Palier 2, 1★ : le cerf se promène et broute ----- */
 function stagGzP(p,gz,w){const q=rotAround(p,[86,96],-1.2*gz*w);return[q[0],q[1]+34*gz*w]}
@@ -1506,7 +1518,7 @@ function drawSpell(now,k){if(G.anim==='stag'&&G.state==='spell'){if(G.lit)drawCa
   if(G.gold)drawLegendFront(now,k,END);
   if(G.anim==='stag'||G.anim==='wolf'||G.anim==='fox'){const lines=animLines(),rev=clamp(k/1.5)*(weak?.8:1);let a;
     if(weak)a=G.anim==='stag'&&!G.fail?clamp(1-(k-7.4)/.7):k>1.6?clamp(1-(k-1.6)/1.2)*(.6+.4*Math.sin(now*.05)):1;
-    else if(G.anim==='stag')a=G.gold?clamp(1-(k-11.7)/.6):G.cr?clamp(1-(k-G.cr.end-1.1)/.4):clamp(1-(k-4.7)/.5);
+    else if(G.anim==='stag')a=G.gold?clamp(1-(k-STH.out)/.6):G.cr?clamp(1-(k-G.cr.end-1.1)/.4):clamp(1-(k-4.7)/.5);
     else if(G.anim==='fox')a=G.foxA;
     else a=clamp(1-(k-3.7)/.6);
     const col=G.gold?'#ffffff':pl.ink,gc=G.gold?'#ffd27a':pl.glow;if(a>0){drawAnimal(lines,rev,a*(.6+.4*G.power),col,gc);if(G.gold&&rev>.9&&G.anim!=='stag'&&G.anim!=='fox')runeRings(G.ap[0],G.ap[1],G.SC.r*1.05*G.asc,now,a*.8,1)}
