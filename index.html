@@ -881,7 +881,24 @@ function mergeSave(L,R){const nw=(R.ts||0)>(L.ts||0),B=JSON.parse(JSON.stringify
     if(G&&G.state==='map')showMap()}}
   cloudWrite()}catch(e){}})();
 // ---- version de sortie : false = version test (tout ouvert, liens Aperçu), true = version boutiques (Grand Grimoire payant) ----
-const RELEASE=false;
+// RELEASE : verrous du Grand Grimoire actifs seulement dans l'appli installée (Capacitor) ou si window.ENC_RELEASE=true avant le chargement ;
+// la version web de test reste ouverte (boutons « version test »).
+const RELEASE=!!(window.ENC_RELEASE||(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()));
+/* ---- achat intégré : adaptateur EncStore pour le plugin « cordova-plugin-purchase » (CdvPurchase v13) sous Capacitor.
+   Produit unique non consommable « grand_grimoire » (4,99 €) à créer dans la Google Play Console. Branché au démarrage de l'appli native ;
+   sans plugin (version web), doBuy affiche un message et rien ne change. ---- */
+const IAP_ID='grand_grimoire';
+function iapSetup(){const CP=window.CdvPurchase;if(!CP||window.EncStore)return;const {store,ProductType,Platform}=CP,PF=Platform.GOOGLE_PLAY;let wait=[];
+  const prod=()=>store.get(IAP_ID,PF),own=()=>{const p=prod();return !!(p&&p.owned)},
+    grant=()=>{if(own()){if(!SAVE.premium){SAVE.premium=1;save()}wait.splice(0).forEach(f=>f(true))}};
+  store.register([{id:IAP_ID,type:ProductType.NON_CONSUMABLE,platform:PF}]);
+  store.when().approved(t=>t.finish()).finished(grant).productUpdated(grant);
+  const ready=store.initialize([PF]).then(()=>{grant();try{if(typeof showMap==='function'&&G&&G.state==='map')showMap()}catch(e){}});
+  window.EncStore={
+    buy(){return ready.then(()=>{if(own()){grant();return true}const p=prod(),o=p&&p.getOffer&&p.getOffer();if(!o)return false;
+      return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v)}};wait.push(fin);o.order().then(err=>{if(err)fin(false)}).catch(()=>fin(false));setTimeout(()=>fin(own()),180000)})})},
+    restore(){return ready.then(()=>store.restorePurchases()).then(()=>{grant();return own()})}}}
+document.addEventListener('deviceready',iapSetup,false);if(document.readyState==='complete')setTimeout(iapSetup,0);else window.addEventListener('load',()=>setTimeout(iapSetup,0));
 function prem(i){return !RELEASE||!PAL[i]||!PAL[i].prem||!!SAVE.premium}
 function showBuy(){const b=$('buy');b.hidden=false;$('buyMsg').textContent=''}
 function doBuy(restore){const st=window.EncStore;if(!st||!(restore?st.restore:st.buy)){$('buyMsg').textContent='L\'achat sera disponible dans l\'application (App Store / Google Play).';return}
