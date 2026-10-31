@@ -207,23 +207,23 @@ const PAL=[
   {name:"L'Envol",inc:'Volare, aves !',room:"Le Hall de l'auberge",ink:'#ffe6a8',glow:'#ffb347',animal:'birds',tol:1.55,
    sig:[circ(0,0,1),[...qb([-.74,-.02],[-.4,-.48],[0,.1]),...qb([0,.1],[.4,-.48],[.74,-.02]).slice(1)],circ(0,.5,.17,40)],
    tip:'Un cercle, des ailes, un cœur.'},
-  {name:'Le Cerf de lune',inc:'Luna, cervus, lumen !',room:'La Bibliothèque',ink:'#d6efff',glow:'#6fc3ff',animal:'stag',tol:1.3,
+  {name:'Le Cerf de lune',inc:'Luna, cervus, lumen !',room:'La Bibliothèque',ink:'#d6efff',glow:'#6fc3ff',animal:'stag',tol:1.3,mg2:0.55,
    sig:[circ(0,0,1),ngon(.86,4),circ(0,.3,.2,40),[[-.36,-.42],[0,.06],[.36,-.42]]],tip:'Le cercle, le losange, la lune, puis les bois du cerf.'},
-  {name:"Le Loup d'argent",inc:'Lupus argenti, ulula !',room:'La Terrasse des cimes',ink:'#efe6ff',glow:'#a98bff',animal:'wolf',tol:1.2,
+  {name:"Le Loup d'argent",inc:'Lupus argenti, ulula !',room:'La Terrasse des cimes',ink:'#efe6ff',glow:'#a98bff',animal:'wolf',tol:1.2,mg2:0.44,
    sig:[circ(0,0,1),circ(0,0,.72),star4(.72,.24),lens(.3,.15)],tip:"Deux cercles, l'étoile, puis l'œil."},
-  {name:'Le Renard de braise',inc:'Ignis, vulpes, ardeo !',room:'Les Cuisines',ink:'#ffdcb4',glow:'#ff6a2a',animal:'fox',tol:1.15,
+  {name:'Le Renard de braise',inc:'Ignis, vulpes, ardeo !',room:'Les Cuisines',ink:'#ffdcb4',glow:'#ff6a2a',animal:'fox',tol:1.15,mg2:0.51,
    sig:[circ(0,0,1),[[-.6,-.26],[-.47,-.76],[-.17,-.36],[.17,-.36],[.47,-.76],[.6,-.26],[0,.56],[-.6,-.26]],
      [...qb([0,.3],[-.36,.08],[.04,-.26]),...qb([.04,-.26],[.32,.06],[0,.3]).slice(1)],
      [...Array.from({length:15},(_,i)=>{const a=Math.PI*(5/6-i*(2/3)/14);return[Math.cos(a)*.84,Math.sin(a)*.84]}),...qb([.73,.42],[.9,.12],[.62,.14]).slice(1)]],
    tip:'Le cercle, la tête du renard, la flamme, puis la queue.'},
-  {name:'La Baleine des astres',inc:'Astra, balena, canta !',room:'Le Sanctuaire des nuées',ink:'#e8fff8',glow:'#5ae0d0',animal:'whale',tol:1.24,
+  {name:'La Baleine des astres',inc:'Astra, balena, canta !',room:'Le Sanctuaire des nuées',ink:'#e8fff8',glow:'#5ae0d0',animal:'whale',tol:1.24,mg2:0.42,
    sig:[circ(0,0,1),
      [...qb([.66,.06],[.5,-.3],[.05,-.26]),...qb([.05,-.26],[-.35,-.22],[-.55,-.02]).slice(1),[-.75,-.2],[-.66,.02],[-.75,.22],[-.55,.06],...qb([-.55,.06],[-.2,.3],[.2,.27]).slice(1),...qb([.2,.27],[.55,.24],[.66,.06]).slice(1)],
      circ(.26,-.52,.14,36),
      Array.from({length:19},(_,i)=>{const t=i/18*Math.PI,x=Math.cos(t)*.3,y=Math.sin(t)*.13,c=Math.cos(-.35),sn=Math.sin(-.35);return[.26+x*c-y*sn,-.52+x*sn+y*c]}),
      Array.from({length:31},(_,i)=>{const x=-.5+i/30;return[x,.6-.1*Math.sin((x+.5)*3*Math.PI)]})],
    tip:'Le cercle, la baleine, la planète, son anneau, puis la vague.'},
-  {name:'Le Hibou des étoiles',inc:'Noctua, stellas aperi !',room:"La Tour aux étoiles",prem:1,ink:'#eef2ff',glow:'#8aa8ff',animal:'owl',tol:1.2,
+  {name:'Le Hibou des étoiles',inc:'Noctua, stellas aperi !',room:"La Tour aux étoiles",prem:1,ink:'#eef2ff',glow:'#8aa8ff',animal:'owl',tol:1.2,mg2:0.45,
    sig:[circ(0,0,1),[[-.5,-.64],[-.36,-.4],[-.52,-.16],[-.5,.14],[-.34,.36],[0,.46],[.34,.36],[.5,.14],[.52,-.16],[.36,-.4],[.5,-.64],[.2,-.49],[0,-.46],[-.2,-.49],[-.5,-.64]],circ(-.21,-.1,.16,36),circ(.21,-.1,.16,36),qb([-.58,.62],[0,.48],[.58,.62],24)],
    tip:'Le cercle, la tête et ses aigrettes, les deux yeux, puis la branche.'},
   {name:'Le Dragon de jade',inc:'Draco, pluvia, surge !',room:'La Serre',prem:1,ink:'#dcffe9',glow:'#3ee0a0',animal:'dragon',tol:1.6,mn2:.55,
@@ -233,10 +233,10 @@ const PAL=[
    sig:[circ(0,0,1),[...qb([0,-.72],[-.22,-.36],[-.1,-.22]),...qb([-.1,-.22],[0,-.12],[.1,-.22]).slice(1),...qb([.1,-.22],[.22,-.36],[0,-.72]).slice(1)],
      [[-.8,0],[-.56,-.3],[-.48,-.04],[-.28,-.24],[-.18,.06],[0,.16],[.18,.06],[.28,-.24],[.48,-.04],[.56,-.3],[.8,0]],qb([0,.28],[-.42,.46],[-.16,.78])],
    tip:'Le cercle, la flamme, les ailes, puis la queue.'},
-  {name:'Le Kirin',inc:'Kirin, per nubes, curre !',room:'Le Pont suspendu',prem:1,ink:'#fff3e0',glow:'#ff8ac0',animal:'kirin',tol:1.05,th3:.67,
+  {name:'Le Kirin',inc:'Kirin, per nubes, curre !',room:'Le Pont suspendu',prem:1,ink:'#fff3e0',glow:'#ff8ac0',animal:'kirin',tol:1.05,mg2:0.47,th3:.67,
    sig:[circ(0,0,1),Array.from({length:37},(_,i)=>{const t=i/36;return[-.62+1.24*t,.42-.16*Math.abs(Math.sin(t*3*Math.PI))]}),[[-.1,.16],[0,-.74],[.1,.16]],circ(0,-.08,.27,40)],
    tip:'Le cercle, le nuage, la corne, puis le soleil.'},
-  {name:"L'Arbre-monde",inc:'Arbor mundi, floresce !',room:'Le Cœur de la forêt',prem:1,ink:'#eaffd8',glow:'#9cff6a',animal:'tree',tol:1.08,
+  {name:"L'Arbre-monde",inc:'Arbor mundi, floresce !',room:'Le Cœur de la forêt',prem:1,ink:'#eaffd8',glow:'#9cff6a',animal:'tree',tol:1.08,mg2:0.4,
    sig:[circ(0,0,1),line([0,.72],[0,-.2]),Array.from({length:33},(_,i)=>{const a=Math.PI+i/32*Math.PI;return[Math.cos(a)*.62,-.05+Math.sin(a)*.62]}),qb([-.52,.56],[0,.92],[.52,.56]),circ(0,-.42,.14,32)],
    tip:'Le cercle, le tronc, la couronne, les racines, puis le cœur.'}
 ];
@@ -972,7 +972,7 @@ function scoreV2(strokes,pi){SCK._u=pi>=4||!!PAL[pi].u;const sig=PAL[pi].sig,tol
     const MI=sig.map(cinfo);best.pm.forEach((j,i)=>{let pf=1;best.pm.forEach((k,i2)=>{if(i2===i||k===j||!MI[k].round)return;const ex=Math.max(...sig[j].map(q=>Math.hypot(q[0]-MI[k].c[0],q[1]-MI[k].c[1])))/MI[k].r;if(ex>1.03||ex<.88)return;const dk=cinfo(NS[i2]),rp=radProfile(NS[i2],dk.c),pen=Math.max(...NS[i].map(q=>{const dx=q[0]-dk.c[0],dy=q[1]-dk.c[1];return Math.hypot(dx,dy)/rp(Math.atan2(dy,dx))}))-1;pf=Math.min(pf,.35+.65*clamp(1-(pen-SCK.crFree)/(SCK.crZero-SCK.crFree)))});C[i][j].cr=pf;C[i][j].f*=pf});
     const fs=best.pm.map((j,i)=>C[i][j].f),wm=best.sm/w.reduce((a,b)=>a+b,0),mn=Math.min(...fs);mnF=mn;fid=wm*.65+mn*.35;detail=best.pm.map((j,i)=>({m:j,...C[i][j]}))}
   let js=0,jl=0;strokes.forEach(st=>{const l=pathLen(st);js+=jitter(st)*l;jl+=l});const jit=js/(jl||1),stab=clamp(1-(jit-.5)/(1.3*tol));
-  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=(PAL[pi]&&PAL[pi].th3||SCK.th3)?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(PAL[pi]&&PAL[pi].mn2&&mnF<PAL[pi].mn2)stars=Math.min(stars,1);/* palier VII : un trait raté (éclair droit, perle mal placée…) empêche de passer */if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
+  const total=fid*((1-SCK.sw)+SCK.sw*stab);let stars=total>=(PAL[pi]&&PAL[pi].th3||SCK.th3)?3:total>=SCK.th2?2:total>=SCK.th1?1:0;if(mnF<.15)stars=Math.min(stars,1);if(PAL[pi]&&PAL[pi].mn2&&mnF<PAL[pi].mn2)stars=Math.min(stars,1);if(PAL[pi]&&PAL[pi].mg2&&detail.length&&Math.min(...detail.map(d=>d.fp*.45+d.fm*.3+d.fs*.25))<PAL[pi].mg2)stars=Math.min(stars,1);/* paliers II-VI, IX, X : un trait de mauvaise forme ou mal placé (forme seule, sans la longueur) plafonne à 1★ *//* palier VII : un trait raté (éclair droit, perle mal placée…) empêche de passer */if(detail.some(d=>d.ov<=.02))stars=0;return{cx,cy,r,dF:1-fid,fid,jit,stab,total,stars,detail}}
 function evaluate(rb){if(G.state!=='wait')return;let sc=score(G.strokes,G.pi);if(rb)sc=Object.assign(sc,{stars:rb.st,fid:rb.f,stab:rb.s,total:rb.t});const mn=Math.min(W,H*.62)*.24;
   if(!rb&&sc.r<mn){msg('Trace plus grand !',1800);G.strokes=[];G.sinfo=[];inkDirty=true;G.state='draw';return}
   G.rule=null;if(!rb&&!G.duel){try{G.rule=ruleCheck(G.strokes,G.pi,sc)}catch(e){G.rule=null}if(G.rule&&G.rule.broken&&sc.stars===3){sc.stars=2;sc.ruleCap=true}}
