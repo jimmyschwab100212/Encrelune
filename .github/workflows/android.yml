@@ -41,7 +41,7 @@ jobs:
         working-directory: app
         run: npm install --no-audit --no-fund
 
-      - name: Copie du jeu (version de test : interrupteur visible)
+      - name: "Copie du jeu (version de test, interrupteur visible)"
         working-directory: app
         run: ENC_TEST=1 npm run www
 
