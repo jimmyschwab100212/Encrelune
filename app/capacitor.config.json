@@ -1,0 +1,8 @@
+{
+  "appId": "com.jimmyschwab.encrelune",
+  "appName": "Encrelune",
+  "webDir": "www",
+  "backgroundColor": "#07060d",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false }
+}

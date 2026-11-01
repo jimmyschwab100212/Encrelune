@@ -1,0 +1,94 @@
+name: Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app/**'
+      - '.github/workflows/android.yml'
+      - '*.mp4'
+      - '*.mp3'
+      - '*.jpg'
+      - '*.png'
+      - '*.webp'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: '1.0.${{ github.run_number }}'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Dépendances
+        working-directory: app
+        run: npm install --no-audit --no-fund
+
+      - name: Copie du jeu (index.html + médias)
+        working-directory: app
+        run: npm run www
+
+      - name: Projet Android (Capacitor)
+        working-directory: app
+        run: |
+          npx cap add android
+          npx @capacitor/assets generate --android --iconBackgroundColor '#0d0b22' --splashBackgroundColor '#07060d'
+          node scripts/patch-android.js
+          npx cap sync android
+
+      - name: APK de test
+        working-directory: app/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Bundle signé pour Google Play (si la clé est fournie)
+        if: ${{ env.KS_B64 != '' }}
+        working-directory: app/android
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          ./gradlew bundleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASS"
+
+      - name: Fichiers produits
+        run: |
+          mkdir -p out
+          cp app/android/app/build/outputs/apk/debug/app-debug.apk out/encrelune-test.apk
+          cp app/android/app/build/outputs/bundle/release/app-release.aab out/encrelune-play.aab 2>/dev/null || true
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrelune-android
+          path: out/*
+
+      - name: Publier l'APK de test (lien direct pour le téléphone)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-test --yes --cleanup-tag 2>/dev/null || true
+          gh release create android-test out/encrelune-test.apk --prerelease \
+            --title "Encrelune — APK de test Android (build ${{ github.run_number }})" \
+            --notes "APK de test (non signé pour le Play Store). Installer depuis le téléphone, autoriser « sources inconnues » si demandé."
