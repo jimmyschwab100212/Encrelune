@@ -1199,7 +1199,7 @@ function drawAnimal(lines,rev,a,col,gc){const sl=lines.map(l=>l.map(([x,y])=>ani
 /* ----- boucle ----- */
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);if(G.state==='pcard'||G.state==='pwait')drawShareCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
-const SPELL_END={spirit:8.5,lune:12,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
+const SPELL_END={spirit:8.5,lune:16.3,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
 function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?(G.gold?15.8:12.4):G.anim==='fox'?11.9:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
 function update(dt,now){
   {const v=!!(G.train&&G.state==='draw');if(v!==tDemoV){tDemoV=v;$('tDemo').hidden=!v}}
@@ -1223,7 +1223,7 @@ function update(dt,now){
   if(G.state==='fizzle'&&k>2){if(G.moon)moonRetry();else showResult()}
   if(G.flash)G.flash=Math.max(0,G.flash-dt*2.2);if(G.moonB)G.moonB=Math.max(0,G.moonB-dt*.2);if(G.shake)G.shake=Math.max(0,G.shake-dt*3);if(G.zoom)G.zoom=Math.max(0,G.zoom-dt*1.4);
   for(const f of FL)if(f.fl)f.fl=Math.max(0,f.fl-dt*.6);
-  const hT=!cur&&(stagHeartTip()||vxTip()),tgt=cur?cur.pts[cur.pts.length-1]:hT?hT.p:restPos();if(!G.tip)G.tip=restPos();if(cur||(hT&&hT.on)){G.tip=[tgt[0],tgt[1]]}else{G.tip[0]=lerp(G.tip[0],tgt[0],1-Math.pow(.002,dt));G.tip[1]=lerp(G.tip[1],tgt[1],1-Math.pow(.002,dt))}
+  const hT=!cur&&(stagHeartTip()||vxTip()||luTip()),tgt=cur?cur.pts[cur.pts.length-1]:hT?hT.p:restPos();if(!G.tip)G.tip=restPos();if(cur||(hT&&hT.on)){G.tip=[tgt[0],tgt[1]]}else{G.tip[0]=lerp(G.tip[0],tgt[0],1-Math.pow(.002,dt));G.tip[1]=lerp(G.tip[1],tgt[1],1-Math.pow(.002,dt))}
   for(let i=P.length-1;i>=0;i--){const p=P[i];p.l+=pdt;if(p.l>p.m){P.splice(i,1);continue}p.x+=p.vx*pdt;p.y+=p.vy*pdt;p.vy+=(p.g||0)*pdt;p.vx*=.98;p.vy*=.98}
   for(let i=WAVES.length-1;i>=0;i--){WAVES[i].t+=pdt;if(WAVES[i].t>1)WAVES.splice(i,1)}
   if(G.state==='spell'){updateSpell(pdt,now);sigUpdate(pdt,now)}}
@@ -3266,7 +3266,7 @@ async function saveCard(){const b=CARD.blob;if(!b)return;const fn=`encrelune-pal
 
 window.__day={dayInfo,daySeal,startDay,dayStreak};
 /* ----- pleine lune : sceau secret ----- */
-const LUG={gold:16};
+const LUG={gold:18.4};
 // pleines lunes (Meeus, ch. 49) — précision de quelques minutes
 function fullMoonJD(k){const T=k/1236.85,T2=T*T,rad=Math.PI/180;let J=2451550.09766+29.530588861*k+.00015437*T2-.00000015*T2*T;
   const E=1-.002516*T-.0000074*T2,M=(2.5534+29.1053567*k-.0000014*T2)*rad,Mp=(201.5643+385.81693528*k+.0107582*T2)*rad,F=(160.7108+390.67050284*k-.0016118*T2)*rad,O=(124.7746-1.56375588*k+.0020672*T2)*rad,sn=Math.sin;
@@ -3330,7 +3330,7 @@ function drawMoonOrbs(now){const M=G.moon;if(!M||!M.aN)return;const t=now/1000,p
   const bob=Math.sin(t*1.7)*4*S;orbDraw(M.aN,sx,sy+bob,R,t*.4,.9,pl,.15+.15*Math.sin(t*3));
   if(G.moon.step===1&&G.state==='draw'&&!G.strokes.length){ctx.save();ctx.font=`italic 600 ${Math.round(13*S)}px "Cormorant Garamond",serif`;ctx.textAlign='center';ctx.fillStyle=hexA(pl.ink,.7);ctx.fillText('sceau I ✓',sx,sy+R+18*S);ctx.restore()}}
 /* le sort : fusion des deux sceaux, puis la pleine lune */
-function startLune(gold,pw){const M=G.moon,SC=G.SC;G.lu={merged:false,flare:false,named:false,rays:Array.from({length:9},(_,i)=>({a:-.55+i/8*1.1+rnd(-.05,.05),w:rnd(.02,.05),ph:rnd(0,TAU)}))};G.dim=0;SND.gust();G.shake=.5}
+function startLune(gold,pw){const M=G.moon,SC=G.SC;G.lf=lfSetup(gold);G.lu={merged:false,flare:false,named:false,rays:Array.from({length:9},(_,i)=>({a:-.55+i/8*1.1+rnd(-.05,.05),w:rnd(.02,.05),ph:rnd(0,TAU)}))};G.dim=0;SND.gust();G.shake=.5}
 function moonScr(){return BGD.moonS||toScr(MOON[0],MOON[1])}
 function lunePos(sk){const SC=G.SC,C=[SC.x,SC.y],A0=mSlot('A'),B0=mSlot('B');
   if(sk<1.2){const e=ease(clamp(sk/1.2));return{A:[A0[0],A0[1],34*S],B:[lerp(SC.x,B0[0],e),lerp(SC.y,B0[1],e),lerp(SC.r,34*S,e)]}}
@@ -3342,7 +3342,8 @@ function updateLune(dt,now){const sk=G.sk,M=G.moon,L=G.lu,SC=G.SC,gold=G.gold,pl
   if(sk>7.4){if(Math.random()<(gold?.9:.5))P.push({x:rnd(0,W),y:rnd(-20,H*.3),vx:rnd(-12,12),vy:rnd(25,70)*S,l:0,m:rnd(3,6),s:rnd(1,2.4),c:Math.random()<.7?pl.ink:'#ffffff'});
     SKY.tTrail=gold?1:.5;SKY.tAur=gold?1:.4;SKY.tSpin=gold?.25:.1;G.dim=Math.max(0,lerp(G.dim,.25,.02))}
   else if(sk>3.4)G.dim=lerp(G.dim,.55,.03);
-  if(sk>8.4&&!L.named){L.named=true;SND.star(2)}}
+  if(sk>LF.NM&&!L.named){L.named=true;SND.star(2)}
+  lfUpdate(sk)}
 function drawLuneSpell(now,k){const sk=G.sk,M=G.moon,pl=M.def,SC=G.SC,gold=G.gold,MS=moonScr(),t=now/1000;
   if(sk<3.4){const p=lunePos(sk);orbDraw(M.aN,p.A[0],p.A[1],p.A[2],t*.4+sk*sk*.8,1,pl,.3);orbDraw(M.bN,p.B[0],p.B[1],p.B[2],-t*.4-sk*sk*.8,1,pl,.3);
     if(sk>1.2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=hexA(pl.glow,.35*clamp((sk-1.2)/1));ctx.lineWidth=2*S;ctx.beginPath();ctx.moveTo(p.A[0],p.A[1]);ctx.quadraticCurveTo(SC.x,SC.y-30*S,p.B[0],p.B[1]);ctx.stroke();gdraw(pl.glow,SC.x,SC.y,SC.r*.9*clamp((sk-1.6)/1.8),.6);ctx.restore()}return}
@@ -3363,8 +3364,76 @@ function drawLuneSpell(now,k){const sk=G.sk,M=G.moon,pl=M.def,SC=G.SC,gold=G.gol
     const tp=st=>st.map(([px,py])=>[cx+(px*c-py*s)*r,cy+(px*s+py*c)*r]);
     if(inMoon){ctx.save();ctx.lineCap=ctx.lineJoin='round';ctx.strokeStyle=hexA(pl.glow,.9*sa);ctx.lineWidth=1.8*S;ctx.shadowColor=pl.glow;ctx.shadowBlur=8*S;fsig.forEach(st=>{tracePath(ctx,tp(st));ctx.stroke()});ctx.restore()}
     else fsig.forEach(st=>inkStroke(tp(st),pl.ink,pl.glow,sa,.5*(1-mv),Math.max(.5,r/140)))}
+  lfDraw(now);
   // nom de la lune
-  if(sk>8.4){const a=clamp((sk-8.4)/1.2)*clamp(((gold?LUG.gold:SPELL_END.lune)-sk)/1.2),y=H*.6;ctx.save();ctx.textAlign='center';ctx.globalAlpha=a;ctx.shadowColor=pl.glow;ctx.shadowBlur=22*S;ctx.fillStyle='#ffffff';ctx.font=`700 ${Math.round(28*S)}px "Cinzel Decorative",serif`;ctx.fillText(pl.nm,W/2,y);ctx.shadowBlur=8*S;ctx.fillStyle=hexA(pl.ink,.9);ctx.font=`italic 600 ${Math.round(17*S)}px "Cormorant Garamond",serif`;ctx.fillText('Pleine lune du '+M.d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),W/2,y+26*S);ctx.restore()}}
+  if(sk>LF.NM){const a=clamp((sk-LF.NM)/1.2)*clamp(((gold?LUG.gold:SPELL_END.lune)-sk)/1.2),y=H*.6;ctx.save();ctx.textAlign='center';ctx.globalAlpha=a;ctx.shadowColor=pl.glow;ctx.shadowBlur=22*S;ctx.fillStyle='#ffffff';ctx.font=`700 ${Math.round(28*S)}px "Cinzel Decorative",serif`;ctx.fillText(pl.nm,W/2,y);ctx.shadowBlur=8*S;ctx.fillStyle=hexA(pl.ink,.9);ctx.font=`italic 600 ${Math.round(17*S)}px "Cormorant Garamond",serif`;ctx.fillText('Pleine lune du '+M.d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),W/2,y+26*S);ctx.restore()}}
+/* ----- pleine lune : la baguette trace une branche, puis une fée qui s'éveille, vole et s'y pose ----- */
+const LF={B0:8,B1:9.5,F0:9.85,F1:11.5,FL0:11.95,FL1:13.8,NM:14.3,BR0:14.5,BR1:16.2};
+function lfBez(a,b,c,d,n){const o=[];for(let i=0;i<=n;i++){const t=i/n,u=1-t;o.push([u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]])}return o}
+function lfAt(pl,t){const i=Math.min(pl.length-1,Math.round(t*(pl.length-1)));return pl[i]}
+function lfCR(pts,closed,n=8){const o=[],N=pts.length,g=i=>closed?pts[(i+N)%N]:pts[Math.max(0,Math.min(N-1,i))];for(let i=0;i<(closed?N:N-1);i++){const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);for(let k=0;k<n;k++){const t=k/n,t2=t*t,t3=t2*t;o.push([0,1].map(j=>.5*(2*p1[j]+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t2+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t3)))}}o.push(closed?o[0]:pts[N-1]);return o}
+function lfWing(side,th,L,w){const o=[],b=[.05*side,-.5];for(let i=0;i<=40;i++){const a=i/40*TAU,x=L*(1-Math.cos(a))/2,y=w*Math.sin(a)*(.55+.45*(1-Math.cos(a))/2)*(1-.25*x/L),c=Math.cos(th),s=Math.sin(th);o.push([b[0]+side*(x*c-y*s),b[1]+(x*s+y*c)])}return o}
+function lfSetup(gold){const sg=(a,b,c,d,n)=>lfBez(a.map((v,i)=>v*(i?H:W)),b.map((v,i)=>v*(i?H:W)),c.map((v,i)=>v*(i?H:W)),d.map((v,i)=>v*(i?H:W)),n);
+  const main=sg([1.03,.165],[.84,.2],[.66,.29],[.4,.265],70),tw=(t,dx,dy,bx,by)=>{const p=lfAt(main,t),q=[p[0]+dx*W,p[1]+dy*H];return lfBez(p,[p[0]+bx*W,p[1]+by*H],[q[0]-bx*.3*W,q[1]-by*.6*H],q,24)};
+  const twigs=[tw(.28,-.05,-.075,-.005,-.04),tw(.5,-.07,.06,-.03,.035),tw(.86,-.07,-.04,-.035,-.005),tw(.66,.02,-.055,.01,-.03)];
+  const leaf=(p,a,l)=>{const o=[];for(let i=0;i<=16;i++){const u=i/16*TAU,x=l*(1-Math.cos(u))/2,y=l*.32*Math.sin(u),c=Math.cos(a),s=Math.sin(a);o.push([p[0]+x*c-y*s,p[1]+x*s+y*c])}return o};
+  const leaves=[];[[0,.55,-2.2],[0,.85,1.9],[1,.7,2.6],[1,1,1.2],[2,.6,-2.3],[2,1,-2.9],[3,1,-1.2]].forEach(([k,t,a])=>leaves.push(leaf(lfAt(twigs[k],t),a,15*S)));
+  const fl=[[0,.26],[0,.42],[1,.98],[1,.45],[2,1],[2,.55],[3,.97],[0,.12]].map(([k,t])=>k===0?lfAt(main,t):lfAt(twigs[k],t)),fl2=gold?[[0,.06],[0,.33],[1,.75],[2,.8],[0,.95]].map(([k,t])=>k===0?lfAt(main,t):lfAt(twigs[k],t)):[];
+  const body=lfCR([[0,-.74],[.14,-.6],[.09,-.28],[.22,.12],[.38,.5],[.2,.6],[0,.52],[-.2,.6],[-.38,.5],[-.22,.12],[-.09,-.28],[-.14,-.6]],true,7);
+  const head=[];for(let i=0;i<=28;i++){const a=-Math.PI/2+i/28*TAU;head.push([Math.cos(a)*.2,-.97+Math.sin(a)*.2])}
+  const wings=[lfWing(1,-.62,1.18,.46),lfWing(1,.42,.82,.3),lfWing(-1,-.62,1.18,.46),lfWing(-1,.42,.82,.3)];
+  const lp=lfAt(main,.73),fs=46*S;
+  return{main,twigs,leaves,fl:fl.concat(fl2),body,head,wings,fs,F:[W*.5,H*.45],lp,land:[lp[0],lp[1]-.6*fs*.68],dust:[],bridge:[],done:{},gold}}
+function lfBranchPaths(L){return[L.main,...L.twigs,...L.leaves]}
+function lfFairyPaths(L){return[L.body,L.head,...L.wings]}
+/* progression du tracé : une liste de chemins dessinés l'un après l'autre entre t0 et t1, au prorata de leur longueur */
+function lfProg(paths,t0,t1,sk){const cs=paths.map(polyC),Ls=cs.map(c=>c.cum[c.cum.length-1]),T=Ls.reduce((a,b)=>a+b,0),e=clamp((sk-t0)/(t1-t0));let rem=e*T;const out=[];let head=null;for(let i=0;i<cs.length;i++){if(rem<=0)break;const l=Math.min(rem,Ls[i]);out.push(l>=Ls[i]?cs[i].p:partial(cs[i],l));if(l<Ls[i]||i===cs.length-1){const q=out[out.length-1];head=q[q.length-1]}rem-=Ls[i]}if(!head&&out.length){const q=out[out.length-1];head=q[q.length-1]}return{out,head,e}}
+function lfFX(p,L,flap){const f=L.fs*(L.sc||1);return p.map(([x,y])=>[L.x+x*f*(flap==null?1:flap),L.y+y*f])}
+function luTip(){if(G.anim!=='lune'||G.state!=='spell'||!G.lf)return null;const L=G.lf,sk=G.sk||0;
+  if(sk>LF.B0-.5&&sk<LF.B0){return{p:L.main[0].map((v,i)=>i?v:W-14*S),on:false}}
+  if(sk>=LF.B0&&sk<=LF.B1){const g=lfProg(lfBranchPaths(L),LF.B0,LF.B1,sk);return g.head?{p:g.head,on:true}:null}
+  if(sk>LF.B1&&sk<LF.F0){return{p:[L.F[0],L.F[1]+(L.body[0][1])*L.fs],on:false}}
+  if(sk>=LF.F0&&sk<=LF.F1){L.x=L.F[0];L.y=L.F[1];L.sc=1;const g=lfProg(lfFairyPaths(L).map(q=>lfFX(q,L)),LF.F0,LF.F1,sk);return g.head?{p:g.head,on:true}:null}
+  return null}
+function lfFlight(L,sk){const u=clamp((sk-LF.FL0)/(LF.FL1-LF.FL0)),e=u*u*(3-2*u),a=L.F,d=L.land,b=[a[0]+W*.42,a[1]-H*.2],c=[d[0]-W*.38,d[1]-H*.16],m=1-e,p=[m*m*m*a[0]+3*m*m*e*b[0]+3*m*e*e*c[0]+e*e*e*d[0],m*m*m*a[1]+3*m*m*e*b[1]+3*m*e*e*c[1]+e*e*e*d[1]];p[0]+=Math.sin(u*Math.PI*4)*16*S*(1-u)*u*4;p[1]+=Math.cos(u*Math.PI*4)*10*S*(1-u)*u*4;return{p,u}}
+function lfBridgeHead(L,sk){const u=clamp((sk-LF.BR0-.4)/1.3);if(u<=0)return null;const MS=moonScr(),a=[L.x+.5*L.fs*L.sc,L.y-.25*L.fs*L.sc],c=[(a[0]+MS[0])/2,Math.min(a[1],MS[1])-H*.12],m=1-u;return[m*m*a[0]+2*m*u*c[0]+u*u*MS[0],m*m*a[1]+2*m*u*c[1]+u*u*MS[1]]}
+function lfUpdate(sk){const L=G.lf;if(!L)return;const pl=G.moon.def,D=L.done,fc=L.gold?'#ffd27a':'#ffc6ee';
+  if(sk>=LF.B0&&!D.b){D.b=1;SND.whoosh(.6)}
+  if(sk>=LF.F0&&!D.f){D.f=1;if(A){const t=at();[79,83,86,91,95,98].forEach((m,i)=>celesta(t+i*.26,m,.8,A.rev))}}
+  if(sk>=LF.FL0-.05&&!D.w){D.w=1;G.flash=.45;SND.pearl();spark(L.F[0],L.F[1],'#ffffff',40,260*S);spark(L.F[0],L.F[1],fc,30,200*S);WAVES.push({x:L.F[0],y:L.F[1],r:L.fs*.5,t:0,col:fc})}
+  if(sk>LF.FL0&&sk<LF.FL1){const f=lfFlight(L,sk);for(let i=0;i<2;i++)P.push({x:f.p[0]+rnd(-4,4)*S,y:f.p[1]+rnd(-2,6)*S,vx:rnd(-14,14)*S,vy:rnd(6,34)*S,l:0,m:rnd(.6,1.4),s:rnd(.8,2),c:Math.random()<.5?fc:'#ffffff'});if(A&&Math.random()<.045)celesta(at(),[86,90,93,98,102][Math.random()*5|0],.45,A.rev)}
+  if(sk>=LF.FL1&&!D.l){D.l=1;SND.bell();G.shake=.25;spark(L.land[0],L.land[1],fc,26,150*S);WAVES.push({x:L.land[0],y:L.land[1],r:10*S,t:0,col:fc})}
+  L.fl.forEach((q,i)=>{const t0=LF.FL1+.15+i*.13;if(sk>=t0&&!D['p'+i]){D['p'+i]=1;spark(q[0],q[1],fc,8,90*S);if(A)SND.lotus(i)}});
+  if(L.gold&&sk>=LF.BR0+.4&&!D.br){D.br=1;SND.whoosh(.4)}
+  if(L.gold&&sk>=LF.BR0+1.7&&!D.bm){D.bm=1;const MS=moonScr();G.flash=.35;SND.star(2);spark(MS[0],MS[1],'#ffffff',40,260*S);WAVES.push({x:MS[0],y:MS[1],r:H*.05,t:0,col:'#ffd27a'})}
+  if(L.gold&&sk>LF.BR0+.4&&sk<LF.BR0+1.75){const q=lfBridgeHead(L,sk);if(q)for(let i=0;i<3;i++)P.push({x:q[0]+rnd(-5,5)*S,y:q[1]+rnd(-5,5)*S,vx:rnd(-10,10)*S,vy:rnd(5,25)*S,l:0,m:rnd(.8,1.8),s:rnd(.9,2.4),c:Math.random()<.6?'#ffd27a':'#ffffff'})}}
+function lfStar(x,y,r,a,col){ctx.save();ctx.globalAlpha=a;ctx.fillStyle=col;ctx.beginPath();for(let i=0;i<8;i++){const rr=i%2?r*.28:r,an=i/8*TAU-Math.PI/2;ctx.lineTo(x+Math.cos(an)*rr,y+Math.sin(an)*rr)}ctx.closePath();ctx.fill();ctx.restore()}
+function lfBlossom(x,y,r,a,col,rot){ctx.save();ctx.globalCompositeOperation='lighter';gdraw(col,x,y,r*3.2,.4*a);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=a;for(let i=0;i<5;i++){const an=rot+i/5*TAU;ctx.fillStyle=hexA(col,.85);ctx.beginPath();ctx.ellipse(x+Math.cos(an)*r*.62,y+Math.sin(an)*r*.62,r*.55,r*.36,an,0,TAU);ctx.fill()}ctx.fillStyle='#fffbe8';ctx.beginPath();ctx.arc(x,y,r*.26,0,TAU);ctx.fill();ctx.restore()}
+function lfDraw(now){const L=G.lf;if(!L)return;const sk=G.sk,t=now/1000,pl=G.moon.def,end=L.gold?LUG.gold:SPELL_END.lune,fa=clamp((end-sk)/1.1),ink=L.gold?'#fff1c4':'#f4ecff',glo=L.gold?'#ffc24a':pl.glow,fc=L.gold?'#ffd27a':'#ffc6ee';if(sk<LF.B0||fa<=0)return;
+  // la branche (tracée, puis gardée en lumière d'argent)
+  const B=sk<=LF.B1?lfProg(lfBranchPaths(L),LF.B0,LF.B1,sk).out:lfBranchPaths(L),nm=1+L.twigs.length;
+  B.forEach((q,i)=>{if(i===0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';tracePath(ctx,q);ctx.strokeStyle=glo;ctx.globalAlpha=.13*fa;ctx.lineWidth=22*S;ctx.stroke();ctx.globalAlpha=.26*fa;ctx.lineWidth=11*S;ctx.stroke();const n=L.main.length-1;for(let c=0;c<6;c++){const k0=Math.round(c/6*n),k1=Math.min(q.length-1,Math.round((c+1)/6*n));if(k0>=q.length-1)break;ctx.beginPath();ctx.moveTo(q[k0][0],q[k0][1]);for(let k=k0+1;k<=k1;k++)ctx.lineTo(q[k][0],q[k][1]);ctx.globalAlpha=.92*fa;ctx.strokeStyle=ink;ctx.lineWidth=(7-5.2*(c+.5)/6)*S;ctx.stroke();ctx.globalAlpha=.6*fa;ctx.strokeStyle='#ffffff';ctx.lineWidth=(2.4-1.4*(c+.5)/6)*S;ctx.stroke()}ctx.restore()}
+    else inkStroke(q,ink,glo,fa*(i<nm?1:.85),0,i<nm?.75:.5)});
+  // la fée : tracée, puis éveillée
+  let flap=null,x=L.F[0],y=L.F[1],sc=1,awake=sk>=LF.FL0-.05;
+  if(sk>=LF.FL0){const f=lfFlight(L,sk);x=f.p[0];y=f.p[1];sc=lerp(1,.68,ease(clamp(f.u*1.4)));flap=sk<LF.FL1?.25+.75*Math.abs(Math.sin(t*26)):.78+.22*Math.sin(t*2.3)}
+  else if(sk>=LF.F1)flap=1-.12*Math.sin((sk-LF.F1)*9);
+  L.x=x;L.y=y+(sk>=LF.FL1?Math.sin(t*1.6)*1.2*S:0);L.sc=sc;
+  if(sk>=LF.F0&&sk<LF.FL0-.05){const fp=lfFairyPaths(L).map((q,i)=>lfFX(q,L,i>=2?flap:null));const g=sk<=LF.F1?lfProg(fp,LF.F0,LF.F1,sk).out:fp;g.forEach(q=>inkStroke(q,'#fff6fd',fc,1,.3,.7));
+    if(sk>LF.F1){const g2=clamp((sk-LF.F1)/.45);ctx.save();ctx.globalCompositeOperation='lighter';gdraw(fc,L.x,L.y-.2*L.fs,L.fs*2.4*g2,.45*g2);ctx.restore()}}
+  else if(awake){const f=L.fs*L.sc,X=q=>lfFX(q,L,null),Wg=q=>lfFX(q,L,flap);ctx.save();ctx.globalAlpha=fa;ctx.globalCompositeOperation='lighter';gdraw(fc,L.x,L.y-.2*f,f*2.6,.5);gdraw('#ffffff',L.x,L.y-.3*f,f*.9,.35);
+    L.wings.forEach((w,i)=>{const q=Wg(w),g=ctx.createRadialGradient(L.x,L.y-.5*f,0,L.x,L.y-.5*f,f*1.3);g.addColorStop(0,hexA('#ffffff',.5));g.addColorStop(.5,hexA(fc,.32));g.addColorStop(1,hexA(glo,.08));ctx.fillStyle=g;tracePath(ctx,q);ctx.fill();ctx.strokeStyle=hexA('#ffffff',.75);ctx.lineWidth=1.3*S;ctx.stroke()});
+    ctx.globalCompositeOperation='source-over';ctx.fillStyle=hexA('#fff9fe',.96);tracePath(ctx,X(L.body));ctx.fill();ctx.beginPath();ctx.arc(L.x,L.y-.97*f,.2*f,0,TAU);ctx.fill();
+    ctx.fillStyle=hexA(L.gold?'#ffcf6a':'#ffb3e6',.85);ctx.beginPath();ctx.arc(L.x-.05*f,L.y-1.04*f,.21*f,Math.PI*.9,Math.PI*2.05);ctx.fill();
+    {const wx=L.x+.5*f,wy=L.y-.25*f;ctx.strokeStyle=hexA('#fff6dc',.9);ctx.lineWidth=1.2*S;ctx.beginPath();ctx.moveTo(L.x+.1*f,L.y-.45*f);ctx.lineTo(wx,wy);ctx.stroke();ctx.globalCompositeOperation='lighter';gdraw(fc,wx,wy,9*S,.8);lfStar(wx,wy,(4+1.5*Math.sin(t*6))*S,1,'#ffffff')}
+    ctx.restore()}
+  // les fleurs qui s'ouvrent sur la branche
+  L.fl.forEach((q,i)=>{const t0=LF.FL1+.15+i*.13;if(sk<t0)return;const u=clamp((sk-t0)/.45),po=u<1?1+.35*Math.sin(u*Math.PI)*(1-u)+(u-1)*0:1,r=(i<8?8:6)*S*ease(u)*po;lfBlossom(q[0],q[1],r,fa,i<8?fc:'#ffffff',i*.7+t*.15)});
+  // lucioles autour de la fée posée
+  if(sk>LF.FL1){const n=L.gold?7:4,a0=clamp((sk-LF.FL1)/1);ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<n;i++){const an=t*(.7+i*.09)+i*TAU/n,rx=(34+i*5)*S,x2=L.x+Math.cos(an)*rx,y2=L.y-.2*L.fs*L.sc+Math.sin(an*1.3)*rx*.45;gdraw(fc,x2,y2,7*S,.55*a0*fa*(.6+.4*Math.sin(t*5+i)));gdraw('#ffffff',x2,y2,2.2*S,.9*a0*fa)}ctx.restore()}
+  // 3★ : la fée lève sa baguette, un pont d'étoiles file jusqu'à la lune
+  if(L.gold&&sk>LF.BR0+.4){const n=34,u=clamp((sk-LF.BR0-.4)/1.3),MS=moonScr(),a=[L.x+.5*L.fs*L.sc,L.y-.25*L.fs*L.sc],c=[(a[0]+MS[0])/2,Math.min(a[1],MS[1])-H*.12];ctx.save();ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<n;i++){const v=i/(n-1);if(v>u)break;const m=1-v,x2=m*m*a[0]+2*m*v*c[0]+v*v*MS[0],y2=m*m*a[1]+2*m*v*c[1]+v*v*MS[1],tw=.55+.45*Math.sin(t*7+i*1.7);gdraw('#ffd27a',x2,y2,7*S,.35*tw*fa);lfStar(x2,y2,(2.4+1.6*tw)*S,.9*fa,i%3?'#fff1c4':'#ffffff')}ctx.restore()}}
 function moonResult(){const M=G.moon,ra=M.res[0],rb=M.res[1]||G.res,st=Math.min(ra.stars,rb.stars);G.hush=false;G.hushM=false;G.blk=0;G.dim=0;G.state='result';$('quit').hidden=true;$('redo').hidden=true;
   G.moonRes={preview:M.preview};SAVE.moons=SAVE.moons||{};let note;
   if(M.preview)note='Aperçu · le vrai sceau s\'ouvrira le soir de la pleine lune';else{const o=SAVE.moons[M.key];if(!o||st>o.st)SAVE.moons[M.key]={st,t:+((ra.total+rb.total)/2).toFixed(3)};save();note=`Lunes invoquées : ${Object.keys(SAVE.moons).length}`}
