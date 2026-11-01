@@ -115,6 +115,64 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);overflow:hi
 #duel.bot .btns .btn.mini{margin-top:0}
 body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff #redo{display:none!important}
 #ffEnd{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;gap:10px;white-space:nowrap}#ffEnd[hidden]{display:none}#ffEnd .btn{padding:12px 20px;font-size:15px}#ffEnd .btn.sec{background:rgba(10,8,18,.8)}
+
+/* ===== Interface A : accueil « ciel vivant » et carte « Chemin des étoiles » ===== */
+#title.ta{padding:0;background:radial-gradient(120% 70% at 50% 18%,#1b1840 0%,#0d0b22 45%,#07060d 100%)}
+.ta .tsky{position:absolute;inset:0;width:100%;height:100%}
+.ta .tbox{position:relative;z-index:1;width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 22px calc(env(safe-area-inset-bottom,0px) + 18px);box-sizing:border-box}
+.ta h1{font-family:"Cinzel Decorative",serif;font-weight:700;font-size:clamp(40px,12.5vw,54px);margin:0;color:var(--gold);text-shadow:0 0 24px rgba(255,190,90,.55)}
+.ta .tsub{font-style:italic;font-size:19px;color:var(--dim);margin:2px 0 18px;text-align:center}
+.ta .tplay{width:100%;font-family:"Cinzel Decorative",serif;font-weight:700;font-size:23px;color:#1a1008;background:linear-gradient(#ffe2a0,#e0a84a);border:0;border-radius:999px;padding:14px 18px 11px;box-shadow:0 0 30px rgba(255,190,90,.5),inset 0 1px 0 #fff6;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;animation:tglow 2.6s ease-in-out infinite}
+.ta .tplay small{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:600;font-size:15px;color:#4a2e0c}
+@keyframes tglow{50%{box-shadow:0 0 44px rgba(255,190,90,.75),inset 0 1px 0 #fff6}}
+.ta .ttiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;margin:14px 0 6px}
+.tile{position:relative;border-radius:18px;padding:10px 4px 9px;color:var(--ink);font-family:"Cormorant Garamond",serif;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;background:rgba(255,210,122,.1);border:1px solid rgba(255,210,122,.45)}
+.tile b{font-size:15px;line-height:1.1}.tile span{font-size:13px;color:var(--gold)}
+.tile.lu{background:rgba(159,200,255,.08);border-color:rgba(159,200,255,.42)}.tile.lu span{color:#cfe4ff}
+.tile.sp{background:rgba(180,140,255,.08);border-color:rgba(180,140,255,.45)}.tile.sp span{color:#d9c4ff}
+.tile.hot{box-shadow:0 0 18px rgba(255,190,90,.45)}
+.tile i{position:absolute;top:-7px;right:8px;background:#ff8a5a;color:#1a0a04;font:700 12px/1 "Cormorant Garamond",serif;font-style:normal;border-radius:999px;padding:3px 7px}
+.ta .tfoot{display:flex;justify-content:space-between;align-items:center;width:100%}
+.ta .tfoot button{background:none;border:0;color:var(--gold);font-family:inherit;font-size:17px;min-height:44px;display:flex;align-items:center;gap:6px;cursor:pointer;padding:0}
+.sealdraw path,.sealdraw circle{stroke-dasharray:700;stroke-dashoffset:700;animation:sdraw 2.8s ease-out forwards}
+.sealdraw .d2{animation-delay:.6s}.sealdraw .d3{animation-delay:1.2s}.sealdraw .d4{animation-delay:1.8s}
+@keyframes sdraw{to{stroke-dashoffset:0}}
+#map.ma{padding:0;display:block;background:linear-gradient(#1a1440 0%,#120f30 38%,#0c0a1e 62%,#07060d 100%)}
+.ma #mapPanel{position:absolute;inset:0;display:flex;flex-direction:column}
+.mtop{flex:none;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 8px;display:flex;flex-direction:column;gap:9px;background:linear-gradient(rgba(7,6,13,.95),rgba(7,6,13,.6));z-index:2}
+.mtop .r1{display:flex;align-items:center;gap:10px;padding-right:96px;min-height:44px}
+.mtop h2{font-family:"Cinzel Decorative",serif;color:var(--gold);margin:0;font-size:22px;flex:1}
+.spill{display:flex;align-items:center;gap:7px;background:rgba(255,210,122,.12);border:1px solid rgba(255,210,122,.4);border-radius:999px;padding:5px 11px;font-weight:700;font-size:16px;white-space:nowrap}
+.spill u{display:block;width:52px;height:6px;border-radius:9px;background:rgba(243,230,200,.2);overflow:hidden;text-decoration:none}.spill u em{display:block;height:6px;background:var(--gold)}
+.mtop .ttiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mtop .tile{flex-direction:row;justify-content:center;gap:6px;min-height:44px;padding:6px 4px;border-radius:14px}
+.mscroll{flex:1;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;position:relative}
+.mpath{position:relative;margin:0 auto;max-width:430px}
+.mpath svg{position:absolute;left:0;top:0}
+.node{position:absolute;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;font-family:"Cinzel Decorative",serif;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-sizing:border-box}
+.node.done{background:radial-gradient(circle at 35% 30%,#3a2d14,#1a1308);border:2px solid var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(255,190,90,.35)}
+.node.cur{width:80px;height:80px;margin:-40px 0 0 -40px;font-size:24px;background:radial-gradient(circle at 35% 30%,#ffe8b0,#e0a84a 60%,#8a5a1a);border:3px solid #fff4d6;color:#2a1606;animation:npulse 1.8s ease-in-out infinite}
+@keyframes npulse{0%,100%{box-shadow:0 0 22px rgba(255,190,90,.55)}50%{box-shadow:0 0 44px rgba(255,190,90,.95);transform:scale(1.05)}}
+.node.lock{background:#15122a;border:2px solid rgba(243,230,200,.25);color:rgba(243,230,200,.5);cursor:default}
+.node.buy{cursor:pointer}
+.nst{position:absolute;width:90px;margin-left:-45px;text-align:center;color:var(--gold);font-size:13px;letter-spacing:1px;pointer-events:none}
+.nst s{color:rgba(243,230,200,.3);text-decoration:none}
+.nlab{position:absolute;font-style:italic;font-size:14px;color:var(--dim);white-space:nowrap;pointer-events:none;transform:translateY(-50%)}
+.nbub{position:absolute;transform:translateY(-50%);background:#fff4d6;color:#2a1606;border-radius:14px;padding:6px 12px;display:flex;flex-direction:column;box-shadow:0 6px 18px rgba(0,0,0,.45);cursor:pointer;border:0;font-family:"Cormorant Garamond",serif;text-align:left}
+.nbub b{font-family:"Cinzel Decorative",serif;font-size:14px}.nbub span{font-style:italic;font-size:13px}
+.mband{position:absolute;left:0;right:0;height:44px;margin-top:-22px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(255,210,122,0),rgba(255,210,122,.2),rgba(255,210,122,0));font-family:"Cinzel Decorative",serif;font-weight:700;font-size:12px;letter-spacing:.07em;color:var(--gold)}
+.mband small{font-family:"Cormorant Garamond",serif;font-weight:500;font-style:italic;letter-spacing:0;font-size:13px;color:var(--dim)}
+.msoon{position:absolute;transform:translate(-50%,-50%);background:rgba(255,210,122,.14);border:1px dashed rgba(255,210,122,.5);border-radius:12px;padding:5px 12px;font-style:italic;font-size:14px;color:var(--gold);white-space:nowrap}
+.mnav{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:rgba(10,8,20,.95);border-top:1px solid rgba(255,210,122,.25);padding-bottom:env(safe-area-inset-bottom,0px)}
+.mnav button{background:none;border:0;color:var(--dim);font-family:"Cormorant Garamond",serif;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:62px;cursor:pointer}
+.mnav button:first-child{color:var(--gold)}
+.msheet{position:absolute;left:0;right:0;bottom:0;z-index:3;max-height:82%;overflow:auto;touch-action:pan-y;background:var(--panel);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px);box-sizing:border-box;box-shadow:0 -20px 60px #000c}
+.mveil{position:absolute;inset:0;z-index:3;background:rgba(3,2,8,.55)}
+.msheet .x{display:block;margin:4px auto 0}
+.msheet h2{font-family:"Cinzel Decorative",serif;color:var(--gold);text-align:center;margin:0 0 14px;font-size:22px}
+.msheet .hint{text-align:center;color:var(--dim);font-style:italic}
+.msheet .tog{display:block;margin:4px auto 0}
+@media (max-height:520px){.ta .tsky{opacity:.3}.ta .tbox{justify-content:center}.ta .tsub{margin-bottom:10px}}
 </style>
 </head>
 <body>
@@ -125,15 +183,33 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
 <button id="mus" class="hud" aria-label="Couper ou remettre la musique">♪</button>
 <button id="tDemo" hidden>▶ Voir le tracé</button>
 
-<div id="title" class="ov"><div class="ttl">
+<div id="title" class="ov ta">
+<svg class="tsky" aria-hidden="true" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+  <defs><radialGradient id="tMoonG"><stop offset="0" stop-color="#ffe8b8" stop-opacity=".55"/><stop offset="1" stop-color="#ffe8b8" stop-opacity="0"/></radialGradient>
+  <radialGradient id="tSealG"><stop offset="0" stop-color="#ffd27a" stop-opacity=".38"/><stop offset=".6" stop-color="#ffb347" stop-opacity=".08"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+  <linearGradient id="tHill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151236"/><stop offset="1" stop-color="#07060d"/></linearGradient></defs>
+  <g fill="#fff4d6"><circle cx="24" cy="60" r="1.2" opacity=".7"/><circle cx="70" cy="128" r=".9" opacity=".5"/><circle cx="112" cy="40" r="1.4" opacity=".8"/><circle cx="160" cy="96" r=".8" opacity=".5"/><circle cx="214" cy="22" r="1.1" opacity=".7"/><circle cx="250" cy="150" r=".9" opacity=".6"/><circle cx="338" cy="210" r="1.2" opacity=".6"/><circle cx="370" cy="88" r=".8" opacity=".5"/><circle cx="18" cy="250" r="1" opacity=".6"/><circle cx="52" cy="330" r="1.3" opacity=".7"/><circle cx="362" cy="320" r="1" opacity=".5"/><circle cx="300" cy="400" r=".8" opacity=".4"/><circle cx="40" cy="470" r=".9" opacity=".4"/><circle cx="350" cy="520" r="1.1" opacity=".5"/><circle cx="90" cy="200" r=".7" opacity=".5"/><circle cx="190" cy="170" r=".9" opacity=".4"/></g>
+  <g stroke="#9fc8ff" stroke-width=".8" opacity=".55" fill="none"><path d="M30 150 L62 132 L92 150 L84 186 L48 190 Z"/><path d="M300 250 L326 236 L352 248 L344 276"/></g>
+  <g fill="#cfe4ff"><circle cx="30" cy="150" r="1.8"/><circle cx="62" cy="132" r="1.6"/><circle cx="92" cy="150" r="1.8"/><circle cx="84" cy="186" r="1.5"/><circle cx="48" cy="190" r="1.6"/><circle cx="300" cy="250" r="1.6"/><circle cx="326" cy="236" r="1.9"/><circle cx="352" cy="248" r="1.5"/><circle cx="344" cy="276" r="1.7"/></g>
+  <circle cx="320" cy="96" r="80" fill="url(#tMoonG)"/><circle cx="320" cy="96" r="30" fill="#f6efdc"/><circle cx="310" cy="88" r="5" fill="#e4dac0"/><circle cx="328" cy="106" r="7" fill="#e4dac0"/>
+  <circle cx="195" cy="290" r="150" fill="url(#tSealG)"/>
+  <g class="sealdraw" fill="none" stroke="#ffd27a" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="195" cy="290" r="104" stroke-width="2.4"/><circle class="d2" cx="195" cy="290" r="94" stroke-width=".8" opacity=".55"/>
+    <path class="d2" d="M195 204 L270 333 L120 333 Z" stroke-width="2.2"/><path class="d3" d="M195 376 L120 247 L270 247 Z" stroke-width="1.4" opacity=".65"/>
+    <circle class="d4" cx="195" cy="290" r="26" stroke-width="2"/><path class="d4" d="M181 290 Q195 272 209 290 Q195 308 181 290" stroke-width="1.6"/></g>
+  <circle cx="232" cy="333" r="12" fill="url(#tMoonG)"/><circle cx="232" cy="333" r="3.2" fill="#fff"/>
+  <path d="M236 337 L330 460" stroke="#6e4226" stroke-width="5" stroke-linecap="round"/><path d="M236 337 L262 371" stroke="#e8e8f4" stroke-width="5" stroke-linecap="round"/>
+  <path d="M0 640 Q90 590 190 622 T390 600 L390 844 L0 844 Z" fill="url(#tHill)"/>
+</svg>
+<div class="tbox">
   <h1>Encrelune</h1>
-  <div class="sub">Les sceaux de l'auberge des bois</div>
-  <p>Trace les sceaux à l'encre de lune.<br>Plus ta main est sûre, plus le sort est beau.</p>
-  <button class="btn" id="bStart">Entrer</button>
-  <button class="link" id="bAbout" style="display:block;margin:14px auto 0;font-size:16px">✦ Comment jouer ?</button>
+  <div class="tsub">Trace. Enchante. Vise les trois étoiles.</div>
+  <button class="tplay" id="bStart"><span>Jouer</span><small id="tCur">Palier I · L'Envol</small></button>
+  <div class="ttiles" id="tTiles"></div>
+  <div class="tfoot"><button id="bAbout">✦ Comment jouer</button><button id="bPaliers">★ <span id="tTot">0</span> / 30 · Les paliers</button></div>
 </div></div>
 
-<div id="map" class="ov" hidden><div class="panel" id="mapPanel"></div></div>
+<div id="map" class="ov ma" hidden><div id="mapPanel"></div></div>
 
 <div id="grim" class="ov" hidden><div class="panel" id="grimPanel"></div></div>
 
@@ -2760,12 +2836,38 @@ function showResult0(){SFX.on=false;SFX.list=[];$('bCard').hidden=true;$('bVid')
   const nx=$('bNext');nx.disabled=!(SAVE.stars[pi]>=2);nx.textContent=pi<PAL.length-1?'Palier suivant':'Grimoire accompli ✦';if(pi>=PAL.length-1)nx.disabled=true;if(!nx.disabled&&!prem(pi+1))nx.textContent='Débloquer le Grand Grimoire · 4,99 €';
   $('result').hidden=false}
 function showMap(){if(SPI)spiQuit();DF=null;if(SFX.list.length)sfxCut();duStop();liveHide();usePal5(null);recAbort();G={state:'map',pi:0,strokes:[],moonB:0};buildBG(0);['title','result','grim','trn','inc','duel','sav','rule','card'].forEach(id=>$(id).hidden=true);$('quit').hidden=true;$('redo').hidden=true;
-  const tot=SAVE.stars.reduce((a,b)=>a+b,0);let h=`<h2>Les Paliers</h2><p class="hint">★ ${tot} / 30 · il faut 2 étoiles pour avancer</p>${dayCard()}${moonCard()}${spiCard()}<button class="btn sec wide" data-g="1">📖 Mon grimoire</button><button class="btn sec wide" data-sv="1">💾 Ma sauvegarde</button><button class="btn sec wide" data-fb="1">💡 Une idée ? Un bug ?</button><button class="btn sec wide" data-ab="1">✦ Comment jouer ?</button><button class="btn sec wide" data-t="1">✍️ Entraînement</button><button class="btn sec mini tog" data-rit="1">🎙 Mode rituel : ${SAVE.rit===false?'désactivé':'activé'}</button><p class="hint" style="margin:6px 0 14px;font-size:14px">${SAVE.rit===false?'Le sort part dès que le sceau est tracé.':'Sceau parfait (3 étoiles) : prononce la formule pour libérer le sort légendaire.'}</p>`;
-  PAL.forEach((p,i)=>{if(i===5)h+=`<div class="sep">Le Grand Grimoire<small>${RELEASE?(SAVE.premium?'débloqué ✓':'5 paliers premium · 4,99 € les cinq'):'5 paliers premium · 4,99 € les cinq · ouverts pour les tests'}</small></div>`;
-    const reach=!!p.sig&&(i===0||SAVE.stars[i-1]>=2||(!RELEASE&&!!SAVE.allOpen)),open=reach&&prem(i),buy=reach&&!open,st=SAVE.stars[i];
-    h+=`<div class="pal${open?'':' lock'}" ${open?`data-p="${i}"`:buy?'data-buy="1"':''}><div class="n">${ROM[i]}</div><div><div class="nm">${p.name}</div><div class="rm">${p.room}</div></div><div class="st">${open?'★'.repeat(st)+'☆'.repeat(3-st):!p.sig?'bientôt':p.prem&&SAVE.stars[i-1]<2?'🔒 2★ au palier '+ROM[i-1]:buy?'🔒 4,99 €':p.prem?'🔒 payant':p.soon?'bientôt':'🔒 2★ requises'}</div></div>`});
-  if(!RELEASE)h+=`<button class="link" data-unl="1" style="margin:14px auto 4px;display:block;font-size:14px">${SAVE.allOpen?'🔒 Remettre les verrous (version test)':'🔓 Débloquer tous les paliers (version test)'}</button>`;
-  $('mapPanel').innerHTML=h;$('map').hidden=false}
+  const tot=SAVE.stars.reduce((a,b)=>a+b,0),cur=curPal(),Wc=Math.min(innerWidth,430),gap=96,top0=110,N=10;
+  const ys=i=>top0+(N-i)*gap+(i<5?50:0),xs=[.3,.62,.77,.5,.24,.33,.64,.77,.52,.28,.5],Hc=ys(0)+90,pts=[];for(let i=0;i<=N;i++)pts.push([xs[i]*Wc,ys(i)]);
+  const pathD=(a,b)=>{let d=`M${pts[a][0]} ${pts[a][1]}`;for(let i=a;i<b;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(N,i+2)];d+=` C${p1[0]+(p2[0]-p0[0])/6} ${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6} ${p2[1]-(p3[1]-p1[1])/6} ${p2[0]} ${p2[1]}`}return d};
+  const TINT=['','','','','','#7af0ff','#5affc0','#ff9a4a','#ff8ad0','#a0e678'];
+  let h=`<div class="mtop"><div class="r1"><h2>Les Paliers</h2><div class="spill">★ ${tot} / 30<u><em style="width:${Math.round(tot/30*100)}%"></em></u></div></div><div class="ttiles">${homeTiles(true)}</div></div>`;
+  h+=`<div class="mscroll" id="mScroll"><div class="mpath" style="width:${Wc}px;height:${Hc}px"><svg width="${Wc}" height="${Hc}" aria-hidden="true">${cur>0?`<path d="${pathD(0,cur)}" fill="none" stroke="#ffd27a" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>`:''}<path d="${pathD(cur,N)}" fill="none" stroke="#f3e6c8" stroke-opacity=".25" stroke-width="2.4" stroke-dasharray="2 9" stroke-linecap="round"/></svg>`;
+  const yb=(ys(4)+ys(5))/2;h+=`<div class="mband" style="top:${yb}px">Le Grand Grimoire · prise de vue réelle<small>${RELEASE?(SAVE.premium?'débloqué ✓':'5 paliers · 4,99 € les cinq'):'5 paliers premium · ouverts pour les tests'}</small></div>`;
+  for(let i=0;i<N;i++){const p=PAL[i];if(!p)continue;const [x,y]=pts[i],reach=!!p.sig&&(i===0||SAVE.stars[i-1]>=2||(!RELEASE&&!!SAVE.allOpen)),open=reach&&prem(i),buy=reach&&!open,st=SAVE.stars[i]||0,isC=open&&i===cur,right=xs[i]<.5;
+    const tint=TINT[i]?`style="left:${x}px;top:${y}px;border-color:${TINT[i]}${open?'':'66'}"`:`style="left:${x}px;top:${y}px"`;
+    const lockI='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+    h+=`<button class="node ${isC?'cur':open?'done':'lock'}${buy?' buy':''}" ${open?`data-p="${i}"`:buy?'data-buy="1"':''} ${tint} aria-label="Palier ${ROM[i]}, ${p.name}${open?', '+st+' étoiles':', verrouillé'}">${open||i>=5?ROM[i]:lockI}</button>`;
+    if(open&&!isC)h+=`<div class="nst" style="left:${x}px;top:${y+32}px">${'★'.repeat(st)}<s>${'★'.repeat(3-st)}</s></div>`;
+    if(isC)h+=`<button class="nbub" data-p="${i}" style="${right?`left:${x+48}px`:`right:${Wc-x+48}px`};top:${y}px"><b>Jouer</b><span>${p.name}</span>${st?`<span style="color:#9a6a14">${'★'.repeat(st)}${'☆'.repeat(3-st)}</span>`:''}</button>`;
+    else h+=`<div class="nlab" style="${right?`left:${x+38}px`:`right:${Wc-x+38}px`};top:${y}px">${p.name}${buy?' · 🔒 4,99 €':''}</div>`}
+  h+=`<div class="msoon" style="left:${pts[N][0]}px;top:${pts[N][1]}px">Bientôt · palier XI</div></div></div>`;
+  h+=`<nav class="mnav" aria-label="Navigation"><button data-g="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM4 21V5"/><path d="M9 8h7"/></svg>Grimoire</button><button data-men="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12C9 6 3 6 4 11c1 4 6 3 8 1zm0 0c3-6 9-6 8-1-1 4-6 3-8 1zm0 0v8"/></svg>Ménagerie</button><button data-rw="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 13h18M12 9v12M12 9C9 3 5 6 8 9m4 0c3-6 7-3 4 0"/></svg>Cadeaux</button><button data-more="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>Plus</button></nav>`;
+  $('mapPanel').innerHTML=h;$('map').hidden=false;
+  requestAnimationFrame(()=>{const sc=$('mScroll');if(sc)sc.scrollTop=Math.max(0,pts[cur][1]-sc.clientHeight*.55)})}
+function palOpen(i){const p=PAL[i];return !!p&&!!p.sig&&(i===0||SAVE.stars[i-1]>=2||(!RELEASE&&!!SAVE.allOpen))&&prem(i)}
+function curPal(){let c=0;for(let i=0;i<10;i++){if(palOpen(i)){c=i;if((SAVE.stars[i]||0)<2)return i}}return c}
+function homeTiles(compact){const sk=dayStreak(),dk=dayInfo().key,done=!!(SAVE.days||{})[dk],m=moonInfo(),best=(SAVE.spi&&SAVE.spi.best)||0;
+  const dd=m?Math.ceil((m.st-Date.now())/864e5):0,mo=m&&m.open;
+  const star='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd27a" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.2 7.2 7.3.1-5.9 4.4 2.2 7.3-5.8-4.4-5.8 4.4 2.2-7.3-5.9-4.4 7.3-.1z"/></svg>',
+    moon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfe4ff" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 7 7 0 0 0 20 14.5z"/></svg>',
+    spi='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d9c4ff" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 12a1.5 1.5 0 0 1 3 0 3 3 0 0 1-6 0 4.5 4.5 0 0 1 9 0 6 6 0 0 1-12 0 7.5 7.5 0 0 1 15 0"/></svg>';
+  if(compact)return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Du jour</b>${!done?'<i>1</i>':sk>1?`<i>${sk} j</i>`:''}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${mo?'Ce soir !':m?'J-'+dd:'Lune'}</b></button><button class="tile sp" data-tspi="1">${spi}<b>Spirale</b></button>`;
+  return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Sceau du jour</b><span>${done?(sk>1?`Série ${sk} jours ✓`:'fait ✓'):sk>0?`Série ${sk} j · à tracer`:'à tracer'}</span>${done?'':'<i>1</i>'}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${m?m.def.nm:'Pleine lune'}</b><span>${mo?'ce soir !':`dans ${dd} jour${dd>1?'s':''}`}</span></button><button class="tile sp" data-tspi="1">${spi}<b>La Spirale</b><span>${best?'record '+best:'sans fin'}</span></button>`}
+function mapSheet(kind){const P=$('mapPanel');P.querySelectorAll('.msheet,.mveil').forEach(e=>e.remove());let c='';
+  if(kind==='day')c=dayCard();else if(kind==='moon')c=moonCard()||'<p class="hint">Pas de pleine lune prévue.</p>';else if(kind==='spi')c=spiCard();
+  else c=`<h2>Plus</h2><button class="btn sec wide" data-t="1">✍️ Entraînement</button><button class="btn sec wide" data-sv="1">💾 Ma sauvegarde</button><button class="btn sec wide" data-fb="1">💡 Une idée ? Un bug ?</button><button class="btn sec wide" data-ab="1">✦ Comment jouer ?</button><button class="btn sec mini tog" data-rit="1">🎙 Mode rituel : ${SAVE.rit===false?'désactivé':'activé'}</button><p class="hint" style="margin:6px 0 4px;font-size:14px">${SAVE.rit===false?'Le sort part dès que le sceau est tracé.':'Sceau parfait (3 étoiles) : prononce la formule pour libérer le sort légendaire.'}</p>${RELEASE?'':`<button class="link" data-unl="1" style="margin:8px auto 0;display:block;font-size:14px">${SAVE.allOpen?'🔒 Remettre les verrous (version test)':'🔓 Débloquer tous les paliers (version test)'}</button>`}`;
+  P.insertAdjacentHTML('beforeend',`<div class="mveil" data-shx="1"></div><div class="msheet">${c}<button class="link x" data-shx="1">Fermer</button></div>`)}
+function titleRefresh(){const c=curPal(),p=PAL[c];$('tCur').textContent=`Palier ${ROM[c]} · ${p.name}`;$('tTot').textContent=SAVE.stars.reduce((a,b)=>a+(b||0),0);$('tTiles').innerHTML=homeTiles(false)}
 function thumb(c,i){const g=c.getContext('2d'),b=SAVE.best[i],pl=PAL[i],z=c.width;const gr=g.createRadialGradient(z/2,z/2,0,z/2,z/2,z*.7);gr.addColorStop(0,'#1c1530');gr.addColorStop(1,'#07050e');g.fillStyle=gr;g.fillRect(0,0,z,z);
   const strokes=b?b.k:pl.sig;g.lineCap=g.lineJoin='round';g.globalCompositeOperation='lighter';
   for(const [lw,al,col] of b?[[10,.18,pl.glow],[4,.4,pl.glow],[2.2,1,pl.ink],[.8,.8,'#ffffff']]:[[2,.18,'#ffffff']]){g.strokeStyle=col;g.globalAlpha=al;g.lineWidth=lw;strokes.forEach(s=>{tracePath(g,s.map(([x,y])=>[z/2+x*z*.38,z/2+y*z*.38]));g.stroke()})}}
@@ -3432,11 +3534,14 @@ async function defShare(){const r=G.res||{},pi=G.pi,pct=Math.round((r.total||0)*
 function defGo(){const d=DF;if(!d)return false;if(!prem(d.pi)){DF=null;showMap();setTimeout(()=>msg('Ce défi est dans le Grand Grimoire',3200),50);return true}startPalier(d.pi);return true}
 function voir(i,st){startPalier(i);G.replay=true;G.voir=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=PAL[i].sig.map(q=>q.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;const v=st===3?.96:st===2?.7:.45;setTimeout(()=>evaluate({st,f:v,s:v,t:v}),700)}
 function replay(i){const b=SAVE.best[i];if(!b)return;startPalier(i);G.replay=true;$('redo').hidden=true;G.state='wait';const r=Math.min(W*.36,H*.22),cx=W/2,cy=H*.4;G.strokes=b.k.map(s=>s.map(([x,y])=>[cx+x*r,cy+y*r,1]));inkDirty=true;setTimeout(()=>evaluate(b),700)}
-$('mapPanel').addEventListener('click',e=>{if(e.target.closest('[data-spi]')){SND.click();startSpi(true);return}const c=e.target.closest('[data-p]');if(c){SND.click();startPalier(+c.dataset.p);return}if(e.target.closest('[data-buy]')){SND.click();showBuy();return}if(e.target.closest('[data-unl]')){SND.click();SAVE.allOpen=!SAVE.allOpen;save();showMap();return}if(e.target.closest('[data-g]')){SND.click();showGrim();return}if(e.target.closest('[data-sv]')){SND.click();showSav();return}if(e.target.closest('[data-rw]')){SND.click();showRew();return}if(e.target.closest('[data-fb]')){SND.click();showFb();return}if(e.target.closest('[data-ab]')){SND.click();showPres(false);return}if(e.target.closest('[data-t]')){SND.click();showTrain();return}if(e.target.closest('[data-du]')){SND.click();showDuel();return}if(e.target.closest('[data-men]')){SND.click();showMen();return}if(e.target.closest('[data-dprev]')){SND.click();startDay(true);return}if(e.target.closest('[data-day]')){SND.click();startDay(false);return}if(e.target.closest('[data-mprev]')){SND.click();startMoon(true);return}if(e.target.closest('[data-moon]')){SND.click();startMoon(false);return}if(e.target.closest('[data-rit]')){SND.click();SAVE.rit=SAVE.rit===false;save();showMap()}});
+$('mapPanel').addEventListener('click',e=>{{const sh=e.target.closest('[data-shx]');if(sh){SND.click();$('mapPanel').querySelectorAll('.msheet,.mveil').forEach(x=>x.remove());return}const tk=e.target.closest('[data-tday],[data-tmoon],[data-tspi],[data-more]');if(tk){SND.click();mapSheet(tk.dataset.tday?'day':tk.dataset.tmoon?'moon':tk.dataset.tspi?'spi':'more');return}}if(e.target.closest('[data-spi]')){SND.click();startSpi(true);return}const c=e.target.closest('[data-p]');if(c){SND.click();startPalier(+c.dataset.p);return}if(e.target.closest('[data-buy]')){SND.click();showBuy();return}if(e.target.closest('[data-unl]')){SND.click();SAVE.allOpen=!SAVE.allOpen;save();showMap();mapSheet('more');return}if(e.target.closest('[data-g]')){SND.click();showGrim();return}if(e.target.closest('[data-sv]')){SND.click();showSav();return}if(e.target.closest('[data-rw]')){SND.click();showRew();return}if(e.target.closest('[data-fb]')){SND.click();showFb();return}if(e.target.closest('[data-ab]')){SND.click();showPres(false);return}if(e.target.closest('[data-t]')){SND.click();showTrain();return}if(e.target.closest('[data-du]')){SND.click();showDuel();return}if(e.target.closest('[data-men]')){SND.click();showMen();return}if(e.target.closest('[data-dprev]')){SND.click();startDay(true);return}if(e.target.closest('[data-day]')){SND.click();startDay(false);return}if(e.target.closest('[data-mprev]')){SND.click();startMoon(true);return}if(e.target.closest('[data-moon]')){SND.click();startMoon(false);return}if(e.target.closest('[data-rit]')){SND.click();SAVE.rit=SAVE.rit===false;save();showMap();mapSheet('more')}});
 $('savPanel').addEventListener('click',savClick);
 $('grimPanel').addEventListener('click',e=>{const tp=e.target.closest('[data-tp]');if(tp){SND.click();startTrain(+tp.dataset.tp);return}const r=e.target.closest('[data-r]');if(r){SND.click();replay(+r.dataset.r);return}if(e.target.closest('[data-back]')){SND.click();showMap()}});
 if(DF)$('bStart').insertAdjacentHTML('beforebegin',`<p class="hint" style="color:#ffd27a;margin:0 0 10px">⚔️ Un ami te défie : fais plus de ${DF.score} % au palier ${DF.pi+1} · ${PAL[DF.pi].name}</p>`);
-$('bStart').addEventListener('click',()=>{audioInit();SND.click();if(!SAVE.pres&&!VOIR&&!DF&&!(SAVE.stars||[]).some(x=>x>0)){showPres(true);return}if(VOIR){voir(VOIR.pi,VOIR.st);return}if(defGo())return;showMap()});
+$('bStart').addEventListener('click',()=>{audioInit();SND.click();if(!SAVE.pres&&!VOIR&&!DF&&!(SAVE.stars||[]).some(x=>x>0)){showPres(true);return}if(VOIR){voir(VOIR.pi,VOIR.st);return}if(defGo())return;const c=curPal();if(palOpen(c))startPalier(c);else showMap()});
+$('bPaliers').addEventListener('click',()=>{audioInit();SND.click();showMap()});
+$('tTiles').addEventListener('click',e=>{const tk=e.target.closest('[data-tday],[data-tmoon],[data-tspi]');if(!tk)return;audioInit();SND.click();showMap();mapSheet(tk.dataset.tday?'day':tk.dataset.tmoon?'moon':'spi')});
+try{titleRefresh()}catch(e){console.warn(e)}
 $('bAbout').addEventListener('click',()=>{audioInit();SND.click();showPres(false)});
 $('presPanel').addEventListener('click',e=>{if(e.target.id==='presOk'){SND.click();presClose()}});
 $('bDef').addEventListener('click',()=>{SND.click();defShare()});
