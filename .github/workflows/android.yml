@@ -24,6 +24,7 @@ jobs:
     env:
       VERSION_CODE: ${{ github.run_number }}
       VERSION_NAME: '1.0.${{ github.run_number }}'
+      HAS_KS: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -57,7 +58,7 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Bundle signé pour Google Play (si la clé est fournie)
-        if: ${{ env.KS_B64 != '' }}
+        if: ${{ env.HAS_KS == 'true' }}
         working-directory: app/android
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
