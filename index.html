@@ -412,9 +412,9 @@ function schedule(){
   if(G.hush){A.music.gain.cancelScheduledValues(t0);A.music.gain.setTargetAtTime(0,t0,.012);A.amb.gain.setTargetAtTime(0,t0,.03);A.next=t0+.05;return}
   A.amb.gain.setTargetAtTime(1,t0,.8);
   A.music.gain.setTargetAtTime(SAVE.mute?0:big?1:.8,t0,.6);
-  if(G.el){elMusic(t0);return}
-  const e8=60/180;if(A.next<t0)A.next=t0+.05;
-  while(A.next<t0+.3){const t=A.next,s=A.step%6,bar=Math.floor(A.step/6),bi=bar%8,ph=Math.floor(bar/8)%3,r=CROOT[bi],pc=CPAD[bi];
+  if(G.el){if(!SAVE.mute)elMusic(t0);return}
+  const e8=60/180;if(A.next<t0||SAVE.mute)A.next=t0+.05;
+  while(!SAVE.mute&&A.next<t0+.3){const t=A.next,s=A.step%6,bar=Math.floor(A.step/6),bi=bar%8,ph=Math.floor(bar/8)%3,r=CROOT[bi],pc=CPAD[bi];
     if(G.moon&&G.pi!==10&&st!=='title'&&st!=='map'){moonMusic(t,s,bar,MEIGHTH);A.step++;A.next+=MEIGHTH;continue}
     if(G.pi===10&&st!=='title'&&st!=='map'){const ch=GCH[bar%4];if(s===0)A.pads.forEach((o,i)=>o.frequency.setTargetAtTime(hz(ch[i%4]+(i>=4?12:0)),t,1.1));gardenMusic(t,s,bar,GEIGHTH);A.step++;A.next+=GEIGHTH;continue}
     if(s===0)A.pads.forEach((o,i)=>o.frequency.setTargetAtTime(hz(pc[i%4]+(i>=4?12:0)),t,.9));
@@ -971,7 +971,7 @@ function mergeSave(L,R){const nw=(R.ts||0)>(L.ts||0),B=JSON.parse(JSON.stringify
 // ---- version de sortie : false = version test (tout ouvert, liens Aperçu), true = version boutiques (Grand Grimoire payant) ----
 // RELEASE : verrous du Grand Grimoire actifs seulement dans l'appli installée (Capacitor) ou si window.ENC_RELEASE=true avant le chargement ;
 // la version web de test reste ouverte (boutons « version test »).
-const RELEASE=!!(window.ENC_RELEASE||(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()));
+const RELEASE=!window.ENC_TEST&&!!(window.ENC_RELEASE||(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()));
 /* ---- achat intégré : adaptateur EncStore pour le plugin « cordova-plugin-purchase » (CdvPurchase v13) sous Capacitor.
    Produit unique non consommable « grand_grimoire » (4,99 €) à créer dans la Google Play Console. Branché au démarrage de l'appli native ;
    sans plugin (version web), doBuy affiche un message et rien ne change. ---- */
@@ -3630,7 +3630,7 @@ $('tDemo').addEventListener('click',()=>{SND.click();if(!G.train||G.state!=='dra
 $('tGuide').addEventListener('click',()=>{SND.click();SAVE.tguide=!(SAVE.tguide!==false);save();startTrain(G.pi)});
 $('tOther').addEventListener('click',()=>{SND.click();showTrain()});
 $('quit').addEventListener('click',()=>{stopRec();$('inc').hidden=true;SND.click();SND.inkOff();cur=null;if(G.res&&!G.replay&&!(G.day||G.moon||G.duel||G.train||G.ff)&&['charge','bloom','spell','fizzle'].includes(G.state)){G.skipped=true;sfxCut();liveHide();showResult();$('result').hidden=true}if(G.ff||G.duel||G.state==='duSpell'||G.state==='duEnd'||G.state==='duSeal'){showDuel();return}showMap()});
-function musUI(){$('mus').classList.toggle('off',!!SAVE.mute)}musUI();$('mus').addEventListener('click',()=>{SAVE.mute=!SAVE.mute;save();musUI();audioInit()});
+function musUI(){$('mus').classList.toggle('off',!!SAVE.mute)}musUI();$('mus').addEventListener('click',()=>{SAVE.mute=!SAVE.mute;save();musUI();audioInit();if(SAVE.mute&&A){const t=A.ac.currentTime;A.music.gain.cancelScheduledValues(t);A.music.gain.setTargetAtTime(0,t,.05)}});
 $('redo').addEventListener('click',()=>{if(G.state!=='draw'||cur)return;if(!G.strokes.length){msg('Rien à effacer',900);return}if(!(G.rep>0)){msg('Plus de repentir pour cet essai',1500);return}SND.click();G.strokes.pop();if(G.sinfo)G.sinfo.pop();G.rep--;G.lastEnd=null;inkDirty=true;msg(G.rep?'Repentir · il t\'en reste '+G.rep:'Dernier repentir utilisé',1300);updRep()});
 function updRep(){const b=$('redo'),n=G.rep>0?G.rep:0,k=n+(G.state==='draw'&&G.strokes&&G.strokes.length?'y':'n');if(b._k===k)return;b._k=k;b.innerHTML='↺<i>'+n+'</i>';b.style.opacity=n?'':'.45';b.setAttribute('aria-label','Repentir : effacer le dernier trait ('+n+' restant'+(n>1?'s':'')+')')}
 /* ================= DUEL DE SCEAUX : deux joueurs, un seul téléphone ================= */

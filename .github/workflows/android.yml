@@ -41,9 +41,9 @@ jobs:
         working-directory: app
         run: npm install --no-audit --no-fund
 
-      - name: Copie du jeu (index.html + médias)
+      - name: Copie du jeu (version de test : interrupteur visible)
         working-directory: app
-        run: npm run www
+        run: ENC_TEST=1 npm run www
 
       - name: Projet Android (Capacitor)
         working-directory: app
@@ -67,6 +67,7 @@ jobs:
           KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          (cd .. && npm run www && npx cap sync android)
           ./gradlew bundleRelease --no-daemon \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
             -Pandroid.injected.signing.store.password="$KS_PASS" \
