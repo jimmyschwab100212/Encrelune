@@ -53,6 +53,11 @@ jobs:
           node scripts/patch-android.js
           npx cap sync android
 
+      - name: Clé de test fixe (les mises à jour s'installent par-dessus)
+        run: |
+          mkdir -p ~/.android
+          cp app/resources/debug.keystore ~/.android/debug.keystore
+
       - name: APK de test
         working-directory: app/android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
