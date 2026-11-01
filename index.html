@@ -915,7 +915,7 @@ function showSav(){['map','grim'].forEach(id=>$(id).hidden=true);const st=SAVE.s
   <button class="btn sec wide" id="svLoad">📥 Charger ce code</button><p class="hint" id="svMsg" style="min-height:22px;margin-top:8px"></p>
   <button class="link" id="svBack">← Retour aux paliers</button>`;$('sav').hidden=false}
 /* ---- boîte à idées : e-mail pré-rempli, sans serveur ---- */
-const FB_MAIL='schwab.jimmy91@gmail.com';
+const FB_MAIL='Jimmysch.app@gmail.com';
 function showFb(kind){['map','grim'].forEach(id=>$(id).hidden=true);kind=kind||'idee';
   const b=(k,t)=>`<button class="btn ${kind===k?'':'sec'} mini" data-fk="${k}">${t}</button>`;
   $('savPanel').innerHTML=`<h2>Une idée ? Un bug ?</h2><p class="hint" style="font-size:15px">Dis-moi ce qui t’a plu, ce qui t’a bloqué ou ce que tu aimerais voir dans Encrelune. Chaque message est lu.</p>
