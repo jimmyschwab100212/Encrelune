@@ -999,7 +999,11 @@ function doBuy(restore){const st=window.EncStore;if(!st||!(restore?st.restore:st
 const OFF=0;const WG={cut:1.6,end:15};let PLAN=[],STARS2=[],SHOOT=[];let cur=null,P=[],BIRDS=[],BLOOMS=[],RINGS=[],RIPS=[],WAVES=[],CONST=null,VINES=[],METS=[],ORBS=[];
 const $=id=>document.getElementById(id);
 const inkCv=document.createElement('canvas'),inkC=inkCv.getContext('2d');let inkDirty=true;
-function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';inkCv.width=cv.width;inkCv.height=cv.height;inkDirty=true;
+// qualité adaptative : si le téléphone peine (images trop lentes plusieurs secondes), moins de pixels et moins de particules, mémorisé pour les parties suivantes
+const QL={lo:(()=>{try{return localStorage.getItem('encQ')==='lo'}catch(e){return false}})(),ema:16,bad:0};
+function pcap(){return QL.lo?140:260}
+function qlTick(ms){if(QL.lo||document.hidden||ms>250)return;QL.ema+=(ms-QL.ema)*.05;if(QL.ema>30)QL.bad+=ms;else QL.bad=Math.max(0,QL.bad-ms*.5);if(QL.bad>2500){QL.lo=true;try{localStorage.setItem('encQ','lo')}catch(e){}try{resize()}catch(e){}}}
+function resize(){DPR=Math.min(devicePixelRatio||1,QL.lo?1.5:2);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';inkCv.width=cv.width;inkCv.height=cv.height;inkDirty=true;
   const cs=getComputedStyle(document.documentElement);ST=parseFloat(cs.paddingTop)||0;SB=parseFloat(cs.paddingBottom)||0;S=clamp(Math.min(W,H*.56)/390,.78,1.35);BGK='';buildBG(G.pi);if(G.state==='draw')G.ghost=G.train?sigScreen(PAL[G.pi].sig,W/2,H*.4,Math.min(W*.36,H*.22)):ghostLines()}
 addEventListener('resize',resize);
 function restPos(){return[W*.64,H-SB-262*S]}
@@ -1142,7 +1146,11 @@ let NREC=null,recTok=0;
 function phon(t){return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z ]/g,' ').replace(/qu/g,'k').replace(/ph/g,'f').replace(/c(?=[eiy])/g,'s').replace(/[cq]/g,'k').replace(/h/g,'').replace(/y/g,'i').replace(/w/g,'v').replace(/(eau|au)/g,'o').replace(/(ou)/g,'u').replace(/([a-z])\1+/g,'$1').replace(/\s+/g,' ').trim()}
 function lev(a,b){const m=a.length,n=b.length;let d=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){let pr=d[0];d[0]=i;for(let j=1;j<=n;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,pr+(a[i-1]===b[j-1]?0:1));pr=t}}return d[n]}
 function simW(a,b){if(!a||!b)return 0;return 1-lev(a,b)/Math.max(a.length,b.length)}
-function incMatch(heard,f){const H=phon(heard).split(' ').filter(Boolean),F=phon(f).split(' ').filter(Boolean);const lit=F.map(w=>Math.max(0,...H.map(h=>simW(h,w)))>=.5);const all=simW(H.join(''),F.join(''));return{lit,score:Math.max(all,lit.filter(Boolean).length/F.length)}}
+// formule reconnue si la phrase entendue (ou un morceau) ressemble à 75 % au moins à la formule, sons comparés et non lettres
+function incMatch(heard,f){const H=phon(heard).split(' ').filter(Boolean),F=phon(f).split(' ').filter(Boolean),fj=F.join('');
+  const lit=F.map(w=>Math.max(0,...H.map(h=>simW(h,w)))>=.6);let all=0;
+  for(let a=0;a<H.length;a++)for(let b=a+1;b<=H.length;b++)all=Math.max(all,simW(H.slice(a,b).join(''),fj));
+  return{lit,score:all,ok:all>=.75}}
 function incRender(lit){const f=PAL[G.pi].inc,ws=f.split(' ');$('iF').innerHTML=ws.map((w,i)=>`<span class="${lit&&lit[i]?'lit':''}">${w}</span>`).join(' ')}
 function incStatus(t){$('iS').textContent=t}
 function startIncant(){G.state='incant';G.t0=performance.now();incTry=0;G.vg=0;$('iF').className='';incRender(null);$('quit').hidden=false;$('redo').hidden=true;
@@ -1158,8 +1166,8 @@ function incFail(why){stopRec();incTry++;if(why==='dead'){srDead=true;$('iMic').
 async function listenN(P){
   const my=++recTok,f=PAL[G.pi].inc;let best={lit:null,score:0},heard='',ended=false;const n={P,hs:[]};NREC=n;
   const live=()=>my===recTok&&G.state==='incant'&&NREC===n;
-  const take=ts=>{if(!live())return;G.vg=Math.max(G.vg,.7);for(const t of ts||[]){const m=incMatch(t,f);if(m.score>best.score){best=m;heard=t}}incRender(best.lit);if(best.score>=.6)incDone(true)};
-  const fin=()=>{if(ended||!live())return;ended=true;if(best.score>=.45||(incTry>=1&&heard.replace(/\s/g,'').length>=6))incDone(true);else incFail()};
+  const take=ts=>{if(!live())return;G.vg=Math.max(G.vg,.7);for(const t of ts||[]){const m=incMatch(t,f);if(m.score>best.score){best=m;heard=t}}incRender(best.lit);if(best.ok)incDone(true)};
+  const fin=()=>{if(ended||!live())return;ended=true;if(best.ok)incDone(true);else incFail()};
   $('iMic').classList.add('on');incStatus('J\'écoute…');
   try{
     try{const av=await P.available();if(av&&av.available===false){incFail('dead');return}}catch(e){}
@@ -1178,10 +1186,10 @@ async function listenN(P){
 function listen(){if(srDead||G.state!=='incant')return;stopRec();const NP=SRN();if(NP){listenN(NP);return}let r;try{r=new SRC()}catch(e){incFail('dead');return}REC=r;r.lang='fr-FR';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
   const f=PAL[G.pi].inc;let best={lit:null,score:0},heard='';$('iMic').classList.add('on');incStatus('J\'écoute…');
   r.onresult=e=>{G.vg=Math.max(G.vg,.7);for(let i=0;i<e.results.length;i++)for(let j=0;j<e.results[i].length;j++){const t=e.results[i][j].transcript;const m=incMatch(t,f);if(m.score>best.score){best=m;heard=t}}
-    incRender(best.lit);if(best.score>=.6)incDone(true)};
+    incRender(best.lit);if(best.ok)incDone(true)};
   r.onspeechstart=()=>{G.vg=Math.max(G.vg,.5)};
   r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'||e.error==='audio-capture')incFail('dead');else if(e.error==='no-speech')incFail('Je n\'ai rien entendu… parle plus fort.');else incFail()};
-  r.onend=()=>{if(G.state!=='incant'||REC!==r)return;if(best.score>=.45||(incTry>=1&&heard.replace(/\s/g,'').length>=6))incDone(true);else incFail()};
+  r.onend=()=>{if(G.state!=='incant'||REC!==r)return;if(best.ok)incDone(true);else incFail()};
   try{r.start()}catch(e){incFail('dead')}}
 
 /* ----- rendu de l'encre ----- */
@@ -1235,7 +1243,7 @@ function drawAnimal(lines,rev,a,col,gc){const sl=lines.map(l=>l.map(([x,y])=>ani
 
 /* ----- boucle ----- */
 let last=performance.now();
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);if(G.state==='pcard'||G.state==='pwait')drawShareCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);qlTick(now-last);last=now;try{update(dt,now);if(G.pi===5)skyStep(dt);if(PSTEP[G.pi])PSTEP[G.pi](dt,now);glFrame(now);render(now,dt);if(FXX){if(!FXX.used&&FXC.style.display!=='none')FXC.style.display='none';FXX.used=false}if(G.state==='dcard'||G.state==='dwait')drawDayCard(now);if(G.state==='pcard'||G.state==='pwait')drawShareCard(now);recFrame()}catch(err){console.error(err)}requestAnimationFrame(frame)}
 const SPELL_END={spirit:8.5,lune:16.3,birds:5.8,stag:5.6,wolf:6.4,fox:5.4,whale:6.6,owl:6.6};const OWG={end:14.5};let FEA=[];
 function goldEnd(){if(SPX[G.anim])return G.lvid?1e9:SPX[G.anim].gold;return G.anim==='stag'?(G.gold?15.8:12.4):G.anim==='fox'?11.9:G.anim==='spirit'?SPG.gold:G.anim==='lune'?LUG.gold:G.anim==='whale'?WG.end:G.anim==='owl'?OWG.end:SPELL_END[G.anim]+2}
 function update(dt,now){
@@ -1262,6 +1270,7 @@ function update(dt,now){
   for(const f of FL)if(f.fl)f.fl=Math.max(0,f.fl-dt*.6);
   const hT=!cur&&(stagHeartTip()||vxTip()||luTip()),tgt=cur?cur.pts[cur.pts.length-1]:hT?hT.p:restPos();if(!G.tip)G.tip=restPos();if(cur||(hT&&hT.on)){G.tip=[tgt[0],tgt[1]]}else{G.tip[0]=lerp(G.tip[0],tgt[0],1-Math.pow(.002,dt));G.tip[1]=lerp(G.tip[1],tgt[1],1-Math.pow(.002,dt))}
   for(let i=P.length-1;i>=0;i--){const p=P[i];p.l+=pdt;if(p.l>p.m){P.splice(i,1);continue}p.x+=p.vx*pdt;p.y+=p.vy*pdt;p.vy+=(p.g||0)*pdt;p.vx*=.98;p.vy*=.98}
+  if(P.length>pcap())P.splice(0,P.length-pcap());
   for(let i=WAVES.length-1;i>=0;i--){WAVES[i].t+=pdt;if(WAVES[i].t>1)WAVES.splice(i,1)}
   if(G.state==='spell'){updateSpell(pdt,now);sigUpdate(pdt,now)}}
 function render(now,dt){
@@ -1983,7 +1992,7 @@ function sgLantern(x,y,s,fl,al){const w=9*s,h=12*s;gdraw('#ff9a40',x,y,h*3.2,.35
   ctx.fillStyle=hexA('#c0502a',.6*al);ctx.fillRect(x-w*.5,y+h/2-1.5*s,w,2*s);gdraw('#fff3c8',x,y+h*.25,w*.75,.9*al*fl)}
 function sgFlame(x,y,s,a,c1,c2,fl){const h=16*s*(1+.18*fl);ctx.fillStyle=hexA(c2,.55*a);ctx.beginPath();ctx.moveTo(x,y-h);ctx.quadraticCurveTo(x+7*s,y-h*.35,x+5*s,y);ctx.arc(x,y,5*s,0,Math.PI);ctx.quadraticCurveTo(x-7*s,y-h*.35,x,y-h);ctx.fill();
   ctx.fillStyle=hexA(c1,.85*a);ctx.beginPath();ctx.moveTo(x,y-h*.62);ctx.quadraticCurveTo(x+3.2*s,y-h*.2,x+2.4*s,y+1*s);ctx.arc(x,y+1*s,2.4*s,0,Math.PI);ctx.quadraticCurveTo(x-3.2*s,y-h*.2,x,y-h*.62);ctx.fill();gdraw(c2,x,y-h*.3,h*1.6,.4*a)}
-function sgTrail(h,col,w,a){if(h.length<2||a<=.01)return;for(let i=1;i<h.length;i++){const f=1-i/h.length;ctx.strokeStyle=hexA(col,a*f);ctx.lineWidth=Math.max(.5,w*f);ctx.beginPath();ctx.moveTo(h[i-1][0],h[i-1][1]);ctx.lineTo(h[i][0],h[i][1]);ctx.stroke()}}
+function sgTrail(h,col,w,a){const n=h.length;if(n<2||a<=.01)return;const B=Math.min(n-1,QL.lo?3:5),st=(n-1)/B;ctx.lineJoin='round';for(let b=0;b<B;b++){const i0=Math.round(b*st),i1=Math.round((b+1)*st);if(i1<=i0)continue;const f=1-((i0+i1)/2+.5)/n;ctx.strokeStyle=hexA(col,a*f);ctx.lineWidth=Math.max(.5,w*f);ctx.beginPath();ctx.moveTo(h[i0][0],h[i0][1]);for(let i=i0+1;i<=i1;i++)ctx.lineTo(h[i][0],h[i][1]);ctx.stroke()}}
 function sgLinesAt(lines,x0,y0,sc,fl,col,gc,a,step=1){lines.forEach(l=>{const p=[];for(let i=0;i<l.length;i+=step)p.push([x0+(l[i][0]-100)*sc*fl,y0+(l[i][1]-188)*sc]);inkStroke(p,col,gc,a,.2,.6)})}
 function sgBolt(x0,y0,x1,y1,n,jit){const p=[[x0,y0]];for(let i=1;i<n;i++){const t=i/n;p.push([lerp(x0,x1,t)+rnd(-1,1)*jit,lerp(y0,y1,t)+rnd(-.3,.3)*jit])}p.push([x1,y1]);return p}
 function sgPoly(p,col,w,a){if(p.length<2)return;ctx.strokeStyle=hexA(col,a);ctx.lineWidth=w;ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke()}
@@ -2008,7 +2017,7 @@ SIG.birds={init(X,g){const n=g?8:5,cs=['#ffd27a','#ffb347','#fff3c8','#ffe0a0','
     const tc0=n?[cx/n,cy/n]:(BGD.chand||[W/2,H*.15]),tc=[lerp(tc0[0],W/2,.5),lerp(tc0[1],H*.34,.55)];X.c=X.c?[lerp(X.c[0],tc[0],1-Math.pow(.1,dt)),lerp(X.c[1],tc[1],1-Math.pow(.1,dt))]:tc;
     const cv=X.on?clamp((X.u-.55)/.35):0,m=(1-.6*cv)*(1+X.rel*.8);X.cv=cv;
     for(const r of X.rb){const th=r.ph+G.st*r.sp*1.6,Rx=W*.4*r.r*m,Ry=H*.19*r.r*m;r.h.unshift([X.c[0]+Math.cos(th)*Rx*(1+.2*Math.sin(G.st*1.3+r.ph)),X.c[1]+Math.sin(th)*Ry+Math.sin(2*th+r.ph)*Ry*.35]);if(r.h.length>22)r.h.length=22}
-    X.va+=(X.on?(g?26:16):(g?9:5))*X.I*dt;while(X.va>1){X.va--;if(X.vf.length<(g?90:55))X.vf.push({ang:rnd(0,TAU),rad:rnd(.25,1)*W*.38,y:rnd(-.4,.4)*H*.16,w:rnd(.8,1.6)*(Math.random()<.5?1:-1),s:rnd(.8,1.5)*S,a:rnd(0,TAU),va:rnd(-2,2),l:0,m:rnd(2.5,4.5),c:Math.random()<.5?'#ffd27a':'#fff3c8',x:0,yy:0})}
+    X.va+=(X.on?(g?26:16):(g?9:5))*X.I*dt;while(X.va>1){X.va--;if(X.vf.length<(g?(QL.lo?45:90):(QL.lo?30:55)))X.vf.push({ang:rnd(0,TAU),rad:rnd(.25,1)*W*.38,y:rnd(-.4,.4)*H*.16,w:rnd(.8,1.6)*(Math.random()<.5?1:-1),s:rnd(.8,1.5)*S,a:rnd(0,TAU),va:rnd(-2,2),l:0,m:rnd(2.5,4.5),c:Math.random()<.5?'#ffd27a':'#fff3c8',x:0,yy:0})}
     for(let i=X.vf.length-1;i>=0;i--){const f=X.vf[i];f.l+=dt;if(f.l>f.m){X.vf.splice(i,1);continue}f.ang+=f.w*dt*(1+cv*2);f.rad*=1-dt*.05*(1+cv*3);f.y+=12*S*dt;f.a+=f.va*dt;f.x=X.c[0]+Math.cos(f.ang)*f.rad;f.yy=X.c[1]+f.y+Math.sin(f.ang)*f.rad*.28}
     if(X.on){FL.forEach(f=>f.fl=Math.max(f.fl||0,.5+.6*X.u));if(A&&G.st>X.nc){X.nc=G.st+rnd(.3,.75);try{chirp(at(),.9,A.music)}catch(e){}}}
     if(g&&Math.random()<(X.on?.6:.25)*X.I)sgAdd(X,{k:'fe',z:1,x:rnd(0,W),y:-10,vx:rnd(-15,15),vy:rnd(40,80)*S,l:0,m:rnd(4,6),s:rnd(.8,1.3)*S,a:rnd(0,TAU),va:rnd(-1.5,1.5),sw:30*S,sf:1.8,ph:rnd(0,TAU),c:'#ffd27a'})},
@@ -3291,12 +3300,12 @@ async function vidShare(){const v=G.vidRes;if(!v||!v.blob)return;const b=$('bVid
   try{const u=URL.createObjectURL(v.blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),6e4);say('Vidéo téléchargée ✓')}catch(e){say('Impossible ici')}}
 // enregistrement vidéo du sort
 let RECV=null;
-function recStart(){RECV=null;try{if(!window.MediaRecorder||!cv.captureStream)return;const w=720,h=Math.round(720*H/W/2)*2,rc=document.createElement('canvas');rc.width=w;rc.height=h;const rx=rc.getContext('2d'),vs=rc.captureStream(30),tr=[...vs.getVideoTracks()];let d=null;
+function recStart(){RECV=null;try{if(!window.MediaRecorder||!cv.captureStream)return;const w0=QL.lo?480:720,fps=QL.lo?20:24,w=w0,h=Math.round(w0*H/W/2)*2,rc=document.createElement('canvas');rc.width=w;rc.height=h;const rx=rc.getContext('2d'),vs=rc.captureStream(fps),tr=[...vs.getVideoTracks()];let d=null;
   if(A&&A.ac.createMediaStreamDestination){d=A.ac.createMediaStreamDestination();A.master.connect(d);tr.push(...d.stream.getAudioTracks())}
   const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
-  const mr=new MediaRecorder(new MediaStream(tr),mt?{mimeType:mt,videoBitsPerSecond:5e6}:undefined),ch=[];const R={mr,rc,rx,d,ch,blob:null,ext:((mr.mimeType||mt||'')+'').includes('mp4')?'mp4':'webm'};
+  const mr=new MediaRecorder(new MediaStream(tr),mt?{mimeType:mt,videoBitsPerSecond:QL.lo?2.5e6:4e6}:undefined),ch=[];const R={mr,rc,rx,d,ch,fps,lt:0,blob:null,ext:((mr.mimeType||mt||'')+'').includes('mp4')?'mp4':'webm'};
   mr.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};mr.onstop=()=>{if(ch.length)R.blob=new Blob(ch,{type:mr.mimeType||mt||'video/webm'});const cb=R.done;R.done=null;cb&&cb()};mr.start(1000);RECV=R}catch(e){console.warn('rec',e);RECV=null}}
-function recFrame(){if(RECV&&RECV.mr.state==='recording')try{const R=RECV,w=R.rc.width,h=R.rc.height;R.rx.drawImage(cv,0,0,w,h);
+function recFrame(){if(RECV&&RECV.mr.state==='recording')try{const R=RECV,w=R.rc.width,h=R.rc.height,tn=performance.now();if(tn-R.lt<1000/R.fps-6)return;R.lt=tn;R.rx.drawImage(cv,0,0,w,h);
   if(G.lvid&&G.liveSrc&&LIVE&&LIVE.v[G.liveSrc]){const v=LIVE.v[G.liveSrc];if(v.readyState>=2&&v.videoWidth&&v.currentTime>.05){const a=clamp((performance.now()-G.liveT0)/600),vw=v.videoWidth,vh=v.videoHeight,q=Math.max(w/vw,h/vh);R.rx.save();R.rx.globalAlpha=a;R.rx.drawImage(v,(vw-w/q)/2,(vh-h/q)/2,w/q,h/q,0,0,w,h);R.rx.restore()}}}catch(e){}}
 function recStop(cb){const R=RECV;if(!R||R.mr.state==='inactive'){cb&&cb();return}let fired=false;const f=()=>{if(fired)return;fired=true;cb&&cb()};R.done=f;try{R.mr.stop()}catch(e){f()}setTimeout(f,2500);try{A.master.disconnect(R.d)}catch(e){}}
 function recAbort(){const R=RECV;RECV=null;if(R){R.done=null;try{R.mr.stop()}catch(e){}try{A.master.disconnect(R.d)}catch(e){}}}
