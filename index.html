@@ -1135,7 +1135,10 @@ function shareRecOn(){return !(G.day||G.moon||G.duel||G.train||G.ff||G.replay||G
 function goCharge(){G.state='charge';G.t0=performance.now();G.spT0=G.t0;SFX.list=[];SFX.on=!(G.day||G.moon||G.duel||G.train);G.vidRes=null;G.shHold=false;if(shareRecOn())recStart();if(G.fail)SND.dud();else SND.ignite()}
 
 // ——— Incantation (mode rituel) ———
-const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;let REC=null,incTry=0;const IN_FRAME=(()=>{try{return window.top!==window.self}catch(e){return true}})();let srDead=!SRC||IN_FRAME;
+const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;let REC=null,incTry=0;const IN_FRAME=(()=>{try{return window.top!==window.self}catch(e){return true}})();let srDead=(!SRC||IN_FRAME)&&!SRN();
+// reconnaissance vocale native (iOS / Android, application Capacitor) : le navigateur intégré n'en a pas
+function SRN(){try{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.SpeechRecognition||null}catch(e){return null}}
+let NREC=null,recTok=0;
 function phon(t){return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z ]/g,' ').replace(/qu/g,'k').replace(/ph/g,'f').replace(/c(?=[eiy])/g,'s').replace(/[cq]/g,'k').replace(/h/g,'').replace(/y/g,'i').replace(/w/g,'v').replace(/(eau|au)/g,'o').replace(/(ou)/g,'u').replace(/([a-z])\1+/g,'$1').replace(/\s+/g,' ').trim()}
 function lev(a,b){const m=a.length,n=b.length;let d=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){let pr=d[0];d[0]=i;for(let j=1;j<=n;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,pr+(a[i-1]===b[j-1]?0:1));pr=t}}return d[n]}
 function simW(a,b){if(!a||!b)return 0;return 1-lev(a,b)/Math.max(a.length,b.length)}
@@ -1146,13 +1149,33 @@ function startIncant(){G.state='incant';G.t0=performance.now();incTry=0;G.vg=0;$
   if(srDead){$('iMic').hidden=true;$('iSay').textContent='✦ Je l\'ai dite · lancer le sort';$('iSay').className='btn';incStatus('Dis-la fort, avec conviction…')}
   else{$('iMic').hidden=false;$('iMic').textContent='🎙 Prononcer';$('iSay').className='link';$('iSay').textContent='Je l\'ai dite · lancer le sort';incStatus('Touche le micro, puis prononce la formule.')}
   $('inc').hidden=false;try{SND.bell()}catch(e){}}
-function stopRec(){if(REC){try{REC.onresult=REC.onerror=REC.onend=null;REC.abort()}catch(e){}REC=null}$('iMic').classList.remove('on')}
+function stopRec(){recTok++;if(NREC){const n=NREC;NREC=null;try{Promise.resolve(n.P.stop()).catch(()=>{})}catch(e){}(n.hs||[]).forEach(h=>{try{Promise.resolve(h.remove&&h.remove()).catch(()=>{})}catch(e){}})}if(REC){try{REC.onresult=REC.onerror=REC.onend=null;REC.abort()}catch(e){}REC=null}$('iMic').classList.remove('on')}
 function incDone(voiced){if(G.state!=='incant')return;stopRec();G.state='incantOk';$('iF').className='ok';incRender(PAL[G.pi].inc.split(' ').map(()=>1));
   if(voiced){G.power=Math.min(1,G.power*1.12);incStatus('La formule résonne dans le sceau…')}else incStatus('');
   G.vg=1.4;setTimeout(()=>{$('inc').hidden=true;if(G.state==='incantOk')goCharge()},voiced?900:450)}
 function incFail(why){stopRec();incTry++;if(why==='dead'){srDead=true;$('iMic').hidden=true;$('iSay').className='btn';$('iSay').textContent='✦ Je l\'ai dite · lancer le sort';incStatus('Micro indisponible ici : dis-la à voix haute, puis lance le sort.');return}
   $('iMic').textContent='🎙 Encore une fois';if(incTry>=2){$('iSay').className='btn';$('iSay').textContent='✦ Lancer le sort quand même'}incStatus(why||'Le sceau n\'a pas entendu… articule bien, plus fort.')}
-function listen(){if(srDead||G.state!=='incant')return;stopRec();let r;try{r=new SRC()}catch(e){incFail('dead');return}REC=r;r.lang='fr-FR';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
+async function listenN(P){
+  const my=++recTok,f=PAL[G.pi].inc;let best={lit:null,score:0},heard='',ended=false;const n={P,hs:[]};NREC=n;
+  const live=()=>my===recTok&&G.state==='incant'&&NREC===n;
+  const take=ts=>{if(!live())return;G.vg=Math.max(G.vg,.7);for(const t of ts||[]){const m=incMatch(t,f);if(m.score>best.score){best=m;heard=t}}incRender(best.lit);if(best.score>=.6)incDone(true)};
+  const fin=()=>{if(ended||!live())return;ended=true;if(best.score>=.45||(incTry>=1&&heard.replace(/\s/g,'').length>=6))incDone(true);else incFail()};
+  $('iMic').classList.add('on');incStatus('J\'écoute…');
+  try{
+    try{const av=await P.available();if(av&&av.available===false){incFail('dead');return}}catch(e){}
+    if(!live())return;
+    try{const pm=await P.requestPermissions();if(pm&&Object.values(pm).some(v=>v==='denied')){incFail('dead');return}}catch(e){}
+    if(!live())return;
+    n.hs.push(await P.addListener('partialResults',e=>take(e&&(e.matches||e.value))));
+    try{n.hs.push(await P.addListener('listeningState',e=>{if(e&&e.status==='stopped')setTimeout(fin,250)}))}catch(e){}
+    if(!live())return;
+    const to=setTimeout(()=>{if(live()){try{Promise.resolve(P.stop()).catch(()=>{})}catch(e){}setTimeout(fin,400)}},9000);
+    const r=await P.start({language:'fr-FR',maxResults:5,partialResults:true,popup:false});
+    if(r&&r.matches&&r.matches.length){take(r.matches);if(live())setTimeout(fin,300)}
+    if(!live())clearTimeout(to);
+  }catch(e){if(live()){const m=String(e&&e.message||e||'').toLowerCase();if(/permission|denied|not.?allowed|unavailable|not available/.test(m))incFail('dead');else incFail()}}
+}
+function listen(){if(srDead||G.state!=='incant')return;stopRec();const NP=SRN();if(NP){listenN(NP);return}let r;try{r=new SRC()}catch(e){incFail('dead');return}REC=r;r.lang='fr-FR';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;
   const f=PAL[G.pi].inc;let best={lit:null,score:0},heard='';$('iMic').classList.add('on');incStatus('J\'écoute…');
   r.onresult=e=>{G.vg=Math.max(G.vg,.7);for(let i=0;i<e.results.length;i++)for(let j=0;j<e.results[i].length;j++){const t=e.results[i][j].transcript;const m=incMatch(t,f);if(m.score>best.score){best=m;heard=t}}
     incRender(best.lit);if(best.score>=.6)incDone(true)};

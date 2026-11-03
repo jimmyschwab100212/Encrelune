@@ -5,9 +5,11 @@ const man = path.join(A, 'src', 'main', 'AndroidManifest.xml');
 let m = fs.readFileSync(man, 'utf8');
 if (!/screenOrientation/.test(m)) m = m.replace(/<activity\b/, '<activity\n            android:screenOrientation="portrait"');
 m = m.replace(/android:allowBackup="true"/, 'android:allowBackup="false"');
-for (const perm of ['POST_NOTIFICATIONS', 'RECEIVE_BOOT_COMPLETED']) {
+for (const perm of ['POST_NOTIFICATIONS', 'RECEIVE_BOOT_COMPLETED', 'RECORD_AUDIO']) {
   if (!m.includes('android.permission.' + perm)) m = m.replace(/<application\b/, `<uses-permission android:name="android.permission.${perm}" />\n    <application`);
 }
+// Android 11+ : l'appli doit déclarer qu'elle cherche un service de reconnaissance vocale
+if (!m.includes('android.speech.RecognitionService')) m = m.replace(/<application\b/, `<queries>\n        <intent>\n            <action android:name="android.speech.RecognitionService" />\n        </intent>\n    </queries>\n    <application`);
 fs.writeFileSync(man, m);
 for (const f of ['build.gradle', 'build.gradle.kts']) {
   const g = path.join(A, f); if (!fs.existsSync(g)) continue;
