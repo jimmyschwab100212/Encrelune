@@ -978,10 +978,10 @@ function mergeSave(L,R){const nw=(R.ts||0)>(L.ts||0),B=JSON.parse(JSON.stringify
 // la version web de test reste ouverte (boutons « version test »).
 const RELEASE=!window.ENC_TEST&&!!(window.ENC_RELEASE||(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()));
 /* ---- achat intégré : adaptateur EncStore pour le plugin « cordova-plugin-purchase » (CdvPurchase v13) sous Capacitor.
-   Produit unique non consommable « grand_grimoire » (4,99 €) à créer dans la Google Play Console. Branché au démarrage de l'appli native ;
+   Produit unique non consommable « grand_grimoire » (4,99 €) à créer dans la Google Play Console ET dans App Store Connect (même identifiant, achat intégré non consommable). Branché au démarrage de l'appli native ;
    sans plugin (version web), doBuy affiche un message et rien ne change. ---- */
 const IAP_ID='grand_grimoire';
-function iapSetup(){const CP=window.CdvPurchase;if(!CP||window.EncStore)return;const {store,ProductType,Platform}=CP,PF=Platform.GOOGLE_PLAY;let wait=[];
+function iapSetup(){const CP=window.CdvPurchase;if(!CP||window.EncStore)return;const {store,ProductType,Platform}=CP,PF=(()=>{try{return window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='ios'?Platform.APPLE_APPSTORE:Platform.GOOGLE_PLAY}catch(e){return Platform.GOOGLE_PLAY}})();let wait=[];
   const prod=()=>store.get(IAP_ID,PF),own=()=>{const p=prod();return !!(p&&p.owned)},
     grant=()=>{if(own()){if(!SAVE.premium){SAVE.premium=1;save()}wait.splice(0).forEach(f=>f(true))}};
   store.register([{id:IAP_ID,type:ProductType.NON_CONSUMABLE,platform:PF}]);

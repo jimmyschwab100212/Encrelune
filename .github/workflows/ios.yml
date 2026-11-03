@@ -1,0 +1,87 @@
+name: iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app/**'
+      - '.github/workflows/ios.yml'
+      - '*.mp4'
+      - '*.mp3'
+      - '*.jpg'
+      - '*.png'
+      - '*.webp'
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
+      VERSION_NAME: '1.0'
+      HAS_ASC: ${{ secrets.APPSTORE_KEY_P8_B64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Xcode le plus récent (Capacitor 8 le demande)
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$X" ]; then sudo xcode-select -s "$X"; fi
+          xcodebuild -version
+
+      - name: Dépendances
+        working-directory: app
+        run: npm install --no-audit --no-fund
+
+      - name: "Copie du jeu (version boutique : achat actif, pas d'interrupteur de test)"
+        working-directory: app
+        run: npm run www
+
+      - name: Projet iOS (Capacitor)
+        working-directory: app
+        run: |
+          npx cap add ios
+          npx @capacitor/assets generate --ios --iconBackgroundColor '#0d0b22' --splashBackgroundColor '#07060d'
+          node scripts/patch-ios.js
+          npx cap sync ios
+
+      - name: Contrôle de compilation (simulateur, sans signature)
+        working-directory: app/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -40
+
+      - name: Archive signée et envoi à TestFlight (si les clés App Store Connect sont fournies)
+        if: ${{ env.HAS_ASC == 'true' }}
+        working-directory: app/ios/App
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_B64: ${{ secrets.APPSTORE_KEY_P8_B64 }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY_B64" | base64 -d > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+          cat > "$RUNNER_TEMP/export.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>destination</key><string>export</string>
+          </dict></plist>
+          EOF
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8 -authenticationKeyID ${KEY_ID} -authenticationKeyIssuerID ${ISSUER_ID}"
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM="$TEAM_ID" $AUTH archive | tail -30
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" -exportOptionsPlist "$RUNNER_TEMP/export.plist" $AUTH | tail -20
+          xcrun altool --upload-app --type ios -f "$RUNNER_TEMP"/export/*.ipa --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
