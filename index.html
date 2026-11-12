@@ -4519,7 +4519,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='183';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='184';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -5679,7 +5679,7 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
 (function(){
   const map=document.getElementById('map');if(!map)return;
   const cv=document.createElement('canvas');cv.id='mapSky';map.insertBefore(cv,map.firstChild);
-  const cx=cv.getContext('2d');let W=0,H=0,D=1,ST=[],MW=[],shoot=null,nextShoot=3,last=0,run=false;
+  const cx=cv.getContext('2d');let W=0,H=0,D=1,ST=[],MW=[],SH=[],SP=[],nextShoot=2.5,last=0,run=false;
   const still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   function rnd(a,b){return a+Math.random()*(b-a)}
   function build(){
@@ -5687,7 +5687,7 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
     W=map.clientWidth||innerWidth;H=map.clientHeight||innerHeight;cv.width=Math.round(W*D);cv.height=Math.round(H*D);
     ST=[];const n=lo?90:150,cols=['243,230,200','243,230,200','243,230,200','188,208,255','188,208,255','255,210,122'];
     for(let i=0;i<n;i++){const big=Math.random();const r=big>.97?rnd(1.8,2.6):big>.85?rnd(1.1,1.7):rnd(.4,.95);
-      ST.push({x:Math.random()*W,y:Math.random()*H*1.25,r,c:cols[(Math.random()*cols.length)|0],ph:rnd(0,6.28),sp:rnd(.4,1.6),a:rnd(.35,.9),par:r>1.6?.28:r>1?.18:.08,fl:r>1.7})}
+      ST.push({bo:0,x:Math.random()*W,y:Math.random()*H*1.25,r,c:cols[(Math.random()*cols.length)|0],ph:rnd(0,6.28),sp:rnd(.4,1.6),a:rnd(.35,.9),par:r>1.6?.28:r>1?.18:.08,fl:r>1.7})}
     // voie lactée : bande diagonale de petites étoiles + voiles
     MW=[];for(let i=0;i<(lo?60:120);i++){const t=Math.random(),u=(Math.random()+Math.random()-1)*.09;
       MW.push({x:(t*1.2-.1)*W+u*W*.8,y:H*(.95-t*.85)+u*H*.5+rnd(-8,8),r:rnd(.3,.7),a:rnd(.2,.55),ph:rnd(0,6.28)})}
@@ -5702,15 +5702,29 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
       const x=W*b[0],y=H*b[1]-sc*.04,r=W*b[2],g=cx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+b[3]+','+b[4]+')');g.addColorStop(1,'rgba('+b[3]+',0)');cx.fillStyle=g;cx.fillRect(x-r,y-r,r*2,r*2)}
     for(const m of MW){const a=m.a*(.7+.3*Math.sin(t*.8+m.ph));cx.fillStyle='rgba(215,225,255,'+a+')';cx.fillRect(m.x,((m.y-sc*.05)%H+H)%H,m.r*1.6,m.r*1.6)}
     for(const s of ST){const y=((s.y-sc*s.par)%(H*1.25)+H*1.25)%(H*1.25);if(y>H+6)continue;
-      const k=still?.85:(.55+.45*Math.sin(t*s.sp+s.ph)),a=s.a*k;
-      if(s.r>1.1){const g=cx.createRadialGradient(s.x,y,0,s.x,y,s.r*5);g.addColorStop(0,'rgba('+s.c+','+(a*.55)+')');g.addColorStop(1,'rgba('+s.c+',0)');cx.fillStyle=g;cx.fillRect(s.x-s.r*5,y-s.r*5,s.r*10,s.r*10)}
+      if(s.bo>0)s.bo=Math.max(0,s.bo-.033*.9);const k=still?.85:Math.min(1.6,(.55+.45*Math.sin(t*s.sp+s.ph))+s.bo*1.1),a=Math.min(1,s.a*k);
+      if(s.r>1.1||s.bo>0){const g=cx.createRadialGradient(s.x,y,0,s.x,y,s.r*(5+s.bo*7));g.addColorStop(0,'rgba('+s.c+','+(a*.55)+')');g.addColorStop(1,'rgba('+s.c+',0)');cx.fillStyle=g;const R=s.r*(5+s.bo*7);cx.fillRect(s.x-R,y-R,R*2,R*2)}
       cx.fillStyle='rgba('+s.c+','+a+')';cx.beginPath();cx.arc(s.x,y,s.r,0,6.283);cx.fill();
-      if(s.fl){cx.strokeStyle='rgba('+s.c+','+(a*.6)+')';cx.lineWidth=.7;const L=s.r*5.5*(.8+.2*k);cx.beginPath();cx.moveTo(s.x-L,y);cx.lineTo(s.x+L,y);cx.moveTo(s.x,y-L);cx.lineTo(s.x,y+L);cx.stroke()}}
-    // étoile filante rare
-    if(!still){if(!shoot&&t>nextShoot){const x0=rnd(W*.25,W*.95),y0=rnd(H*.05,H*.4);shoot={x:x0,y:y0,vx:-rnd(380,520),vy:rnd(150,230),l:0,m:rnd(.7,1.0)};nextShoot=t+rnd(7,14)}
-      if(shoot){const dt=.033;shoot.l+=dt;shoot.x+=shoot.vx*dt;shoot.y+=shoot.vy*dt;const f=1-shoot.l/shoot.m;
-        if(f<=0)shoot=null;else{const tl=.12,x2=shoot.x-shoot.vx*tl,y2=shoot.y-shoot.vy*tl,g=cx.createLinearGradient(shoot.x,shoot.y,x2,y2);g.addColorStop(0,'rgba(255,240,205,'+(.9*f)+')');g.addColorStop(1,'rgba(255,240,205,0)');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(shoot.x,shoot.y);cx.lineTo(x2,y2);cx.stroke()}}}
+      if(s.fl||s.bo>.3){cx.strokeStyle='rgba('+s.c+','+(a*.6)+')';cx.lineWidth=.7;const L=s.r*5.5*(.8+.2*k);cx.beginPath();cx.moveTo(s.x-L,y);cx.lineTo(s.x+L,y);cx.moveTo(s.x,y-L);cx.lineTo(s.x,y+L);cx.stroke()}}
+    // étoiles filantes (automatiques + au toucher) et étincelles
+    if(!still){if(t>nextShoot&&SH.length<3){spawnShoot(rnd(W*.3,W*1.0),rnd(H*.04,H*.45));nextShoot=t+rnd(3.5,8)}
+      const dt=.033;
+      for(let i=SH.length-1;i>=0;i--){const h=SH[i];h.l+=dt;h.x+=h.vx*dt;h.y+=h.vy*dt;const f=1-h.l/h.m;if(f<=0){SH.splice(i,1);continue}
+        const tl=.14,x2=h.x-h.vx*tl,y2=h.y-h.vy*tl,g=cx.createLinearGradient(h.x,h.y,x2,y2);g.addColorStop(0,'rgba(255,244,214,'+(.95*f)+')');g.addColorStop(.4,'rgba(255,210,122,'+(.5*f)+')');g.addColorStop(1,'rgba(255,210,122,0)');
+        cx.strokeStyle=g;cx.lineWidth=2;cx.lineCap='round';cx.beginPath();cx.moveTo(h.x,h.y);cx.lineTo(x2,y2);cx.stroke();
+        cx.fillStyle='rgba(255,250,232,'+f+')';cx.beginPath();cx.arc(h.x,h.y,1.6,0,6.283);cx.fill()}
+      for(let i=SP.length-1;i>=0;i--){const p=SP[i];p.l+=dt;if(p.l>p.m){SP.splice(i,1);continue}p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.95;p.vy*=.95;const f=1-p.l/p.m;
+        cx.fillStyle='rgba('+p.c+','+(.9*f)+')';cx.beginPath();cx.arc(p.x,p.y,p.r*(.5+f*.7),0,6.283);cx.fill()}}
   }
+  function spawnShoot(x,y){const sp=rnd(420,600),an=rnd(.35,.7);SH.push({x,y,vx:-Math.cos(an)*sp,vy:Math.sin(an)*sp,l:0,m:rnd(.8,1.15)})}
+  function burst(x,y,n){for(let i=0;i<n;i++){const a=rnd(0,6.283),v=rnd(30,120);SP.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.5,1),r:rnd(1,2.2),c:Math.random()<.5?'255,226,150':'243,230,200'})}if(SP.length>140)SP.splice(0,SP.length-140)}
+  // toucher : étoile proche -> elle s'embrase ; sinon étincelles + étoile filante
+  function tap(e){if(map.hidden)return;const t=e.target;if(!t.closest||!t.closest('.mscroll')||t.closest('button,a,.node,.mband,input,[onclick]'))return;
+    const r=map.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,sc=(map.querySelector('.mscroll')||{}).scrollTop||0;let best=null,bd=34*34;
+    for(const s of ST){const sy=((s.y-sc*s.par)%(H*1.25)+H*1.25)%(H*1.25),d=(s.x-x)**2+(sy-y)**2;if(d<bd){bd=d;best=s}}
+    if(best){best.bo=1;burst(x,y,10)}else{burst(x,y,16);if(SH.length<4)spawnShoot(Math.min(W+20,x+rnd(30,90)),Math.max(0,y-rnd(20,60)))}
+    try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}
+  map.addEventListener('pointerdown',tap,{passive:true});
   function start(){if(run||map.hidden)return;run=true;if(!W||Math.abs((map.clientWidth||0)-W)>2||Math.abs((map.clientHeight||0)-H)>2)build();requestAnimationFrame(frame)}
   new MutationObserver(start).observe(map,{attributes:true,attributeFilter:['hidden']});
   addEventListener('resize',()=>{W=0;if(!map.hidden)build()});
