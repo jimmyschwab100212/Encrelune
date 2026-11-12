@@ -118,11 +118,14 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
 #ffEnd{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;gap:10px;white-space:nowrap}#ffEnd[hidden]{display:none}#ffEnd .btn{padding:12px 20px;font-size:15px}#ffEnd .btn.sec{background:rgba(10,8,18,.8)}
 
 /* ===== Interface A : accueil « ciel vivant » et carte « Chemin des étoiles » ===== */
-#title.ta{padding:0;background:radial-gradient(120% 70% at 50% 18%,#1b1840 0%,#0d0b22 45%,#07060d 100%)}
+#title.ta{padding:0;background:#07060d url(accueil_live.jpg) center/cover no-repeat}
+#title.ta::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(7,6,13,.0) 0%,rgba(7,6,13,0) 45%,rgba(7,6,13,.55) 78%,rgba(7,6,13,.9) 100%)}
+.ta .tbox{z-index:2}
+.ta .tsky .tx{display:none}
 .ta .tsky{position:absolute;inset:0;width:100%;height:100%}
 .ta .tbox{position:relative;z-index:1;width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 22px calc(env(safe-area-inset-bottom,0px) + 18px);box-sizing:border-box}
 .ta h1{font-family:"Cinzel Decorative",serif;font-weight:700;font-size:clamp(40px,12.5vw,54px);margin:0;color:var(--gold);text-shadow:0 0 24px rgba(255,190,90,.55)}
-.ta .tsub{font-style:italic;font-size:19px;color:var(--dim);margin:2px 0 18px;text-align:center}
+.ta .tsub{font-style:italic;font-size:19px;color:#e6dcc3;text-shadow:0 1px 10px #07060d,0 0 4px #07060d;margin:2px 0 18px;text-align:center}
 .ta .tplay{width:100%;font-family:"Cinzel Decorative",serif;font-weight:700;font-size:23px;color:#1a1008;background:linear-gradient(#ffe2a0,#e0a84a);border:0;border-radius:999px;padding:14px 18px 11px;box-shadow:0 0 30px rgba(255,190,90,.5),inset 0 1px 0 #fff6;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;animation:tglow 2.6s ease-in-out infinite}
 .ta .tplay small{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:600;font-size:15px;color:#4a2e0c}
 @keyframes tglow{50%{box-shadow:0 0 44px rgba(255,190,90,.75),inset 0 1px 0 #fff6}}
@@ -139,7 +142,8 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
 .sealdraw .d2{animation-delay:.6s}.sealdraw .d3{animation-delay:1.2s}.sealdraw .d4{animation-delay:1.8s}
 @keyframes sdraw{to{stroke-dashoffset:0}}
 #map.ma{padding:0;display:block;background:linear-gradient(#1a1440 0%,#120f30 38%,#0c0a1e 62%,#07060d 100%)}
-#map.ma #mapSky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#map.ma .mySky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#title.ta .mySky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 .ma #mapPanel{z-index:1}
 .ma #mapPanel{position:absolute;inset:0;display:flex;flex-direction:column}
 .mtop{flex:none;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 8px;display:flex;flex-direction:column;gap:9px;background:linear-gradient(rgba(7,6,13,.95),rgba(7,6,13,.6));z-index:2}
@@ -193,10 +197,10 @@ body:has(#title:not([hidden])) #mus{right:auto;left:12px}
   <defs><radialGradient id="tMoonG"><stop offset="0" stop-color="#ffe8b8" stop-opacity=".55"/><stop offset="1" stop-color="#ffe8b8" stop-opacity="0"/></radialGradient>
   <radialGradient id="tSealG"><stop offset="0" stop-color="#ffd27a" stop-opacity=".38"/><stop offset=".6" stop-color="#ffb347" stop-opacity=".08"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
   <linearGradient id="tHill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151236"/><stop offset="1" stop-color="#07060d"/></linearGradient></defs>
-  <g fill="#fff4d6"><circle cx="24" cy="60" r="1.2" opacity=".7"/><circle cx="70" cy="128" r=".9" opacity=".5"/><circle cx="112" cy="40" r="1.4" opacity=".8"/><circle cx="160" cy="96" r=".8" opacity=".5"/><circle cx="214" cy="22" r="1.1" opacity=".7"/><circle cx="250" cy="150" r=".9" opacity=".6"/><circle cx="338" cy="210" r="1.2" opacity=".6"/><circle cx="370" cy="88" r=".8" opacity=".5"/><circle cx="18" cy="250" r="1" opacity=".6"/><circle cx="52" cy="330" r="1.3" opacity=".7"/><circle cx="362" cy="320" r="1" opacity=".5"/><circle cx="300" cy="400" r=".8" opacity=".4"/><circle cx="40" cy="470" r=".9" opacity=".4"/><circle cx="350" cy="520" r="1.1" opacity=".5"/><circle cx="90" cy="200" r=".7" opacity=".5"/><circle cx="190" cy="170" r=".9" opacity=".4"/></g>
-  <g stroke="#9fc8ff" stroke-width=".8" opacity=".55" fill="none"><path d="M30 150 L62 132 L92 150 L84 186 L48 190 Z"/><path d="M300 250 L326 236 L352 248 L344 276"/></g>
-  <g fill="#cfe4ff"><circle cx="30" cy="150" r="1.8"/><circle cx="62" cy="132" r="1.6"/><circle cx="92" cy="150" r="1.8"/><circle cx="84" cy="186" r="1.5"/><circle cx="48" cy="190" r="1.6"/><circle cx="300" cy="250" r="1.6"/><circle cx="326" cy="236" r="1.9"/><circle cx="352" cy="248" r="1.5"/><circle cx="344" cy="276" r="1.7"/></g>
-  <circle cx="320" cy="96" r="80" fill="url(#tMoonG)"/><circle cx="320" cy="96" r="30" fill="#f6efdc"/><circle cx="310" cy="88" r="5" fill="#e4dac0"/><circle cx="328" cy="106" r="7" fill="#e4dac0"/>
+  <g class="tx" fill="#fff4d6"><circle cx="24" cy="60" r="1.2" opacity=".7"/><circle cx="70" cy="128" r=".9" opacity=".5"/><circle cx="112" cy="40" r="1.4" opacity=".8"/><circle cx="160" cy="96" r=".8" opacity=".5"/><circle cx="214" cy="22" r="1.1" opacity=".7"/><circle cx="250" cy="150" r=".9" opacity=".6"/><circle cx="338" cy="210" r="1.2" opacity=".6"/><circle cx="370" cy="88" r=".8" opacity=".5"/><circle cx="18" cy="250" r="1" opacity=".6"/><circle cx="52" cy="330" r="1.3" opacity=".7"/><circle cx="362" cy="320" r="1" opacity=".5"/><circle cx="300" cy="400" r=".8" opacity=".4"/><circle cx="40" cy="470" r=".9" opacity=".4"/><circle cx="350" cy="520" r="1.1" opacity=".5"/><circle cx="90" cy="200" r=".7" opacity=".5"/><circle cx="190" cy="170" r=".9" opacity=".4"/></g>
+  <g class="tx" stroke="#9fc8ff" stroke-width=".8" opacity=".55" fill="none"><path d="M30 150 L62 132 L92 150 L84 186 L48 190 Z"/><path d="M300 250 L326 236 L352 248 L344 276"/></g>
+  <g class="tx" fill="#cfe4ff"><circle cx="30" cy="150" r="1.8"/><circle cx="62" cy="132" r="1.6"/><circle cx="92" cy="150" r="1.8"/><circle cx="84" cy="186" r="1.5"/><circle cx="48" cy="190" r="1.6"/><circle cx="300" cy="250" r="1.6"/><circle cx="326" cy="236" r="1.9"/><circle cx="352" cy="248" r="1.5"/><circle cx="344" cy="276" r="1.7"/></g>
+  <g class="tx"><circle cx="320" cy="96" r="80" fill="url(#tMoonG)"/><circle cx="320" cy="96" r="30" fill="#f6efdc"/><circle cx="310" cy="88" r="5" fill="#e4dac0"/><circle cx="328" cy="106" r="7" fill="#e4dac0"/></g>
   <circle cx="195" cy="290" r="150" fill="url(#tSealG)"/>
   <g class="sealdraw" fill="none" stroke="#ffd27a" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="195" cy="290" r="104" stroke-width="2.4"/><circle class="d2" cx="195" cy="290" r="94" stroke-width=".8" opacity=".55"/>
@@ -204,7 +208,7 @@ body:has(#title:not([hidden])) #mus{right:auto;left:12px}
     <circle class="d4" cx="195" cy="290" r="26" stroke-width="2"/><path class="d4" d="M181 290 Q195 272 209 290 Q195 308 181 290" stroke-width="1.6"/></g>
   <circle cx="232" cy="333" r="12" fill="url(#tMoonG)"/><circle cx="232" cy="333" r="3.2" fill="#fff"/>
   <path d="M236 337 L330 460" stroke="#6e4226" stroke-width="5" stroke-linecap="round"/><path d="M236 337 L262 371" stroke="#e8e8f4" stroke-width="5" stroke-linecap="round"/>
-  <path d="M0 640 Q90 590 190 622 T390 600 L390 844 L0 844 Z" fill="url(#tHill)"/>
+  <path class="tx" d="M0 640 Q90 590 190 622 T390 600 L390 844 L0 844 Z" fill="url(#tHill)"/>
 </svg>
 <div class="tbox">
   <h1>Encrelune</h1>
@@ -4519,7 +4523,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='184';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='185';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -5676,20 +5680,20 @@ function elFireText(txt,x,y,size,a,t,cold){if(a<=0)return;const p=clamp(t/.28),s
 window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpirit,EL_CRI,EL_DRI,EL_DRL,EL_DRA,elSolo,elBotPlan,elDrPose,elDrUseImg,EL_DRB,EL_WING,elCrLoad,elCrDrawImgTest:elCrDrawImg,elCrUseImg,elCrPoseK,elCrOn,elVis,elCrPose,elCrRig,elFoxT,EL_FOX,EL_JADE,EL_CRN,get ctx(){return ctx},set ctx(v){ctx=v},EL_GMAX,elFFPos,elEstL,EL,EL_SP,elDecide,elScore,elEnc,elDec,elConnect,showOnline,elDims,elGeo,elClash,score,PAL,startPalier,get G(){return G},get A(){return A},evaluate,showMap,showGrim,replay,get SAVE(){return SAVE},DU,showDuel,duBegin,duTurn,duChance,duRoll,duSeed,duSpec,duPlay,duCxTable,duProbs,showDuCol,duPlayCol,duName,duReveal,makeCard,showCard,saveCard,CARD,diagSeal,ruleCheck,ruleSet,RULES,trySkip,spSeen,SFX,scoreV2,FAF,ffStart,ffRound,ffJudge,FF_ATK,FF_SHD};
 
 /* ---- ciel étoilé de la carte des paliers (canvas, une seule boucle, active seulement carte visible) ---- */
-(function(){
-  const map=document.getElementById('map');if(!map)return;
-  const cv=document.createElement('canvas');cv.id='mapSky';map.insertBefore(cv,map.firstChild);
+function makeSky(map,ok,light){
+  if(!map)return;
+  const cv=document.createElement('canvas');cv.className='mySky';map.insertBefore(cv,map.firstChild);
   const cx=cv.getContext('2d');let W=0,H=0,D=1,ST=[],MW=[],SH=[],SP=[],nextShoot=2.5,last=0,run=false;
   const still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   function rnd(a,b){return a+Math.random()*(b-a)}
   function build(){
     const lo=(typeof QL!=='undefined'&&QL.lo);D=Math.min(devicePixelRatio||1,lo?1.5:2);
     W=map.clientWidth||innerWidth;H=map.clientHeight||innerHeight;cv.width=Math.round(W*D);cv.height=Math.round(H*D);
-    ST=[];const n=lo?90:150,cols=['243,230,200','243,230,200','243,230,200','188,208,255','188,208,255','255,210,122'];
+    ST=[];const n=light?(lo?40:60):(lo?90:150),cols=['243,230,200','243,230,200','243,230,200','188,208,255','188,208,255','255,210,122'];
     for(let i=0;i<n;i++){const big=Math.random();const r=big>.97?rnd(1.8,2.6):big>.85?rnd(1.1,1.7):rnd(.4,.95);
       ST.push({bo:0,x:Math.random()*W,y:Math.random()*H*1.25,r,c:cols[(Math.random()*cols.length)|0],ph:rnd(0,6.28),sp:rnd(.4,1.6),a:rnd(.35,.9),par:r>1.6?.28:r>1?.18:.08,fl:r>1.7})}
     // voie lactée : bande diagonale de petites étoiles + voiles
-    MW=[];for(let i=0;i<(lo?60:120);i++){const t=Math.random(),u=(Math.random()+Math.random()-1)*.09;
+    MW=[];for(let i=0;i<(light?0:(lo?60:120));i++){const t=Math.random(),u=(Math.random()+Math.random()-1)*.09;
       MW.push({x:(t*1.2-.1)*W+u*W*.8,y:H*(.95-t*.85)+u*H*.5+rnd(-8,8),r:rnd(.3,.7),a:rnd(.2,.55),ph:rnd(0,6.28)})}
   }
   function frame(now){
@@ -5698,7 +5702,7 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
     if(now-last<33)return;last=now;const t=now/1000,sc=(map.querySelector('.mscroll')||{}).scrollTop||0;
     cx.setTransform(D,0,0,D,0,0);cx.clearRect(0,0,W,H);
     // voiles de la voie lactée
-    for(const b of [[.28,.62,.34,'120,110,220',.10],[.55,.38,.30,'90,130,230',.08],[.78,.18,.26,'150,120,230',.07]]){
+    if(!light)for(const b of [[.28,.62,.34,'120,110,220',.10],[.55,.38,.30,'90,130,230',.08],[.78,.18,.26,'150,120,230',.07]]){
       const x=W*b[0],y=H*b[1]-sc*.04,r=W*b[2],g=cx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+b[3]+','+b[4]+')');g.addColorStop(1,'rgba('+b[3]+',0)');cx.fillStyle=g;cx.fillRect(x-r,y-r,r*2,r*2)}
     for(const m of MW){const a=m.a*(.7+.3*Math.sin(t*.8+m.ph));cx.fillStyle='rgba(215,225,255,'+a+')';cx.fillRect(m.x,((m.y-sc*.05)%H+H)%H,m.r*1.6,m.r*1.6)}
     for(const s of ST){const y=((s.y-sc*s.par)%(H*1.25)+H*1.25)%(H*1.25);if(y>H+6)continue;
@@ -5719,7 +5723,7 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
   function spawnShoot(x,y){const sp=rnd(420,600),an=rnd(.35,.7);SH.push({x,y,vx:-Math.cos(an)*sp,vy:Math.sin(an)*sp,l:0,m:rnd(.8,1.15)})}
   function burst(x,y,n){for(let i=0;i<n;i++){const a=rnd(0,6.283),v=rnd(30,120);SP.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rnd(.5,1),r:rnd(1,2.2),c:Math.random()<.5?'255,226,150':'243,230,200'})}if(SP.length>140)SP.splice(0,SP.length-140)}
   // toucher : étoile proche -> elle s'embrase ; sinon étincelles + étoile filante
-  function tap(e){if(map.hidden)return;const t=e.target;if(!t.closest||!t.closest('.mscroll')||t.closest('button,a,.node,.mband,input,[onclick]'))return;
+  function tap(e){if(map.hidden)return;const t=e.target;if(!t.closest||!ok(t))return;
     const r=map.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,sc=(map.querySelector('.mscroll')||{}).scrollTop||0;let best=null,bd=34*34;
     for(const s of ST){const sy=((s.y-sc*s.par)%(H*1.25)+H*1.25)%(H*1.25),d=(s.x-x)**2+(sy-y)**2;if(d<bd){bd=d;best=s}}
     if(best){best.bo=1;burst(x,y,10)}else{burst(x,y,16);if(SH.length<4)spawnShoot(Math.min(W+20,x+rnd(30,90)),Math.max(0,y-rnd(20,60)))}
@@ -5729,7 +5733,9 @@ window.__enc={daySeal,dayVariant,creOf,startDay,dayInfo,elVsDraw,elTitle,elSpiri
   new MutationObserver(start).observe(map,{attributes:true,attributeFilter:['hidden']});
   addEventListener('resize',()=>{W=0;if(!map.hidden)build()});
   start();
-})();
+}
+makeSky(document.getElementById('map'),t=>t.closest('.mscroll')&&!t.closest('button,a,.node,.mband,input,[onclick]'),false);
+makeSky(document.getElementById('title'),t=>!t.closest('button,a,.ttiles,.tfoot,input,[onclick]'),true);
 </script>
 </body>
 </html>
