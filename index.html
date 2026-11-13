@@ -1165,7 +1165,9 @@ function startIncant(){G.state='incant';G.t0=performance.now();incTry=0;G.vg=0;$
   if(srDead){$('iMic').hidden=true;$('iSay').hidden=false;$('iNote').hidden=true;$('iSay').textContent='✦ Je l\'ai dite · lancer le sort';$('iSay').className='btn';incStatus('Dis-la fort, avec conviction…')}
   else{$('iMic').hidden=false;$('iMic').textContent='🎙 Prononcer';$('iSay').hidden=true;$('iNote').hidden=false;incStatus('Touche le micro, puis prononce la formule.')}
   $('inc').hidden=false;try{SND.bell()}catch(e){}}
-function stopRec(){recTok++;if(NREC){const n=NREC;NREC=null;try{Promise.resolve(n.P.stop()).catch(()=>{})}catch(e){}(n.hs||[]).forEach(h=>{try{Promise.resolve(h.remove&&h.remove()).catch(()=>{})}catch(e){}})}if(REC){try{REC.onresult=REC.onerror=REC.onend=null;REC.abort()}catch(e){}REC=null}$('iMic').classList.remove('on')}
+// après le micro natif, l'iPhone rend la main au son du jeu : on relance le contexte audio et la piste silencieuse
+function audioWake(){try{if(A&&A.ac&&A.ac.state!=='running')A.ac.resume();if(SIL)SIL.play().catch(()=>{})}catch(e){}}
+function stopRec(){recTok++;if(NREC){const n=NREC;NREC=null;setTimeout(audioWake,350);setTimeout(audioWake,1200);try{Promise.resolve(n.P.stop()).catch(()=>{})}catch(e){}(n.hs||[]).forEach(h=>{try{Promise.resolve(h.remove&&h.remove()).catch(()=>{})}catch(e){}})}if(REC){try{REC.onresult=REC.onerror=REC.onend=null;REC.abort()}catch(e){}REC=null}$('iMic').classList.remove('on')}
 function incDone(voiced){if(G.state!=='incant')return;stopRec();G.state='incantOk';$('iF').className='ok';incRender(PAL[G.pi].inc.split(' ').map(()=>1));
   if(voiced){G.power=Math.min(1,G.power*1.12);incStatus('La formule résonne dans le sceau…')}else incStatus('');
   G.vg=1.4;setTimeout(()=>{$('inc').hidden=true;if(G.state==='incantOk')goCharge()},voiced?900:450)}
@@ -4523,7 +4525,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='186';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='187';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
