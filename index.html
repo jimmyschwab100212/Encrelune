@@ -994,16 +994,17 @@ function iapSetup(){const CP=window.CdvPurchase;if(!CP||window.EncStore)return;c
     grant=()=>{if(own()){if(!SAVE.premium){SAVE.premium=1;save()}wait.splice(0).forEach(f=>f(true))}};
   store.register([{id:IAP_ID,type:ProductType.NON_CONSUMABLE,platform:PF}]);
   store.when().approved(t=>t.finish()).finished(grant).productUpdated(grant);
+  try{store.error(e=>{if(window.EncStore)window.EncStore.err=String(e&&(e.code||'')+' '+(e&&e.message||'')).trim()})}catch(e){}
   const ready=store.initialize([PF]).then(()=>{grant();try{if(typeof showMap==='function'&&G&&G.state==='map')showMap()}catch(e){}});
   window.EncStore={
-    buy(){return ready.then(()=>{if(own()){grant();return true}const p=prod(),o=p&&p.getOffer&&p.getOffer();if(!o)return false;
-      return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v)}};wait.push(fin);o.order().then(err=>{if(err)fin(false)}).catch(()=>fin(false));setTimeout(()=>fin(own()),180000)})})},
+    buy(){window.EncStore.why='';return ready.then(()=>{if(own()){grant();return true}const p=prod(),o=p&&p.getOffer&&p.getOffer();if(!o){window.EncStore.why=(p?'offre':'produit')+' introuvable'+(window.EncStore.err?' · '+window.EncStore.err:'');return false}
+      return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v)}};wait.push(fin);o.order().then(err=>{if(err){window.EncStore.why=String(err.code||'')+' '+(err.message||'');fin(false)}}).catch(()=>fin(false));setTimeout(()=>fin(own()),180000)})})},
     restore(){return ready.then(()=>store.restorePurchases()).then(()=>{grant();return own()})}}}
 document.addEventListener('deviceready',iapSetup,false);if(document.readyState==='complete')setTimeout(iapSetup,0);else window.addEventListener('load',()=>setTimeout(iapSetup,0));
 function prem(i){return !RELEASE||!PAL[i]||!PAL[i].prem||!!SAVE.premium}
 function showBuy(){const b=$('buy');b.hidden=false;$('buyMsg').textContent=''}
 function doBuy(restore){const st=window.EncStore;if(!st||!(restore?st.restore:st.buy)){$('buyMsg').textContent='L\'achat sera disponible dans l\'application (App Store / Google Play).';return}
-  $('buyMsg').textContent='…';Promise.resolve(restore?st.restore():st.buy()).then(ok=>{if(ok){SAVE.premium=1;save();$('buy').hidden=true;SND.star(2);showMap()}else $('buyMsg').textContent=restore?'Aucun achat à restaurer.':'Achat annulé.'}).catch(()=>{$('buyMsg').textContent='Le paiement n\'a pas abouti. Réessaie.'})}
+  $('buyMsg').textContent='…';Promise.resolve(restore?st.restore():st.buy()).then(ok=>{if(ok){SAVE.premium=1;save();$('buy').hidden=true;SND.star(2);showMap()}else $('buyMsg').textContent=restore?'Aucun achat à restaurer.':(st.why&&/introuvable/.test(st.why)?'L\'achat n\'est pas disponible pour l\'instant ('+st.why+'). Réessaie plus tard.':st.why&&st.why.indexOf('6777006')<0?'Le paiement n\'a pas abouti ('+st.why+').':'Achat annulé.')}).catch(()=>{$('buyMsg').textContent='Le paiement n\'a pas abouti. Réessaie.'})}
 const OFF=0;const WG={cut:1.6,end:15};let PLAN=[],STARS2=[],SHOOT=[];let cur=null,P=[],BIRDS=[],BLOOMS=[],RINGS=[],RIPS=[],WAVES=[],CONST=null,VINES=[],METS=[],ORBS=[];
 const $=id=>document.getElementById(id);
 const inkCv=document.createElement('canvas'),inkC=inkCv.getContext('2d');let inkDirty=true;
@@ -4525,7 +4526,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='187';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='188';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
