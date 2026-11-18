@@ -1488,11 +1488,11 @@ function lavaFlw(X,Y,sz,r,c,a,now){ctx.save();ctx.translate(X,Y);ctx.rotate(Math
   for(let p=0;p<5;p++){ctx.save();ctx.rotate(p/5*TAU+r);ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(0,-sz*.55,sz*.36,sz*.58,0,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.ellipse(0,-sz*.6,sz*.12,sz*.34,0,0,TAU);ctx.fill();ctx.restore()}
   ctx.fillStyle='#fff0f6';ctx.beginPath();ctx.arc(0,0,sz*.2,0,TAU);ctx.fill();ctx.restore()}
 /* ---- bébé renard (sort légendaire du Renard) : sprite dessiné, profil, galop rebondissant ---- */
-function foxCubDraw(x,y,s,dir,ph,a,now,mode){
+function foxCubDraw(x,y,s,dir,ph,a,now,mode,lum){
   // mode 0 = court ; 1 = assis (queue qui remue)
   const sit=mode===1,sw=Math.sin(ph),sw2=Math.sin(ph+Math.PI),tw=Math.sin(now/180)*(sit?.35:.18);
   ctx.save();ctx.translate(x,y);ctx.scale(dir*s,s);ctx.globalAlpha=a;ctx.lineCap=ctx.lineJoin='round';
-  const OR='#f58a2e',OR2='#d96a18',CR='#fff1dc',DK='#3a2216';
+  const OR=lum?'#ffe7b8':'#f58a2e',OR2=lum?'#ffc680':'#d96a18',CR=lum?'#ffffff':'#fff1dc',DK=lum?'#9a5d22':'#3a2216';if(lum){ctx.shadowColor='rgba(255,214,130,.95)';ctx.shadowBlur=16*(1+.25*Math.sin(now/220))}
   const hop=sit?0:Math.abs(sw)*7,pitch=sit?-.55:-.06*sw,by=-hop;
   // ombre
   ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(0,1,(sit?15:25)*(1-hop*.02),4,0,0,TAU);ctx.fill();
@@ -1542,6 +1542,7 @@ function foxCubInit(){const [hx]=BGD.hearth||[W/2,H*.7],wp=[[-.14,.84],[.08,.855
 function foxCubPos(u){const L=G.cb,d=u*L.len;let j=1;while(j<L.cum.length-1&&L.cum[j]<d)j++;const f=(d-L.cum[j-1])/((L.cum[j]-L.cum[j-1])||1);return[lerp(L.pts[j-1][0],L.pts[j][0],f),lerp(L.pts[j-1][1],L.pts[j][1],f)]}
 function foxCubUpd(dt,now,sk){if(!G.lv0)return;if(!G.cb)foxCubInit();const c=G.cb,FC=['#ff4f7a','#d94cff','#9a6bff','#ff8fc0','#c46bff','#ffd27a','#ffffff'];
   if(sk<c.t0)return;const u0=clamp((sk-c.t0)/c.T),u=u0<1?1-Math.pow(1-u0,1.35):1,[nx,ny]=foxCubPos(u);
+  if(u0<1&&Math.random()<dt*50)P.push({x:c.x+rnd(-14,6)*c.sc*c.dir,y:c.y-rnd(8,40)*c.sc,vx:rnd(-20,20)*S,vy:-rnd(10,50)*S,l:0,m:rnd(.5,1),s:rnd(1,2.2),c:Math.random()<.5?'#ffe9b0':'#ffffff'});
   if(u0<1){const dx=nx-c.x,dy=ny-c.y,ds=Math.hypot(dx,dy);if(Math.abs(dx)>.05)c.dir=dx>0?1:-1;c.x=nx;c.y=ny;const v=clamp((ny/H-.785)/.08);c.sc=lerp(1.05,1.65,v)*S;c.ph+=ds/(21*c.sc)*Math.PI*1.0;
     const lc=Math.floor(c.ph/Math.PI);if(lc>c.land){c.land=lc;
       for(let i=0;i<5;i++)P.push({x:c.x+rnd(-10,10)*c.sc,y:c.y-4*c.sc,vx:rnd(-50,50)*S,vy:-rnd(50,130)*S,l:0,m:rnd(.7,1.3),s:rnd(1.6,3),c:FC[Math.random()*FC.length|0],g:150});
@@ -1553,16 +1554,16 @@ function foxCubUpd(dt,now,sk){if(!G.lv0)return;if(!G.cb)foxCubInit();const c=G.c
 function foxCubDrawAll(now,k,fade){const c=G.cb;if(!c||k<c.t0)return;const a=ease(clamp((k-c.t0)/.4))*fade;ctx.save();
   ctx.globalCompositeOperation='lighter';c.ring.forEach(r=>{ctx.strokeStyle=hexA('#ffd27a',.55*(1-r.t)*a);ctx.lineWidth=1.6*S;ctx.beginPath();ctx.ellipse(r.x,r.y,(10+r.t*34)*r.s,(4+r.t*12)*r.s,0,0,TAU);ctx.stroke()});
   if(G.fld)for(const f of G.fld){const d=Math.hypot(f.x-c.x,(f.y-c.y)*2);if(d<70*S){const g=1-d/(70*S);gdraw(f.c,f.x,f.y-3*S,f.s*(2.4+1.4*g),.5*g*a)}}
-  gdraw('#ffd27a',c.x,c.y-20*c.sc,50*c.sc,.18*a);
-  ctx.globalCompositeOperation='source-over';foxCubDraw(c.x,c.y,c.sc,c.dir,c.ph,a,now,c.mode);
+  gdraw('#ffd27a',c.x,c.y-24*c.sc,70*c.sc,.38*a);gdraw('#ffffff',c.x,c.y-26*c.sc,28*c.sc,.22*a);
+  ctx.globalCompositeOperation='source-over';foxCubDraw(c.x,c.y,c.sc,c.dir,c.ph,a,now,c.mode,1);
   ctx.globalCompositeOperation='lighter';c.hrt.forEach(h=>{const t=h.t,x=h.x+Math.sin(t*6+h.ph)*5*S,y=h.y-t*60*S,s=h.s*S*(.8+.4*Math.sin(t*3)),al=Math.sin(Math.PI*t)*a;ctx.fillStyle=hexA('#ff7aa8',.85*al);ctx.beginPath();ctx.moveTo(x,y+4*s);ctx.bezierCurveTo(x-8*s,y-2*s,x-5*s,y-9*s,x,y-4*s);ctx.bezierCurveTo(x+5*s,y-9*s,x+8*s,y-2*s,x,y+4*s);ctx.fill();gdraw('#ff9ac0',x,y,9*s,.25*al)});
   ctx.restore()}
 
 function foxGoldUpd(dt,now,sk){if(!G.dive)return;if(G.lv0==null){G.lv0=sk+.25;foxLavaInit()}
   const [hx,hy]=BGD.hearth||[W/2,H*.7];if(sk<G.lv0+2.4&&Math.random()<dt*14)P.push({x:hx+rnd(-.3,.3)*(BGD.hw||W*.4),y:H*.75,vx:rnd(-30,30)*S,vy:-rnd(40,110)*S,l:0,m:rnd(.5,1),s:rnd(1,2),c:Math.random()<.6?'#ff7a2a':'#ffcf5a'});
   if(!G.bl&&sk>G.lv0+1.8){G.bl=1;try{[0,3,7,10,12].forEach((d,i)=>harp(at()+i*.22,pen(62,d)+12,.55))}catch(e){}}
-  // le renard ressort et s'assoit parmi les fleurs, queues déployées
-  const RT=G.lv0+4.4;if(sk>RT){const t=clamp((sk-RT)/.8);G.foxA=t*clamp((FXE-.4-sk)/.5);{const f=G.SC.r*1.4/100*.5;G.ap=[hx,H*.79-80*f]}G.asc=.5;G.arot=0;G.asy=1;G.aflip=1;G.fan=1}foxCubUpd(dt,now,sk)}
+  // le grand renard est parti dans la marmite : il ne revient pas ; seul le bébé de lumière court sur les fleurs
+  foxCubUpd(dt,now,sk)}
 function drawFoxLava(now,k){if(!G.lava)return;const t0=G.lv0,FL2=2.2,fade=clamp((FXE-.5-k)/.6);ctx.save();ctx.lineCap=ctx.lineJoin='round';
   const [hx]=BGD.hearth||[W/2,H*.7],ov=clamp((k-t0+.2)/.4)*clamp((t0+3.2-k)/1);if(ov>0){ctx.globalCompositeOperation='lighter';gdraw('#ff6a20',hx,H*.75,(BGD.hw||W*.4)*.55,.35*ov)}
   if(G.fld){const FT=2.6,fr=ease(clamp((k-t0)/FT)),fy0=H*.75;if(fr>0){const cool=clamp((k-t0-FT*.55)/1.8);ctx.save();ctx.globalCompositeOperation='source-over';ctx.beginPath();ctx.rect(0,fy0-4*S,W,H);ctx.clip();
@@ -4989,7 +4990,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='199';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='200';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
