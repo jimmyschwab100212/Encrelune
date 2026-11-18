@@ -2849,7 +2849,13 @@ function envPath(p,close){ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1
 function envDrawBird(x,y,u,f,rot,a,fill,hb,tm=0){if(a<=.01)return;const g=envGeo(f),lw=1/u;ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalCompositeOperation='lighter';ctx.lineCap=ctx.lineJoin='round';
   if(fill>.2){ctx.lineCap='round';for(let k=0;k<20;k++){const an=tm*.12+k*TAU/20,l0=u*.5,l1=u*(1.05+.28*Math.sin(tm*1.7+k*1.3));ctx.strokeStyle=hexA(k%2?'#ffd27a':'#ff9a50',.09*a*fill);ctx.lineWidth=(k%2?1.2:2.2)*S;ctx.beginPath();ctx.moveTo(Math.cos(an)*l0,-.1*u+Math.sin(an)*l0);ctx.lineTo(Math.cos(an)*l1,-.1*u+Math.sin(an)*l1);ctx.stroke()}
     ctx.strokeStyle=hexA('#ffd27a',.12*a*fill);ctx.lineWidth=1*S;ctx.beginPath();ctx.arc(0,-.1*u,u*.62,0,TAU);ctx.stroke()}
-  gdraw('#ff9a40',0,0,u*1.5,.1*a*fill);gdraw('#ffcf8a',0,0,u*1.25,.14*a*fill);gdraw('#fff6e6',0,-.05*u,u*.42,.2*a*fill);ctx.scale(u,u);
+  gdraw('#ff9a40',0,0,u*1.5,.1*a*fill);gdraw('#ffcf8a',0,0,u*1.25,.14*a*fill);gdraw('#ff5a20',0,0,u*1.9,.12*a*fill);gdraw('#fff6e6',0,-.05*u,u*.42,.2*a*fill);ctx.scale(u,u);
+  if(fill>.05){const sites=[];for(const w of g.wings){w.lead.forEach((q,i)=>i>1&&sites.push([q[0],q[1],.16+.1*i/12,.035]));w.tips.forEach((q,i)=>sites.push([q[0],q[1],.12+.16*i/w.tips.length,.03]))}
+    g.body.forEach((q,i)=>i%2||sites.push([q[0],q[1],.12,.03]));g.crest.forEach(c=>sites.push([c[2][0],c[2][1],.2,.035]));
+    const fa=a*fill;ctx.globalCompositeOperation='lighter';
+    sites.forEach((q,k)=>{const n=Math.sin(tm*7.3+k*1.91)*.5+Math.sin(tm*11.1+k*.73)*.5,h=q[2]*(.75+.45*n),w=q[3],sw=Math.sin(tm*5+k)*w*1.2,x=q[0],y=q[1];
+      for(const [hm,wm,col,al] of [[1.25,1.5,'#ff4a18',.16],[1,1,'#ff9a30',.26],[.55,.55,'#ffe7a0',.4]]){ctx.fillStyle=hexA(col,al*fa);ctx.beginPath();ctx.moveTo(x-w*wm,y);ctx.quadraticCurveTo(x-w*wm,y-h*hm*.55,x+sw,y-h*hm);ctx.quadraticCurveTo(x+w*wm,y-h*hm*.55,x+w*wm,y);ctx.closePath();ctx.fill()}});
+    ctx.lineCap=ctx.lineJoin='round'}
   for(const w of g.wings){envPath([...w.lead,...w.tips.slice().reverse(),[w.sd*.06,.12]],true);const gr=ctx.createLinearGradient(0,0,w.sd*.95,0);gr.addColorStop(0,hexA('#fff0cc',.3*a*fill));gr.addColorStop(.55,hexA('#ffb347',.16*a*fill));gr.addColorStop(1,hexA('#ff5a2a',.12*a*fill));ctx.fillStyle=gr;ctx.fill();
     w.fe.forEach((fe,j)=>{const q=j/(w.fe.length-1);envPath(fe,true);ctx.fillStyle=hexA(q<.5?'#ffd27a':'#ff8a3a',(.1+.1*q)*a*fill);ctx.fill();ctx.strokeStyle=hexA(q<.35?'#fff2d8':q<.7?'#ffd08a':'#ffa060',.78*a);ctx.lineWidth=.9*S*lw;ctx.stroke()});
     w.tips.forEach((q,j)=>{if(j<w.tips.length*.45)return;const fl=.7+.3*Math.sin(tm*13+j*2.1),r=(.018+.022*j/w.tips.length)*fl;ctx.fillStyle=hexA('#ff7a30',.55*a*fill);ctx.beginPath();ctx.ellipse(q[0],q[1],r*1.4,r*1.4,0,0,TAU);ctx.fill();ctx.fillStyle=hexA('#ffe0a0',.8*a*fill);ctx.beginPath();ctx.arc(q[0],q[1],r*.6,0,TAU);ctx.fill()});
@@ -2873,10 +2879,10 @@ function envOutline(){const g=envGeo(.18),L=[g.body,...g.crest,g.heart];for(cons
   let tot=0;const o=L.map(p=>{let l=0;for(let i=1;i<p.length;i++)l+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);tot+=l;return{p,l}});return{o,tot}}
 function crm(a,b,c,d,t){const t2=t*t,t3=t2*t;return[.5*(2*b[0]+(-a[0]+c[0])*t+(2*a[0]-5*b[0]+4*c[0]-d[0])*t2+(-a[0]+3*b[0]-3*c[0]+d[0])*t3),.5*(2*b[1]+(-a[1]+c[1])*t+(2*a[1]-5*b[1]+4*c[1]-d[1])*t2+(-a[1]+3*b[1]-3*c[1]+d[1])*t3)]}
 function startEnv3(pw){BIRDS.length=0;P.length=0;WAVES.length=0;G.lit=null;G.flash=Math.min(G.flash||0,.4);
-  const u=Math.min(W*.27,H*.15,160),C0=[W/2,H*.36],C1=[W/2,H*.34],hi=H*.15,wall=FL.map((f,i)=>({x:f.x,y:f.y,i})).filter(o=>o.y>hi).sort((a,b)=>a.x-b.x),grp=[];
+  const u=Math.min(W*.34,H*.19,215),C0=[W/2,H*.36],C1=[W/2,H*.34],hi=H*.15,wall=FL.map((f,i)=>({x:f.x,y:f.y,i})).filter(o=>o.y>hi).sort((a,b)=>a.x-b.x),grp=[];
   for(const o of wall){const g=grp.find(q=>Math.hypot(q.x-o.x,q.y-o.y)<70*S);if(g){g.ids.push(o.i);g.x=(g.x+o.x)/2;g.y=(g.y+o.y)/2}else grp.push({x:o.x,y:o.y,ids:[o.i]})}
   const ch=FL.map((f,i)=>i).filter(i=>FL[i].y<=hi),cp=BGD.chand||[W/2,H*.11],pts=[C0],tm=[ENVG.fly];let t=ENVG.fly;
-  grp.forEach(g=>{t+=1.15;g.t=t;pts.push([clamp(g.x,W*.36,W*.64),g.y-u*.62]);tm.push(t)});const tc=t+1.25;pts.push([cp[0],cp[1]+u*.95]);tm.push(tc);pts.push(C1);tm.push(ENVG.fin);
+  grp.forEach(g=>{t+=1.15;g.t=t;pts.push([clamp(g.x,W*.42,W*.58),g.y-u*.62]);tm.push(t)});const tc=t+1.25;pts.push([cp[0],cp[1]+u*.95]);tm.push(tc);pts.push(C1);tm.push(ENVG.fin);
   const pts2=[C1,[W*.8,H*.46],[W*.52,H*.6],[W*.2,H*.44],[W*.42,H*.24],[W*.66,H*.03],[W*.76,-H*.14]],tm2=[ENVG.up,15,15.8,16.5,17.2,18,18.7];try{envForest()}catch(e){}
   G.ev={u,C0,C1,grp,ch,cp,tc,pts,tm,pts2,tm2,out:envOutline(),f2:[],trl:[],tro:0,upo:0,up2:0,D:0,on:{},lt:{},ff:[],pos:C0.slice(),vx:0,rot:0,ph:0,nn:0,ni:0,woke:0,chl:0,bl:0,snuf:0}}
 function envBirdAt(sk){const E=G.ev;let pts=E.pts,tm=E.tm;if(sk>=ENVG.up){pts=E.pts2;tm=E.tm2}if(sk<=tm[0])return(sk>=ENVG.up?E.C1:E.C0).slice();if(sk>=tm[tm.length-1])return pts[pts.length-1].slice();let i=0;while(i<tm.length-2&&sk>tm[i+1])i++;
@@ -2894,7 +2900,7 @@ function updateEnv3(dt,now){const E=G.ev;if(!E)return;const sk=G.sk,u=E.u;
   E.rot=lerp(E.rot,fly?clamp(E.vx/(700*S),-.32,.32):0,1-Math.pow(.05,dt));
   if(sk>=ENVG.up){E.trl.unshift([p[0],p[1]]);if(E.trl.length>(QL.lo?26:40))E.trl.length=QL.lo?26:40}
   if(fly&&Math.random()<dt*34){const sd=Math.random()<.5?-1:1,f=Math.sin(E.ph),tx=p[0]+sd*u*.85,ty=p[1]-u*(.13+.6*f*.8);P.push({x:tx,y:ty,vx:rnd(-12,12),vy:rnd(8,36),l:0,m:rnd(.7,1.3),s:rnd(.7,1.5),c:['#ffe7b0','#ffb050','#ff7a30'][Math.random()*3|0]})}
-  if(sk>ENVG.wake&&Math.random()<dt*14){const sd=Math.random()<.5?-1:1,r=rnd(.3,1);P.push({x:p[0]+sd*r*u*.9,y:p[1]-u*.1*r,vx:rnd(-10,10),vy:-rnd(20,60)*S,l:0,m:rnd(.6,1.2),s:rnd(.8,1.6),c:Math.random()<.5?'#ff9a40':'#ffd27a'})}
+  for(let rep=0;rep<3;rep++)if(sk>ENVG.wake&&Math.random()<dt*16){const sd=Math.random()<.5?-1:1,r=rnd(.3,1);P.push({x:p[0]+sd*r*u*.9,y:p[1]-u*.1*r,vx:rnd(-10,10),vy:-rnd(20,60)*S,l:0,m:rnd(.6,1.2),s:rnd(.8,1.6),c:Math.random()<.5?'#ff9a40':'#ffd27a'})}
   // 4 · chaque groupe de bougies se rallume au passage de l'oiseau
   E.grp.forEach((g,k)=>{if(!E.on[k]&&sk>=g.t-.12){E.on[k]=1;g.ids.forEach(i=>{G.lit&&G.lit.add(i);FL[i].fl=1.15;E.lt[i]=sk});try{celesta(at(),pen(74,4+k*2),1.3,A.master);celesta(at()+.12,pen(74,6+k*2),1,A.master);if(k%2)chirp(at()+.2,1,A.master)}catch(e){}
     g.ids.forEach(i=>spark(FL[i].x,FL[i].y,'#ffd27a',14,110*S))}});
@@ -4674,7 +4680,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='192';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='193';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
