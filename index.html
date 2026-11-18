@@ -2885,7 +2885,7 @@ function startEnv3(pw){BIRDS.length=0;P.length=0;WAVES.length=0;G.lit=null;G.fla
   grp.forEach(g=>{t+=1.15;g.t=t;pts.push([clamp(g.x,W*.42,W*.58),g.y-u*.62]);tm.push(t)});const tc=t+1.25;pts.push([cp[0],cp[1]+u*.95]);tm.push(tc);pts.push(C1);tm.push(ENVG.fin);
   const pts2=[C1,[W*.78,H*.4],[W*.5,H*.5],[W*.2,H*.42],[W*.45,H*.28],[W*.85,H*.16],[W*1.45,H*.08]],tm2=[ENVG.up,15,15.8,16.5,17.2,18,18.9];try{envForest()}catch(e){}
   G.ev={u,C0,C1,grp,ch,cp,tc,pts,tm,pts2,tm2,out:envOutline(),f2:[],trl:[],tro:0,upo:0,up2:0,D:0,on:{},lt:{},ff:[],pos:C0.slice(),vx:0,rot:0,ph:0,nn:0,ni:0,woke:0,chl:0,bl:0,snuf:0}}
-function envBirdAt(sk){const E=G.ev;let pts=E.pts,tm=E.tm;if(sk>=ENVG.up){pts=E.pts2;tm=E.tm2}if(sk<=tm[0])return(sk>=ENVG.up?E.C1:E.C0).slice();if(sk>=tm[tm.length-1])return pts[pts.length-1].slice();let i=0;while(i<tm.length-2&&sk>tm[i+1])i++;
+function envBirdAt(sk){const E=G.ev;if(sk>ENVG.fin&&sk<ENVG.up){const a=(sk-ENVG.fin)/(ENVG.up-ENVG.fin)*TAU;return[E.C1[0]+Math.sin(a)*W*.24,E.C1[1]+(1-Math.cos(a))*H*.06]}let pts=E.pts,tm=E.tm;if(sk>=ENVG.up){pts=E.pts2;tm=E.tm2}if(sk<=tm[0])return(sk>=ENVG.up?E.C1:E.C0).slice();if(sk>=tm[tm.length-1])return pts[pts.length-1].slice();let i=0;while(i<tm.length-2&&sk>tm[i+1])i++;
   const t=(sk-tm[i])/(tm[i+1]-tm[i]),e=t*t*(3-2*t)*.35+t*.65;return crm(pts[Math.max(0,i-1)],pts[i],pts[i+1],pts[Math.min(pts.length-1,i+2)],e)}
 function updateEnv3(dt,now){const E=G.ev;if(!E)return;const sk=G.sk,u=E.u;
   // 1 · le noir tombe, les bougies s'éteignent
@@ -2971,7 +2971,7 @@ function envFilament(w,tg,now,a){if(a<=.01)return;const pts=envFilPts(w,tg,now);
   if(Math.random()<.4){const q=pts[Math.random()*pts.length|0];P.push({x:q[0],y:q[1],vx:rnd(-12,12),vy:rnd(-10,25),l:0,m:rnd(.4,.9),s:rnd(.6,1.2),c:'#ffe7b0'})}}
 
 // ---------- phénix vu de profil (vol horizontal) ----------
-function envSide(sk){const r=(t,a,b)=>clamp((t-a)/(b-a));return Math.max(r(sk,ENVG.fly+.1,ENVG.fly+.45)*(1-r(sk,ENVG.fin-.55,ENVG.fin-.15)),r(sk,ENVG.up+.05,ENVG.up+.4))}
+function envSide(sk){return clamp((sk-ENVG.fly-.1)/.35)}
 function envSideGeo(f,sh){const ang=lerp(.55,-1.95,(f+1)/2),d=[Math.cos(ang),Math.sin(ang)],E1=[sh[0]+.42*Math.cos(ang+.3),sh[1]+.42*Math.sin(ang+.3)],T=[E1[0]+.66*Math.cos(ang-.18),E1[1]+.66*Math.sin(ang-.18)];
   let n=[-d[1],d[0]];if(n[0]>0)n=[d[1],-d[0]];const lead=[],fe=[],tips=[],cv=[],N=13,at=t=>{const u=1-t;return[u*u*sh[0]+2*u*t*E1[0]+t*t*T[0],u*u*sh[1]+2*u*t*E1[1]+t*t*T[1]]};
   for(let i=0;i<=12;i++)lead.push(at(i/12));
@@ -4718,7 +4718,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='194';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='195';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
