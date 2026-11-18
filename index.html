@@ -2883,7 +2883,7 @@ function startEnv3(pw){BIRDS.length=0;P.length=0;WAVES.length=0;G.lit=null;G.fla
   for(const o of wall){const g=grp.find(q=>Math.hypot(q.x-o.x,q.y-o.y)<70*S);if(g){g.ids.push(o.i);g.x=(g.x+o.x)/2;g.y=(g.y+o.y)/2}else grp.push({x:o.x,y:o.y,ids:[o.i]})}
   const ch=FL.map((f,i)=>i).filter(i=>FL[i].y<=hi),cp=BGD.chand||[W/2,H*.11],pts=[C0],tm=[ENVG.fly];let t=ENVG.fly;
   grp.forEach(g=>{t+=1.15;g.t=t;pts.push([clamp(g.x,W*.42,W*.58),g.y-u*.62]);tm.push(t)});const tc=t+1.25;pts.push([cp[0],cp[1]+u*.95]);tm.push(tc);pts.push(C1);tm.push(ENVG.fin);
-  const pts2=[C1,[W*.8,H*.46],[W*.52,H*.6],[W*.2,H*.44],[W*.42,H*.24],[W*.66,H*.03],[W*.76,-H*.14]],tm2=[ENVG.up,15,15.8,16.5,17.2,18,18.7];try{envForest()}catch(e){}
+  const pts2=[C1,[W*.78,H*.4],[W*.5,H*.5],[W*.2,H*.42],[W*.45,H*.28],[W*.85,H*.16],[W*1.45,H*.08]],tm2=[ENVG.up,15,15.8,16.5,17.2,18,18.9];try{envForest()}catch(e){}
   G.ev={u,C0,C1,grp,ch,cp,tc,pts,tm,pts2,tm2,out:envOutline(),f2:[],trl:[],tro:0,upo:0,up2:0,D:0,on:{},lt:{},ff:[],pos:C0.slice(),vx:0,rot:0,ph:0,nn:0,ni:0,woke:0,chl:0,bl:0,snuf:0}}
 function envBirdAt(sk){const E=G.ev;let pts=E.pts,tm=E.tm;if(sk>=ENVG.up){pts=E.pts2;tm=E.tm2}if(sk<=tm[0])return(sk>=ENVG.up?E.C1:E.C0).slice();if(sk>=tm[tm.length-1])return pts[pts.length-1].slice();let i=0;while(i<tm.length-2&&sk>tm[i+1])i++;
   const t=(sk-tm[i])/(tm[i+1]-tm[i]),e=t*t*(3-2*t)*.35+t*.65;return crm(pts[Math.max(0,i-1)],pts[i],pts[i+1],pts[Math.min(pts.length-1,i+2)],e)}
@@ -2895,7 +2895,7 @@ function updateEnv3(dt,now){const E=G.ev;if(!E)return;const sk=G.sk,u=E.u;
   // 3 · éveil
   if(!E.woke&&sk>=ENVG.wake){E.woke=1;try{[0,2,4,7].forEach((d,i)=>harp(at()+i*.1,pen(62,d)+12,.7));chirp(at()+.3,1.1,A.master)}catch(e){}spark(E.C0[0],E.C0[1]-u*.1,'#fff3c8',24,160*S)}
   // vol : position, inclinaison, battements
-  const p=envBirdAt(sk),vx=(p[0]-E.pos[0])/Math.max(dt,1e-3);E.vx=lerp(E.vx,vx,1-Math.pow(.02,dt));E.pos=p;
+  const p=envBirdAt(sk),vx=(p[0]-E.pos[0])/Math.max(dt,1e-3);const vy=(p[1]-E.pos[1])/Math.max(dt,1e-3);E.vx=lerp(E.vx,vx,1-Math.pow(.02,dt));E.vy=lerp(E.vy||0,vy,1-Math.pow(.02,dt));if(Math.abs(E.vx)>30*S)E.dir=E.vx>0?1:-1;E.pos=p;
   const fly=sk>=ENVG.fly&&sk<ENVG.fin||sk>=ENVG.up,hz=sk<ENVG.wake?0:sk<ENVG.fly?1.1:sk>=ENVG.up?1.8:fly?2.2:1.15;E.ph+=dt*hz*TAU;
   E.rot=lerp(E.rot,fly?clamp(E.vx/(700*S),-.32,.32):0,1-Math.pow(.05,dt));
   if(sk>=ENVG.up){E.trl.unshift([p[0],p[1]]);if(E.trl.length>(QL.lo?26:40))E.trl.length=QL.lo?26:40}
@@ -2945,7 +2945,7 @@ function drawEnv3(now,k){const E=G.ev;if(!E)return;const sk=k,u=E.u,p=E.pos,end=
       if(t<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=hexA('#fff1c8',.5*(1-t));ctx.lineWidth=10*S;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.stroke();ctx.strokeStyle=hexA('#ffffff',.8*(1-t));ctx.lineWidth=1.6*S;ctx.stroke();
         for(let j=0;j<6;j++){const an=rnd(0,TAU);P.push({x:cx+Math.cos(an)*r,y:cy+Math.sin(an)*r,vx:Math.cos(an)*rnd(10,60),vy:Math.sin(an)*rnd(10,60),l:0,m:rnd(.5,1),s:rnd(.8,1.6),c:Math.random()<.5?'#fff3c8':'#d8ff9a'})}ctx.restore()}}
     ctx.save();ctx.globalCompositeOperation='lighter';for(const f of E.f2){if(Math.hypot(f.x-cx,f.y-cy)>r)continue;const bl=.3+.7*Math.max(0,Math.sin(sk*(1.4+f.z)+f.ph)),a=bl*end*clamp((sk-ENVG.tr)/.8),s=f.bs*(.6+.7*f.z)*S;gdraw(f.c,f.x,f.y,s*5,.5*a);ctx.fillStyle=hexA('#ffffff',.9*a);ctx.fillRect(f.x-s*.35,f.y-s*.35,s*.7,s*.7)}ctx.restore()}
-  if(E.trl.length>2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';const n=E.trl.length;for(let i=1;i<n;i++){const q=1-i/n,a=q*end*clamp((ENVG.end-.6-sk)/1.5);ctx.strokeStyle=hexA(i<n*.3?'#fff3c8':'#ffb347',.55*a);ctx.lineWidth=(1+9*q)*S;ctx.beginPath();ctx.moveTo(E.trl[i-1][0],E.trl[i-1][1]+u*.2);ctx.lineTo(E.trl[i][0],E.trl[i][1]+u*.2);ctx.stroke()}ctx.restore()}
+  if(E.trl.length>2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';const n=E.trl.length;for(let i=1;i<n;i++){const q=1-i/n,a=q*end*clamp((ENVG.end-.6-sk)/1.5);ctx.strokeStyle=hexA(i<n*.3?'#fff3c8':'#ffb347',.55*a);ctx.lineWidth=(1+9*q)*S;ctx.beginPath();ctx.moveTo(E.trl[i-1][0],E.trl[i-1][1]+u*.2*(1-(E.sv||0)));ctx.lineTo(E.trl[i][0],E.trl[i][1]+u*.2*(1-(E.sv||0)));ctx.stroke()}ctx.restore()}
   {const fa=envFilA(sk);if(fa>0){const w=envWand();let tg;if(fill<1&&drawn<1&&sk>ENVG.d0)tg=envPenPos(Math.max(.001,drawn));if(!tg){const bob=sk>=ENVG.fin?Math.sin(sk*1.6)*6*S:0;tg=[p[0],p[1]+bob+u*.03]}
     if(tg)envFilament(w,tg,now,fa*end)}
     if(!E.snap&&sk>=ENVG.up+.55){E.snap=1;const w=envWand(),tg=[p[0],p[1]];for(let i=0;i<40;i++){const t=Math.random();P.push({x:lerp(w[0],tg[0],t),y:lerp(w[1],tg[1],t),vx:rnd(-40,40),vy:rnd(-60,20),l:0,m:rnd(.6,1.4),s:rnd(.8,1.8),c:Math.random()<.5?'#fff3c8':'#ffb347'})}try{celesta(at(),pen(74,12),1.2,A.master);harp(at()+.05,pen(62,7)+12,.6)}catch(e){}}}
@@ -2953,7 +2953,9 @@ function drawEnv3(now,k){const E=G.ev;if(!E)return;const sk=k,u=E.u,p=E.pos,end=
   if(fill>0){const f=sk<ENVG.fly?.18+.42*Math.sin(E.ph)*clamp((sk-ENVG.wake)/.5):sk>=ENVG.up?.1+.95*Math.sin(E.ph):.15+.85*Math.sin(E.ph)*(sk<ENVG.fin?1:.75),bob=sk>=ENVG.fin?Math.sin(sk*1.6)*6*S:0,hb=.5+.5*Math.sin(sk*5.2);
     const gl=sk>=ENVG.fin&&sk<ENVG.up?Math.sin(clamp((sk-ENVG.fin)/(ENVG.up-ENVG.fin))*Math.PI):0,sc=sk<16.4?1:lerp(1,.42,ease(clamp((sk-16.4)/2)));
     if(gl>0){ctx.save();ctx.globalCompositeOperation='lighter';gdraw('#fff1c8',p[0],p[1]+bob,u*1.6,.35*gl);ctx.restore()}
-    envDrawBird(p[0],p[1]+bob,u*sc,f,E.rot,ba*end,fill,hb,sk)}}
+    const sv=envSide(sk);E.sv=sv;
+    if(sv<1)envDrawBird(p[0],p[1]+bob,u*sc,f,E.rot,ba*end*(1-sv),fill,hb,sk);
+    if(sv>0){const pit=clamp(Math.atan2(E.vy||0,Math.abs(E.vx)+60*S),-.6,.6);envDrawSide(p[0],p[1]+bob,u*sc*.95,f,E.dir||1,pit,ba*end*sv,fill,sk)}}}
 function envPenPos(r){const E=G.ev,O=E.out;let d=r*O.tot;for(const s of O.o){if(d<=s.l){const p=s.p;for(let i=1;i<p.length;i++){const l=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);if(d<=l){const t=l?d/l:0;return[E.C0[0]+lerp(p[i-1][0],p[i][0],t)*E.u,E.C0[1]+lerp(p[i-1][1],p[i][1],t)*E.u]}d-=l}return null}d-=s.l}return null}
 function envDrawOutline(r,a){const E=G.ev,O=E.out,u=E.u,[x0,y0]=E.C0;let d=r*O.tot;ctx.lineCap=ctx.lineJoin='round';
   for(const s of O.o){if(d<=0)break;const p=s.p,q=[[x0+p[0][0]*u,y0+p[0][1]*u]];let rest=d;for(let i=1;i<p.length&&rest>0;i++){const l=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]),t=Math.min(1,rest/(l||1));q.push([x0+lerp(p[i-1][0],p[i][0],t)*u,y0+lerp(p[i-1][1],p[i][1],t)*u]);rest-=l}d-=s.l;
@@ -2967,6 +2969,42 @@ function envFilament(w,tg,now,a){if(a<=.01)return;const pts=envFilPts(w,tg,now);
   for(let k=0;k<6;k++){const t=(now*.0005+k/6)%1,q=pts[Math.round(t*(pts.length-1))];gdraw('#ffd27a',q[0],q[1],9*S,.7*a);gdraw('#ffffff',q[0],q[1],3*S,a)}
   gdraw('#ffb347',w[0],w[1],22*S,.75*a);gdraw('#ffffff',w[0],w[1],7*S,a);gdraw('#ffd27a',tg[0],tg[1],16*S,.6*a);ctx.restore();
   if(Math.random()<.4){const q=pts[Math.random()*pts.length|0];P.push({x:q[0],y:q[1],vx:rnd(-12,12),vy:rnd(-10,25),l:0,m:rnd(.4,.9),s:rnd(.6,1.2),c:'#ffe7b0'})}}
+
+// ---------- phénix vu de profil (vol horizontal) ----------
+function envSide(sk){const r=(t,a,b)=>clamp((t-a)/(b-a));return Math.max(r(sk,ENVG.fly+.1,ENVG.fly+.45)*(1-r(sk,ENVG.fin-.55,ENVG.fin-.15)),r(sk,ENVG.up+.05,ENVG.up+.4))}
+function envSideGeo(f,sh){const ang=lerp(.55,-1.95,(f+1)/2),d=[Math.cos(ang),Math.sin(ang)],E1=[sh[0]+.42*Math.cos(ang+.3),sh[1]+.42*Math.sin(ang+.3)],T=[E1[0]+.66*Math.cos(ang-.18),E1[1]+.66*Math.sin(ang-.18)];
+  let n=[-d[1],d[0]];if(n[0]>0)n=[d[1],-d[0]];const lead=[],fe=[],tips=[],cv=[],N=13,at=t=>{const u=1-t;return[u*u*sh[0]+2*u*t*E1[0]+t*t*T[0],u*u*sh[1]+2*u*t*E1[1]+t*t*T[1]]};
+  for(let i=0;i<=12;i++)lead.push(at(i/12));
+  for(let i=0;i<N;i++){const t=.12+.88*i/(N-1),a=at(t),w=Math.pow(t,1.7)*.75,vx=lerp(n[0],d[0],w),vy=lerp(n[1],d[1],w),vl=Math.hypot(vx,vy)||1,L=.12+.44*Math.pow(t,1.6),b=[a[0]+vx/vl*L,a[1]+vy/vl*L];fe.push(envLeaf(a,b,.022+.016*t));tips.push(b)}
+  for(let i=0;i<8;i++){const t=.08+.6*i/7,a=at(t),vx=lerp(n[0],d[0],.3),vy=lerp(n[1],d[1],.3),vl=Math.hypot(vx,vy)||1,L=.09+.05*t;cv.push(envLeaf(a,[a[0]+vx/vl*L,a[1]+vy/vl*L],.03))}
+  return{lead,fe,tips,cv,sh}}
+const ENVSB=(()=>{const P=[[-.4,.02],[-.2,-.09],[.05,-.12],[.25,-.1],[.36,-.17],[.42,-.25],[.5,-.27],[.56,-.23],[.55,-.17],[.46,-.13],[.36,-.03],[.2,.08],[0,.12],[-.22,.09]],o=[];for(let i=0;i<P.length;i++)for(let j=0;j<4;j++)o.push(crm(P[(i-1+P.length)%P.length],P[i],P[(i+1)%P.length],P[(i+2)%P.length],j/4));o.push(o[0].slice());return o})();
+function envTongues(sites,tm,fa,ux,uy){ctx.globalCompositeOperation='lighter';sites.forEach((q,k)=>{const n=Math.sin(tm*7.3+k*1.91)*.5+Math.sin(tm*11.1+k*.73)*.5,h=q[2]*(.75+.45*n),w=q[3],sw=Math.sin(tm*5+k)*w*1.2,x=q[0],y=q[1],px=-uy,py=ux;
+  for(const [hm,wm,col,al] of [[1.25,1.5,'#ff4a18',.16],[1,1,'#ff9a30',.26],[.55,.55,'#ffe7a0',.4]]){const tx=x+ux*h*hm+px*sw,ty=y+uy*h*hm+py*sw;ctx.fillStyle=hexA(col,al*fa);ctx.beginPath();ctx.moveTo(x-px*w*wm,y-py*w*wm);ctx.quadraticCurveTo(x-px*w*wm+ux*h*hm*.55,y-py*w*wm+uy*h*hm*.55,tx,ty);ctx.quadraticCurveTo(x+px*w*wm+ux*h*hm*.55,y+py*w*wm+uy*h*hm*.55,x+px*w*wm,y+py*w*wm);ctx.closePath();ctx.fill()}})}
+function envSideWing(w,a,fill,lw,tm,far){const k=far?.45:1;envPath([...w.lead,...w.tips.slice().reverse(),[w.sh[0]-.12,w.sh[1]+.06]],true);const gr=ctx.createLinearGradient(w.sh[0],w.sh[1],w.lead[12][0],w.lead[12][1]);gr.addColorStop(0,hexA('#fff0cc',.3*a*fill*k));gr.addColorStop(.55,hexA('#ffb347',.16*a*fill*k));gr.addColorStop(1,hexA('#ff5a2a',.12*a*fill*k));ctx.fillStyle=gr;ctx.fill();
+  w.fe.forEach((fe,j)=>{const q=j/(w.fe.length-1);envPath(fe,true);ctx.fillStyle=hexA(q<.5?'#ffd27a':'#ff8a3a',(.1+.1*q)*a*fill*k);ctx.fill();ctx.strokeStyle=hexA(q<.35?'#fff2d8':q<.7?'#ffd08a':'#ffa060',.78*a*k);ctx.lineWidth=.9*S*lw;ctx.stroke()});
+  w.tips.forEach((q,j)=>{if(j<w.tips.length*.45)return;const fl=.7+.3*Math.sin(tm*13+j*2.1),r=(.018+.022*j/w.tips.length)*fl;ctx.fillStyle=hexA('#ff7a30',.55*a*fill*k);ctx.beginPath();ctx.arc(q[0],q[1],r*1.4,0,TAU);ctx.fill();ctx.fillStyle=hexA('#ffe0a0',.8*a*fill*k);ctx.beginPath();ctx.arc(q[0],q[1],r*.6,0,TAU);ctx.fill()});
+  for(const c of w.cv){envPath(c,true);ctx.fillStyle=hexA('#fff1d2',.16*a*fill*k);ctx.fill();ctx.strokeStyle=hexA('#fff6e6',.6*a*k);ctx.lineWidth=.8*S*lw;ctx.stroke()}
+  envPath(w.lead);ctx.strokeStyle=hexA('#ffd27a',.3*a*k);ctx.lineWidth=4*S*lw;ctx.stroke();ctx.strokeStyle=hexA('#ffffff',.95*a*k);ctx.lineWidth=1.7*S*lw;ctx.stroke()}
+function envDrawSide(x,y,u,f,dir,pit,a,fill,tm){if(a<=.01)return;const lw=1/u,near=envSideGeo(f,[.06,-.09]),far=envSideGeo(f*.85-.1,[.02,-.11]);
+  ctx.save();ctx.translate(x,y);ctx.globalCompositeOperation='lighter';gdraw('#ff5a20',0,0,u*1.6,.12*a*fill);gdraw('#fff6e6',u*.1*dir,0,u*.4,.18*a*fill);
+  ctx.scale(dir,1);ctx.rotate(pit);ctx.scale(u,u);ctx.lineCap=ctx.lineJoin='round';
+  // flammes qui filent vers l'arrière
+  const sites=[];for(const w of [near]){w.lead.forEach((q,i)=>i>1&&sites.push([q[0],q[1],.15+.1*i/12,.033]));w.tips.forEach((q,i)=>sites.push([q[0],q[1],.12+.15*i/w.tips.length,.03]))}
+  ENVSB.forEach((q,i)=>i%3||q[1]>0||sites.push([q[0],q[1],.13,.03]));envTongues(sites,tm,a*fill,-.8,-.6);
+  envSideWing(far,a,fill,lw,tm,1);
+  // queue : cinq plumes de flamme qui traînent
+  for(const sd of [-2,-1,0,1,2]){const q=[],n=22,Lq=1.55-.15*Math.abs(sd);for(let i=0;i<=n;i++){const t=i/n;q.push([-.36-t*Lq,t*sd*.07+t*t*.1+Math.sin(tm*2.4+t*4.6+sd*1.7)*.07*t])}
+    const Lf=[],Rt=[];for(let i=0;i<=n;i++){const t=i/n,a0=q[Math.max(0,i-1)],a1=q[Math.min(n,i+1)],dx=a1[0]-a0[0],dy=a1[1]-a0[1],dl=Math.hypot(dx,dy)||1,w=(.012+(sd?.045:.06)*Math.sin(Math.PI*Math.pow(t,.55)))*(1+.15*Math.sin(tm*9+t*12));Lf.push([q[i][0]-dy/dl*w,q[i][1]+dx/dl*w]);Rt.push([q[i][0]+dy/dl*w,q[i][1]-dx/dl*w])}
+    envPath([...Lf,...Rt.reverse()],true);const gt=ctx.createLinearGradient(-.36,0,-.36-Lq,0);gt.addColorStop(0,hexA('#fff0c0',.5*a*fill));gt.addColorStop(.45,hexA('#ffa040',.38*a*fill));gt.addColorStop(1,hexA('#ff4020',0));ctx.fillStyle=gt;ctx.fill();
+    envPath(q);ctx.strokeStyle=hexA('#ffe6b0',.75*a);ctx.lineWidth=.9*S*lw;ctx.stroke();const e=q[Math.round(n*.82)];ctx.fillStyle=hexA('#ffcf7a',.8*a*fill);ctx.beginPath();ctx.ellipse(e[0],e[1],.045,.03,0,0,TAU);ctx.fill();ctx.fillStyle=hexA('#ff6a30',.9*a*fill);ctx.beginPath();ctx.arc(e[0],e[1],.016,0,TAU);ctx.fill()}
+  // corps, tête, aigrettes
+  ctx.save();ctx.scale(1.35,1.35);envPath(ENVSB,true);const gb=ctx.createRadialGradient(.1,-.04,0,.05,0,.45);gb.addColorStop(0,hexA('#ffffff',.6*a*fill));gb.addColorStop(.6,hexA('#ffd08a',.3*a*fill));gb.addColorStop(1,hexA('#ff9a40',.15*a*fill));ctx.fillStyle=gb;ctx.fill();ctx.strokeStyle=hexA('#ffffff',.85*a);ctx.lineWidth=1.3*S*lw;ctx.stroke();
+  ctx.fillStyle=hexA('#ffd27a',.9*a);ctx.beginPath();ctx.moveTo(.555,-.225);ctx.lineTo(.66,-.19);ctx.lineTo(.55,-.172);ctx.closePath();ctx.fill();ctx.fillStyle=hexA('#ffffff',.95*a);ctx.beginPath();ctx.ellipse(.505,-.215,.013,.009,0,0,TAU);ctx.fill();
+  ctx.strokeStyle=hexA('#fff6e6',.85*a);ctx.lineWidth=1*S*lw;const cr=[[[.46,-.26],[.4,-.36],[.22,-.42]],[[.47,-.27],[.44,-.42],[.28,-.52]],[[.49,-.27],[.52,-.42],[.4,-.56]]],cs=[];
+  cr.forEach(c=>{ctx.beginPath();ctx.moveTo(c[0][0],c[0][1]);ctx.quadraticCurveTo(c[1][0],c[1][1],c[2][0],c[2][1]);ctx.stroke();ctx.fillStyle=hexA('#ffb050',a);ctx.beginPath();ctx.arc(c[2][0],c[2][1],.02,0,TAU);ctx.fill();cs.push([c[2][0],c[2][1],.18,.033])});envTongues(cs,tm+3,a*fill,-.8,-.6);
+  ctx.globalCompositeOperation='lighter';const hp=.5+.5*Math.sin(tm*5.2);ctx.fillStyle=hexA('#ffb3cc',(.25+.35*hp)*a*fill);ctx.beginPath();ctx.arc(.12,-.01,.035,0,TAU);ctx.fill();
+  ctx.restore();envSideWing(near,a,fill,lw,tm,0);ctx.restore()}
 SPX.tree={start:startTree,update:updateTree,draw:drawTreeSpell,gold:TRG.end};
 SPELL_END.tree=7.2;
 SPX.tree.start=((orig)=>(gold,pw)=>{const src=realP()&&!G.moon&&!G.day?liveSrc(liveLvl(gold,pw)):null;if(src){liveStart(src,()=>orig(gold,G.power));return}orig(gold,pw)})(SPX.tree.start);
@@ -4680,7 +4718,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='193';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='194';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
