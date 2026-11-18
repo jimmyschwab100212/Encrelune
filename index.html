@@ -1362,7 +1362,7 @@ function startSpell(){const pl=PAL[G.pi],SC=G.SC,pw=G.power,gold=G.moon?!!G.gold
   FL.forEach(f=>f.fl=Math.max(f.fl||0,.8*pw));SND.gust();
   if(gold&&(G.anim==='stag'||G.anim==='fox')){SND.perfect();G.shake=.3;WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.2,t:-.3,col:'#ffd27a'})}else if(gold){G.slow=1.7;G.shake=1.2;SND.perfect();spark(SC.x,SC.y,'#ffffff',90,620*S);WAVES.push({x:SC.x,y:SC.y,r:SC.r*1.3,t:-.3,col:'#ffd27a'},{x:SC.x,y:SC.y,r:SC.r*.4,t:-.45,col:'#ff9ad8'});FL.forEach(f=>f.fl=1.5);for(let i=0;i<150;i++)P.push({x:rnd(0,W),y:rnd(-H*.1,H*.6),vx:rnd(-10,10),vy:rnd(20,70),l:0,m:rnd(3,6),s:rnd(1,2.6),c:Math.random()<.8?'#ffd27a':'#ffffff'})}
   if(G.anim==='birds'&&gold){G.bx=0;startEnv3(pw)}else if(G.anim==='birds'){G.bx=0;G.ba=0;G.rg=null;G.lit=null;G.ev=null;if(!gold&&pw>=.5){G.bx=3.8;const r0=Math.min(W*.13,70);G.rg=[{x:W*.24,y:H*.4,r:r0,h:0},{x:W*.76,y:H*.5,r:r0,h:0},{x:W*.5,y:H*.3,r:r0*1.15,h:0}]}const n=gold?96:Math.round(10+44*pw),ww=Math.min(W*.66,360),tg=gold?cloud(BIGBIRD,n):null;for(let i=0;i<n;i++){const a=Math.random()*TAU,v=rnd(140,340)*S;BIRDS.push({x:SC.x+Math.cos(a)*SC.r*.2,y:SC.y+Math.sin(a)*SC.r*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ph:Math.random()*TAU,fr:rnd(10,15),s:rnd(.7,1.35)*S,age:-Math.random()*.6,gold:gold&&Math.random()<.65,tx:tg?tg[i%tg.length][0]:0,ty:tg?tg[i%tg.length][1]:0,th:Math.random()*TAU,R:rnd(40,125)*S,dir:Math.random()<.8?1:-1,ox:rnd(-.3,.3)*ww,oy:rnd(-50,40)*S,depth:0,lag:rnd(0,.14),rx:rnd(-.45,.45),ry:rnd(-.45,.45),hi:i/n})}SND.birds(n)}
-  if(G.anim==='fox'){G.lava=null;G.lv0=null;G.bl=0;G.fld=null;G.cb=null}if(G.anim==='stag'){SND.stag();G.hp2=0;G.hrt=null;G.hok=0;G.lv=null;G.tree=null;G.gfy=null;G.cr=null;G.lit=(!gold&&pw>=.5)?new Set():null;if(G.lit){FL.forEach(f=>{f.fl=0});try{SND.snuff()}catch(e){}}G.gz=null;G.gw=null;G.grass=null;G.bk=null;G.fw=null;G.rbs=null;G.lie=null;G.hp=0;G.fl0=0;G.su=null;G.rr=0;G.bw=0;G.bx=(!gold&&pw>=.5)?2.4:0}if(G.anim==='wolf'&&(gold||(!G.moon&&!G.day&&G.res&&G.res.stars===2&&pw>=.5)))startWlf(gold,pw);else if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
+  if(G.anim==='fox'){G.lava=null;G.lv0=null;G.bl=0;G.fld=null;G.cb=null;G.vn=null}if(G.anim==='stag'){SND.stag();G.hp2=0;G.hrt=null;G.hok=0;G.lv=null;G.tree=null;G.gfy=null;G.cr=null;G.lit=(!gold&&pw>=.5)?new Set():null;if(G.lit){FL.forEach(f=>{f.fl=0});try{SND.snuff()}catch(e){}}G.gz=null;G.gw=null;G.grass=null;G.bk=null;G.fw=null;G.rbs=null;G.lie=null;G.hp=0;G.fl0=0;G.su=null;G.rr=0;G.bw=0;G.bx=(!gold&&pw>=.5)?2.4:0}if(G.anim==='wolf'&&(gold||(!G.moon&&!G.day&&G.res&&G.res.stars===2&&pw>=.5)))startWlf(gold,pw);else if(G.anim==='wolf')SND.wolf();if(G.anim==='fox')SND.fox();if(G.anim==='owl')startOwl(gold,pw);if(SPX[G.anim])SPX[G.anim].start(gold,pw);if(G.anim==='spirit')startSpirit(gold,pw)}
 /* ----- Palier 2 : le galop des livres (2★) et la constellation (3★) ----- */
 const STAG_TIPS=[[64,1],[81,25],[46,7],[75,9],[44,3],[27,26],[30,15]];
 function stagPath(u){const cx=W/2,cy=G.ay0-H*.02,rx=W*.32,ry=H*.09,th=Math.PI/2+u*2.5*Math.PI;return{x:cx+rx*Math.cos(th),y:cy+ry*Math.sin(th)-u*H*.08,f:.74+.26*Math.sin(th)}}
@@ -1559,6 +1559,27 @@ function foxCubDrawAll(now,k,fade){const c=G.cb;if(!c||k<c.t0)return;const a=eas
   ctx.globalCompositeOperation='lighter';c.hrt.forEach(h=>{const t=h.t,x=h.x+Math.sin(t*6+h.ph)*5*S,y=h.y-t*60*S,s=h.s*S*(.8+.4*Math.sin(t*3)),al=Math.sin(Math.PI*t)*a;ctx.fillStyle=hexA('#ff7aa8',.85*al);ctx.beginPath();ctx.moveTo(x,y+4*s);ctx.bezierCurveTo(x-8*s,y-2*s,x-5*s,y-9*s,x,y-4*s);ctx.bezierCurveTo(x+5*s,y-9*s,x+8*s,y-2*s,x,y+4*s);ctx.fill();gdraw('#ff9ac0',x,y,9*s,.25*al)});
   ctx.restore()}
 
+/* ---- lianes lumineuses qui poussent tout autour de l'écran (fin du sort légendaire du Renard) ---- */
+function foxVinesInit(){const R=mulberry(hash32('liane')),V=[],mk=(fn,n,dirv)=>{const pts=[];for(let i=0;i<=n;i++)pts.push(fn(i/n));return pts};
+  const side=(x0,sg,amp,ph,top)=>mk(t=>[W*(x0+sg*(amp*Math.sin(t*9+ph)+amp*.4*Math.sin(t*23+ph*2))),H*(.94-(.94-top)*t)],70),
+        topv=(y0,sg,amp,ph)=>mk(t=>[W*(sg>0?-.02+1.04*t:1.02-1.04*t),H*(y0+amp*Math.sin(t*11+ph)+amp*.35*Math.sin(t*27+ph))],70);
+  V.push({p:side(.035,1,.025,0,.085),d:0},{p:side(.085,1,.02,2.1,.16),d:.35},{p:side(.965,-1,.025,1,.085),d:.15},{p:side(.915,-1,.02,3.3,.16),d:.5},{p:topv(.095,1,.012,0),d:.6},{p:topv(.14,-1,.01,1.7),d:.8});
+  V.forEach((v,vi)=>{v.lv=[];v.bd=[];v.tc=[];const n=v.p.length;for(let i=3;i<n-1;i+=3){const a=v.p[i-1],b=v.p[i+1],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),sd=(i/3)%2?1:-1;v.lv.push({i,a:ang+sd*(1.0+R()*.5),s:(8+R()*7)*S,c:R()<.5?'#5fd47a':'#8cf0a0'});
+      if(R()<.18)v.bd.push({i,c:['#ffd27a','#ff9ad8','#fff3c8','#9fe8ff'][R()*4|0],s:(3+R()*3)*S,ph:R()*TAU});
+      if(R()<.2){const q=v.p[i],cx=W/2-q[0],cy=H*.42-q[1],cl=Math.hypot(cx,cy)||1,ux=cx/cl,uy=cy/cl,tp=[],L=7+R()*5|0,r0=(10+R()*14)*S,sg=sd;for(let j=0;j<=14;j++){const t=j/14,r=r0*(1-t*.82),an=t*5.2*sg+Math.atan2(uy,ux);tp.push([q[0]+ux*r0*1.1*t*1.4+Math.cos(an)*r-Math.cos(Math.atan2(uy,ux))*r0,q[1]+uy*r0*1.1*t*1.4+Math.sin(an)*r-Math.sin(Math.atan2(uy,ux))*r0])}v.tc.push({i,p:tp})}}});
+  G.vn=V}
+function foxVinesDraw(now,k,fade){if(!G.lv0)return;const t0=G.lv0+2.2,V=G.vn||(foxVinesInit(),G.vn);if(k<t0)return;const gl=ease(clamp((k-t0-2.2)/1.6))*(.85+.15*Math.sin(now/500)),arr=G.cb&&G.cb.arr?1:0;ctx.save();ctx.lineCap=ctx.lineJoin='round';
+  V.forEach((v,vi)=>{const g=ease(clamp((k-t0-v.d)/3.4)),n=Math.round(g*(v.p.length-1));if(n<2)return;const pts=v.p;
+    ctx.globalCompositeOperation='source-over';ctx.beginPath();for(let i=0;i<=n;i++)i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);ctx.strokeStyle=`rgba(28,70,42,${.95*fade})`;ctx.lineWidth=7*S;ctx.stroke();ctx.strokeStyle=`rgba(80,175,100,${.95*fade})`;ctx.lineWidth=3.4*S;ctx.stroke();
+    v.tc.forEach(c=>{if(c.i>n)return;const u=clamp((n-c.i)/8);ctx.beginPath();const m=Math.round(u*(c.p.length-1));for(let j=0;j<=m;j++)j?ctx.lineTo(c.p[j][0],c.p[j][1]):ctx.moveTo(c.p[j][0],c.p[j][1]);ctx.strokeStyle=`rgba(90,190,110,${.85*fade})`;ctx.lineWidth=1.6*S;ctx.stroke()});
+    v.lv.forEach(l=>{if(l.i>n)return;const u=ease(clamp((n-l.i)/6)),q=pts[l.i];ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(l.a);ctx.globalAlpha=fade*u;ctx.fillStyle=l.c;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(l.s*.6,-l.s*.5,l.s*1.5*u,0);ctx.quadraticCurveTo(l.s*.6,l.s*.5,0,0);ctx.fill();ctx.strokeStyle='rgba(20,80,40,.7)';ctx.lineWidth=.7*S;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(l.s*1.3*u,0);ctx.stroke();ctx.restore()});
+    // lueur
+    ctx.globalCompositeOperation='lighter';if(gl>0){ctx.beginPath();for(let i=0;i<=n;i++)i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);ctx.strokeStyle=hexA(arr?'#ffe39a':'#8dffb0',(.26+.14*arr)*gl*fade);ctx.lineWidth=12*S;ctx.stroke();ctx.strokeStyle=hexA('#d8ffe0',.55*gl*fade);ctx.lineWidth=1.2*S;ctx.stroke();
+      v.lv.forEach(l=>{if(l.i>n)return;const q=pts[l.i];gdraw('#9dffb8',q[0]+Math.cos(l.a)*l.s,q[1]+Math.sin(l.a)*l.s,l.s*1.3,.22*gl*fade)});
+      const p=Math.min(n,Math.floor(((now/2200+vi*.27)%1)*(pts.length-1)));if(p<=n){gdraw('#ffffff',pts[p][0],pts[p][1],14*S,.7*gl*fade);gdraw('#9dffb8',pts[p][0],pts[p][1],30*S,.4*gl*fade)}}
+    v.bd.forEach(b=>{if(b.i>n)return;const q=pts[b.i],bl=ease(clamp((k-t0-3.2-b.i*.02)/1)),tw=.6+.4*Math.sin(now/300+b.ph);if(bl<=0)return;gdraw(b.c,q[0],q[1],b.s*4*tw*bl,.6*fade);ctx.fillStyle=hexA('#ffffff',.9*bl*fade);ctx.beginPath();ctx.arc(q[0],q[1],b.s*.5*bl,0,TAU);ctx.fill()})});
+  ctx.restore()}
+
 function foxGoldUpd(dt,now,sk){if(!G.dive)return;if(G.lv0==null){G.lv0=sk+.25;foxLavaInit()}
   const [hx,hy]=BGD.hearth||[W/2,H*.7];if(sk<G.lv0+2.4&&Math.random()<dt*14)P.push({x:hx+rnd(-.3,.3)*(BGD.hw||W*.4),y:H*.75,vx:rnd(-30,30)*S,vy:-rnd(40,110)*S,l:0,m:rnd(.5,1),s:rnd(1,2),c:Math.random()<.6?'#ff7a2a':'#ffcf5a'});
   if(!G.bl&&sk>G.lv0+1.8){G.bl=1;try{[0,3,7,10,12].forEach((d,i)=>harp(at()+i*.22,pen(62,d)+12,.55))}catch(e){}}
@@ -1582,6 +1603,7 @@ function drawFoxLava(now,k){if(!G.lava)return;const t0=G.lv0,FL2=2.2,fade=clamp(
       for(let p=0;p<5;p++){ctx.save();ctx.rotate(p/5*TAU);ctx.fillStyle=q.c;ctx.beginPath();ctx.ellipse(0,-sz*.55,sz*.36,sz*.58,0,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.ellipse(0,-sz*.6,sz*.12,sz*.34,0,0,TAU);ctx.fill();ctx.restore()}
       ctx.fillStyle='#fff0f6';ctx.beginPath();ctx.arc(0,0,sz*.2,0,TAU);ctx.fill();ctx.restore()}}
   if(G.fld){ctx.globalCompositeOperation='source-over';for(const f of G.fld){const b=ease(clamp((k-(t0+f.dd*2.6)-1.1)/.9));if(b>0)lavaFlw(f.x,f.y,f.s*b,f.r,f.c,fade,now)}}
+  foxVinesDraw(now,k,fade);
   foxCubDrawAll(now,k,fade);
   ctx.restore()}
 /* ----- Grand Grimoire : le sort jaillit de la baguette ----- */
@@ -4990,7 +5012,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='200';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='201';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
