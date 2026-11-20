@@ -5024,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='211';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='212';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6245,7 +6245,7 @@ const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',bg:'ciel_1.jpg',sp
   ed:[[0,1],[1,2],[2,3],[3,1],[1,4],[4,9],[9,11],[11,10],[10,12],[12,13],[13,14],[14,15],[15,8],[8,4],[4,5],[5,6],[6,7],[7,16],[16,17],[17,18],[18,19],[19,7],[7,8]],
   out:[0,2,3,11,12,13,14,15,16,17,18,19,6,5,4,1],
   wing:[10,11,12,13,14,15],base:9,eye:[.19,.255],plume:[[9,[11,12,13,14,15]],[7,[16,17,18,19]]]}];
-const CST_LV=[{k:1,nm:'Éveil',sub:'les étoiles brillent un peu',boost:.58},{k:2,nm:'Veille',sub:'elles brillent à peine',boost:.2},{k:3,nm:'Nuit noire',sub:'aucun repère',boost:.06}];
+const CST_LV=[{k:1,nm:'Éveil',sub:'on devine la silhouette',boost:.7,sil:.15},{k:2,nm:'Veille',sub:'à peine un souffle',boost:.2,sil:.07},{k:3,nm:'Nuit noire',sub:'aucun repère',boost:.06,sil:0}];
 let CST=null;
 function cstSave(){return SAVE.cst||(SAVE.cst={})}
 function cstSeedRng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
@@ -6309,6 +6309,12 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
   const flap=win>2.6?Math.sin((win-2.6)*3.2):0;
   /* position d'une étoile (les ailes battent après l'éveil) */
   const P=i=>{const s=st[i];if(win<2.6||!C.c.wing.includes(i))return[s.x,s.y];const bs=st[C.c.base],k=Math.hypot(s.x-bs.x,s.y-bs.y)/C.S;return[s.x,s.y-flap*C.S*.16*k]};
+  /* silhouette fantôme : une brume bleutée très douce (sprite réduit puis agrandi = flou), selon le niveau */
+  const SI0=C.spi;if(lv.sil>0&&win<1.4&&SI0&&SI0.complete&&SI0.naturalWidth>0){
+    if(!C.sil){const n=64,k=document.createElement('canvas');k.width=n;k.height=Math.round(n*SI0.naturalHeight/SI0.naturalWidth);const x=k.getContext('2d');x.drawImage(SI0,0,0,k.width,k.height);x.globalCompositeOperation='source-in';x.fillStyle='#9db2ff';x.fillRect(0,0,k.width,k.height);C.sil=k}
+    const c=C.c,Wd=C.S*(c.sprW||1),Hd=Wd*SI0.naturalHeight/SI0.naturalWidth,e=C.Qw(c.eye[0],c.eye[1]);let x0=e[0]-c.sprE[0]*Wd,y0=e[1]-c.sprE[1]*Hd;const m=6;
+    if(x0+Wd>w-m)x0=w-m-Wd;if(x0<m)x0=m;if(y0<m+40)y0=m+40;if(y0+Hd>h-m)y0=h-m-Hd;
+    cx.save();cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';cx.globalCompositeOperation='lighter';cx.globalAlpha=lv.sil*(1-win/1.4)*(.8+.2*Math.sin(T*1.3));cx.drawImage(C.sil,x0,y0,Wd,Hd);cx.restore()}
   /* l'oiseau de feu (image) s'éveille : fondu depuis les étoiles, souffle, ailes qui palpitent */
   if(win>.9){const k=Math.min(1,(win-.9)/2.2),S=C.S,c=C.c,SI=C.spi;
     if(SI&&SI.complete&&SI.naturalWidth>0){
