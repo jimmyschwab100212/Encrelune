@@ -5025,7 +5025,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='214';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='215';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6299,6 +6299,25 @@ function cstWin(){const C=CST;try{SND.lit(3);setTimeout(()=>{try{SND.ignite()}ca
   setTimeout(()=>{if(!CST||!CST.run)return;const P=$('cstPanel');P.hidden=false;P.classList.add('end');const nx=C.lv<3;
     P.innerHTML=`<div class="cstH">${C.c.nm} s’éveille !</div><p class="cstP">Constellation I · niveau ${C.L.nm} réussi ★</p>${nx?`<button class="cstB" data-cl="${C.lv+1}"><b>Niveau suivant</b><small>${CST_LV[C.lv].nm}</small></button>`:''}<button class="cstB" data-cl="${C.lv}"><b>Rejouer</b></button><div class="cstR"><button class="cstX" data-cs="1">Choisir le niveau</button><button class="cstX" data-cx="1">Retour</button></div>`;CST.shown=true},6200)}
 function cstPoly(cx,pts){/* courbe douce passant au milieu des segments */const n=pts.length;cx.beginPath();const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let m=mid(pts[n-1],pts[0]);cx.moveTo(m[0],m[1]);for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n],mm=mid(p,q);cx.quadraticCurveTo(p[0],p[1],mm[0],mm[1])}cx.closePath()}
+/* animation de l'oiseau : le sprite est découpé en grille et déformé (ailes qui battent, queue qui ondule, tête qui se redresse) */
+function cstWarp(cx,img,x0,y0,Wd,Hd,T,amp){
+  const NX=14,NY=16,iw=img.naturalWidth,ih=img.naturalHeight,sh=[.50,.56],asp=Hd/Wd,om=4.4,sm=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t)};
+  const dsp=(u,v)=>{const rx=(u-sh[0]),ry=(v-sh[1])*asp,r=Math.hypot(rx,ry);
+    const mw=sm(.50,.40,v)*sm(.30,.52,u)+sm(.46,.30,v)*sm(.42,.12,u)*.55;   /* ailes (et huppe) */
+    const th=amp*(.2*Math.sin(om*T-r*2.2))*mw*(u>.42?1:-.45);
+    const c=Math.cos(th),s=Math.sin(th);let dx=rx*c-ry*s-rx,dy=(rx*s+ry*c-ry)/asp;
+    const mt=sm(.44,.72,u)*sm(.50,.70,v);                                       /* queue */
+    dx+=amp*.035*Math.sin(om*.7*T-u*5-v*2)*mt;dy+=amp*.05*Math.sin(om*.7*T-u*4.2)*mt;
+    const mh=sm(.30,.0,u)*sm(.7,.2,v);dy+=amp*.012*Math.sin(om*T-1.2)*mh;       /* tête */
+    return[dx,dy]};
+  const P=[];for(let j=0;j<=NY;j++){const row=[];for(let i=0;i<=NX;i++){const u=i/NX,v=j/NY,d=dsp(u,v);row.push([x0+(u+d[0])*Wd,y0+(v+d[1])*Hd,u*iw,v*ih])}P.push(row)}
+  const tri=(A,B,C)=>{const cxm=(A[0]+B[0]+C[0])/3,cym=(A[1]+B[1]+C[1])/3,g=1.035,q=p=>[cxm+(p[0]-cxm)*g,cym+(p[1]-cym)*g];const a=q(A),b=q(B),c=q(C);
+    const d=(A[2]*(B[3]-C[3])+B[2]*(C[3]-A[3])+C[2]*(A[3]-B[3]));if(!d)return;
+    const m11=(A[0]*(B[3]-C[3])+B[0]*(C[3]-A[3])+C[0]*(A[3]-B[3]))/d,m21=(A[1]*(B[3]-C[3])+B[1]*(C[3]-A[3])+C[1]*(A[3]-B[3]))/d,
+      m12=(A[0]*(C[2]-B[2])+B[0]*(A[2]-C[2])+C[0]*(B[2]-A[2]))/d,m22=(A[1]*(C[2]-B[2])+B[1]*(A[2]-C[2])+C[1]*(B[2]-A[2]))/d,
+      m13=(A[0]*(B[2]*C[3]-C[2]*B[3])+B[0]*(C[2]*A[3]-A[2]*C[3])+C[0]*(A[2]*B[3]-B[2]*A[3]))/d,m23=(A[1]*(B[2]*C[3]-C[2]*B[3])+B[1]*(C[2]*A[3]-A[2]*C[3])+C[1]*(A[2]*B[3]-B[2]*A[3]))/d;
+    cx.save();cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.lineTo(c[0],c[1]);cx.closePath();cx.clip();cx.transform(m11,m21,m12,m22,m13,m23);cx.drawImage(img,0,0);cx.restore()};
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const A=P[j][i],B=P[j][i+1],C=P[j+1][i+1],D=P[j+1][i];tri(A,B,D);tri(B,C,D)}}
 function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cstFrame);const cx=C.cx,w=C.w,h=C.h,T=now/1000;cx.setTransform(C.dpr,0,0,C.dpr,0,0);
   const g=cx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#05040f');g.addColorStop(.55,'#0b0a24');g.addColorStop(1,'#150f2c');cx.fillStyle=g;cx.fillRect(0,0,w,h);
   const BI=C.bgi,hasBg=BI&&BI.complete&&BI.naturalWidth>0;
@@ -6322,10 +6341,9 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
       const Wd=S*(c.sprW||1)*(.9+.1*k),Hd=Wd*SI.naturalHeight/SI.naturalWidth,e=C.Qw(c.eye[0],c.eye[1]);
       let x0=e[0]-c.sprE[0]*Wd,y0=e[1]-c.sprE[1]*Hd;const m=6;
       if(x0+Wd>w-m)x0=w-m-Wd;if(x0<m)x0=m;if(y0<m+40)y0=m+40;if(y0+Hd>h-m)y0=h-m-Hd;
-      const br=Math.sin(T*2.4),fl=win>2.4?Math.sin((win-2.4)*3.4):0,px=x0+Wd*.34,py=y0+Hd*.6;
-      cx.save();cx.translate(px,py);cx.rotate(-fl*.035);cx.scale(1+br*.008,1+fl*.018+br*.006);cx.translate(-px,-py);
-      cx.globalAlpha=k;cx.shadowColor='rgba(255,140,40,.9)';cx.shadowBlur=26+10*br;cx.drawImage(SI,x0,y0,Wd,Hd);
-      cx.shadowBlur=0;cx.globalCompositeOperation='lighter';cx.globalAlpha=k*(.16+.08*br);cx.drawImage(SI,x0,y0,Wd,Hd);cx.restore();
+      const br=Math.sin(T*2.4),amp=Math.min(1,Math.max(0,(win-1.4)/1.2));
+      cx.save();cx.globalAlpha=k;cstWarp(cx,SI,x0,y0+Math.sin(T*2.1)*Wd*.012*amp,Wd,Hd,T,amp);
+      cx.shadowBlur=0;cx.globalCompositeOperation='lighter';cx.globalAlpha=k*(.16+.08*br);cstWarp(cx,SI,x0,y0+Math.sin(T*2.1)*Wd*.012*amp,Wd,Hd,T,amp);cx.restore();
       C.fx={x0,y0,Wd,Hd};
       if(Math.random()<.9){const fx=C.fx;C.sparks.push({x:fx.x0+fx.Wd*(.15+Math.random()*.75),y:fx.y0+fx.Hd*(.2+Math.random()*.7),vx:(Math.random()-.5)*34,vy:-40-Math.random()*70,t:now,l:1+Math.random()*1.3,c:Math.random()<.5?'255,190,80':'255,120,50'})}}}
   /* lignes reliées */
