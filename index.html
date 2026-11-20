@@ -5024,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='210';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='211';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6329,10 +6329,19 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
   /* étoiles du dessin */
   const conn=new Set();for(let i=0;i<ed.length;i++){if(C.dn[i]){conn.add(ed[i][0]);conn.add(ed[i][1])}}
   /* aucune étoile dessinée : on ne fait que raviver les vraies étoiles de la photo (la même image, par-dessus, en « lumière ») */
-  if(hasBg&&!C.pt){C.pt=C.c.fig.map(p=>{const r=10,k=document.createElement('canvas');k.width=k.height=r*2;const x=k.getContext('2d');x.drawImage(BI,p[0]-r,p[1]-r,r*2,r*2,0,0,r*2,r*2);x.globalCompositeOperation='destination-in';const g=x.createRadialGradient(r,r,0,r,r,r);g.addColorStop(0,'#000');g.addColorStop(.55,'rgba(0,0,0,.75)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,r*2,r*2);return k})}
+  if(hasBg&&!C.pt){C.pt=C.c.fig.map(p=>{const r=10,k=document.createElement('canvas');k.width=k.height=r*2;const x=k.getContext('2d');x.drawImage(BI,p[0]-r,p[1]-r,r*2,r*2,0,0,r*2,r*2);x.globalCompositeOperation='destination-in';const g=x.createRadialGradient(r,r,0,r,r,r);g.addColorStop(0,'#000');g.addColorStop(.55,'rgba(0,0,0,.75)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,r*2,r*2);return k});
+    /* relief : carte de hauteur tirée des pixels réels de l'étoile, éclairée en haut à gauche (reflets clairs / ombres douces) */
+    C.rl=C.c.fig.map(p=>{const r=12,n=96,k=document.createElement('canvas');k.width=k.height=n;const x=k.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(BI,p[0]-r,p[1]-r,r*2,r*2,0,0,n,n);
+      const d=x.getImageData(0,0,n,n).data,H=new Float32Array(n*n);for(let i=0;i<n*n;i++)H[i]=(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11)/255;
+      const B=new Float32Array(n*n);for(let y=2;y<n-2;y++)for(let xx=2;xx<n-2;xx++){let a=0;for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)a+=H[(y+j)*n+xx+i];B[y*n+xx]=a/25}
+      const o=x.createImageData(n,n),od=o.data;
+      for(let y=2;y<n-2;y++)for(let xx=2;xx<n-2;xx++){const gx=B[y*n+xx+1]-B[y*n+xx-1],gy=B[(y+1)*n+xx]-B[(y-1)*n+xx],l=-(gx+gy)*5.2,dx=xx-n/2,dy=y-n/2,m=Math.max(0,1-Math.hypot(dx,dy)/(n/2)),a=Math.min(.85,Math.abs(l))*m,i=(y*n+xx)*4;
+        if(l>0){od[i]=255;od[i+1]=248;od[i+2]=225}else{od[i]=8;od[i+1]=4;od[i+2]=22}od[i+3]=a*255}
+      x.putImageData(o,0,0);return k})}
   if(C.pt){const k=Math.max(w/BI.naturalWidth,h/BI.naturalHeight),r=10*k*1.0;cx.save();cx.globalCompositeOperation='lighter';
     for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),tw=.75+.25*Math.sin(T*1.7+i*1.9),al=on?1:Math.min(1,lv.boost*1.7*tw),rr=on?r*1.5:r;if(al<.03)continue;cx.globalAlpha=al;cx.drawImage(C.pt[i],p[0]-rr,p[1]-rr,rr*2,rr*2);if(on){cx.globalAlpha=.8;cx.drawImage(C.pt[i],p[0]-rr,p[1]-rr,rr*2,rr*2)}}
-    cx.restore()}
+    cx.restore();
+    cx.save();for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),al=on?1:Math.min(1,.45+lv.boost),rr=r*1.2*(on?1.5:1.15);cx.globalAlpha=al*(win>1.2?Math.max(.3,1-(win-1.2)*.5):1);cx.drawImage(C.rl[i],p[0]-rr,p[1]-rr,rr*2,rr*2)}cx.restore()}
   /* ondes et étincelles */
   C.ripples=C.ripples.filter(r=>now-r.t<700);for(const r of C.ripples){const k=(now-r.t)/700;cx.strokeStyle=(r.bad?'rgba(255,120,120,':'rgba(255,236,170,')+(1-k).toFixed(3)+')';cx.lineWidth=1.6;cx.beginPath();cx.arc(r.x,r.y,6+k*(r.bad?22:30),0,6.283);cx.stroke()}
   C.sparks=C.sparks.filter(s=>(now-s.t)/1000<s.l);for(const s of C.sparks){const a=(now-s.t)/1000,k=1-a/s.l;cx.fillStyle='rgba('+s.c+','+k.toFixed(3)+')';cx.beginPath();cx.arc(s.x+s.vx*a,s.y+s.vy*a,1.6+k*1.4,0,6.283);cx.fill()}
