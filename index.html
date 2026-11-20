@@ -5024,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='207';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='209';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6245,7 +6245,7 @@ const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',bg:'ciel_1.jpg',iw
   ed:[[0,1],[1,2],[2,3],[3,1],[1,4],[4,9],[9,11],[11,10],[10,12],[12,13],[13,14],[14,15],[15,8],[8,4],[4,5],[5,6],[6,7],[7,16],[16,17],[17,18],[18,19],[19,7],[7,8]],
   out:[0,2,3,11,12,13,14,15,16,17,18,19,6,5,4,1],
   wing:[10,11,12,13,14,15],base:9,eye:[.19,.255],plume:[[9,[11,12,13,14,15]],[7,[16,17,18,19]]]}];
-const CST_LV=[{k:1,nm:'Éveil',sub:'les étoiles brillent un peu',boost:.42},{k:2,nm:'Veille',sub:'elles brillent à peine',boost:.2},{k:3,nm:'Nuit noire',sub:'aucun repère',boost:.06}];
+const CST_LV=[{k:1,nm:'Éveil',sub:'les étoiles brillent un peu',boost:.58},{k:2,nm:'Veille',sub:'elles brillent à peine',boost:.2},{k:3,nm:'Nuit noire',sub:'aucun repère',boost:.06}];
 let CST=null;
 function cstSave(){return SAVE.cst||(SAVE.cst={})}
 function cstSeedRng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
@@ -6329,9 +6329,11 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
   if(C.drag&&!C.done){const a=st[C.from];cx.strokeStyle='rgba(255,240,200,.9)';cx.lineWidth=2.4;cx.shadowColor='#ffe9a8';cx.shadowBlur=14;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(C.px,C.py);cx.stroke();cx.shadowBlur=0;cx.fillStyle='rgba(255,246,220,.95)';cx.beginPath();cx.arc(C.px,C.py,5,0,6.283);cx.fill()}
   /* étoiles du dessin */
   const conn=new Set();for(let i=0;i<ed.length;i++){if(C.dn[i]){conn.add(ed[i][0]);conn.add(ed[i][1])}}
-  for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),tw=.5+.5*Math.sin(T*1.7+i*1.9);
-    if(on){cx.fillStyle='rgba(255,240,190,.28)';cx.beginPath();cx.arc(p[0],p[1],9+3*tw,0,6.283);cx.fill();cx.fillStyle='#fff7d8';cx.beginPath();cx.arc(p[0],p[1],3.6,0,6.283);cx.fill()}
-    else{const hb=lv.boost*(.7+.3*tw),r=3+lv.boost*18;const g2=cx.createRadialGradient(p[0],p[1],0,p[0],p[1],r);g2.addColorStop(0,'rgba(255,250,238,'+Math.min(.7,hb*1.1).toFixed(3)+')');g2.addColorStop(1,'rgba(255,250,238,0)');cx.fillStyle=g2;cx.beginPath();cx.arc(p[0],p[1],r,0,6.283);cx.fill();cx.fillStyle='rgba(255,252,245,'+Math.min(.95,.25+hb*1.5).toFixed(3)+')';cx.beginPath();cx.arc(p[0],p[1],.9+lv.boost*2.6,0,6.283);cx.fill()}}
+  /* aucune étoile dessinée : on ne fait que raviver les vraies étoiles de la photo (la même image, par-dessus, en « lumière ») */
+  if(hasBg&&!C.pt){C.pt=C.c.fig.map(p=>{const r=10,k=document.createElement('canvas');k.width=k.height=r*2;const x=k.getContext('2d');x.drawImage(BI,p[0]-r,p[1]-r,r*2,r*2,0,0,r*2,r*2);x.globalCompositeOperation='destination-in';const g=x.createRadialGradient(r,r,0,r,r,r);g.addColorStop(0,'#000');g.addColorStop(.55,'rgba(0,0,0,.75)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,r*2,r*2);return k})}
+  if(C.pt){const k=Math.max(w/BI.naturalWidth,h/BI.naturalHeight),r=10*k*1.0;cx.save();cx.globalCompositeOperation='lighter';
+    for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),tw=.75+.25*Math.sin(T*1.7+i*1.9),al=on?1:Math.min(1,lv.boost*1.7*tw),rr=on?r*1.5:r;if(al<.03)continue;cx.globalAlpha=al;cx.drawImage(C.pt[i],p[0]-rr,p[1]-rr,rr*2,rr*2);if(on){cx.globalAlpha=.8;cx.drawImage(C.pt[i],p[0]-rr,p[1]-rr,rr*2,rr*2)}}
+    cx.restore()}
   /* ondes et étincelles */
   C.ripples=C.ripples.filter(r=>now-r.t<700);for(const r of C.ripples){const k=(now-r.t)/700;cx.strokeStyle=(r.bad?'rgba(255,120,120,':'rgba(255,236,170,')+(1-k).toFixed(3)+')';cx.lineWidth=1.6;cx.beginPath();cx.arc(r.x,r.y,6+k*(r.bad?22:30),0,6.283);cx.stroke()}
   C.sparks=C.sparks.filter(s=>(now-s.t)/1000<s.l);for(const s of C.sparks){const a=(now-s.t)/1000,k=1-a/s.l;cx.fillStyle='rgba('+s.c+','+k.toFixed(3)+')';cx.beginPath();cx.arc(s.x+s.vx*a,s.y+s.vy*a,1.6+k*1.4,0,6.283);cx.fill()}
