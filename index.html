@@ -5024,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='202';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='203';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6240,7 +6240,7 @@ makeSky(document.getElementById('title'),t=>!t.closest('button,a,.ttiles,.tfoot,
 /* ===== Mode Constellations (prototype : carte du Phénix) =====
    On relie les étoiles pour dessiner la créature endormie ; elle s'éveille quand la figure est complète.
    3 niveaux : Éveil (traits fantômes), Veille (étoiles leurres), Nuit noire (plus de leurres, aide tardive). */
-const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',
+const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',bg:'ciel_1.jpg',
   st:[[.07,.30],[.20,.27],[.15,.14],[.26,.15],[.28,.42],[.33,.58],[.45,.68],[.62,.62],[.52,.44],[.46,.36],[.60,.22],[.46,.05],[.68,.04],[.86,.14],[.92,.32],[.76,.40],[.82,.76],[.93,.93],[.70,.92],[.54,.96]],
   ed:[[0,1],[1,2],[2,3],[3,1],[1,4],[4,9],[9,11],[11,10],[10,12],[12,13],[13,14],[14,15],[15,8],[8,4],[4,5],[5,6],[6,7],[7,16],[16,17],[17,18],[18,19],[19,7],[7,8]],
   out:[0,2,3,11,12,13,14,15,16,17,18,19,6,5,4,1],
@@ -6263,7 +6263,7 @@ function cstStart(lv){
   const rng=cstSeedRng(1234+lv*77),dec=[];let tries=0;
   while(dec.length<L.dec&&tries++<900){const p=[rng()*1.1-.05,rng()*1.1-.03];if(c.st.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.085))continue;if(dec.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.07))continue;dec.push(p)}
   const bg=[];for(let i=0;i<90;i++)bg.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.2+.3,ph:Math.random()*6.28,sp:.5+Math.random()*1.8});
-  CST={c,L,lv,cv,cx:cv.getContext('2d'),dpr,w,h,S,ox,oy,st,dec:dec.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S,ph:Math.random()*6.28})),bg,cur:0,drag:false,px:0,py:0,err:0,lastWrong:-1,idle:performance.now(),t0:performance.now(),done:0,sparks:[],ripples:[],run:true,last:performance.now(),shown:false,R:Math.max(24,S*.07)};
+  const bgi=new Image();bgi.src=c.bg;CST={bgi,c,L,lv,cv,cx:cv.getContext('2d'),dpr,w,h,S,ox,oy,st,dec:dec.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S,ph:Math.random()*6.28})),bg,cur:0,drag:false,px:0,py:0,err:0,lastWrong:-1,idle:performance.now(),t0:performance.now(),done:0,sparks:[],ripples:[],run:true,last:performance.now(),shown:false,R:Math.max(24,S*.07)};
   $('cstTitle').textContent='Constellation mystère';$('cstSub').textContent='Niveau '+L.nm+' · 0 / '+c.ed.length;
   requestAnimationFrame(cstFrame)}
 function cstPos(e){const r=CST.cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
@@ -6292,8 +6292,11 @@ function cstWin(){const C=CST;try{SND.lit(3);setTimeout(()=>{try{SND.ignite()}ca
 function cstPoly(cx,pts){/* courbe douce passant au milieu des segments */const n=pts.length;cx.beginPath();const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let m=mid(pts[n-1],pts[0]);cx.moveTo(m[0],m[1]);for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n],mm=mid(p,q);cx.quadraticCurveTo(p[0],p[1],mm[0],mm[1])}cx.closePath()}
 function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cstFrame);const cx=C.cx,w=C.w,h=C.h,T=now/1000;cx.setTransform(C.dpr,0,0,C.dpr,0,0);
   const g=cx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#05040f');g.addColorStop(.55,'#0b0a24');g.addColorStop(1,'#150f2c');cx.fillStyle=g;cx.fillRect(0,0,w,h);
-  cx.save();cx.globalAlpha=.16;const mg=cx.createLinearGradient(0,h*.2,w,h*.8);mg.addColorStop(0,'rgba(120,140,255,0)');mg.addColorStop(.5,'rgba(170,150,255,.9)');mg.addColorStop(1,'rgba(120,140,255,0)');cx.fillStyle=mg;cx.beginPath();cx.moveTo(-20,h*.15);cx.quadraticCurveTo(w*.5,h*.45,w+20,h*.55);cx.lineTo(w+20,h*.75);cx.quadraticCurveTo(w*.5,h*.62,-20,h*.38);cx.closePath();cx.filter='blur(22px)';cx.fill();cx.filter='none';cx.restore();
-  for(const s of C.bg){const a=.25+.5*(.5+.5*Math.sin(T*s.sp+s.ph));cx.fillStyle='rgba(220,230,255,'+a.toFixed(3)+')';cx.fillRect(s.x,s.y,s.r,s.r)}
+  const BI=C.bgi,hasBg=BI&&BI.complete&&BI.naturalWidth>0;
+  if(hasBg){const sc=Math.max(w/BI.naturalWidth,h/BI.naturalHeight),dw=BI.naturalWidth*sc,dh=BI.naturalHeight*sc;cx.drawImage(BI,(w-dw)/2,(h-dh)/2,dw,dh);const ov=cx.createRadialGradient(w/2,h*.45,C.S*.25,w/2,h*.45,Math.max(w,h)*.75);ov.addColorStop(0,'rgba(4,3,14,.42)');ov.addColorStop(1,'rgba(4,3,14,.08)');cx.fillStyle=ov;cx.fillRect(0,0,w,h)}
+
+  if(!hasBg){cx.save();cx.globalAlpha=.16;const mg=cx.createLinearGradient(0,h*.2,w,h*.8);mg.addColorStop(0,'rgba(120,140,255,0)');mg.addColorStop(.5,'rgba(170,150,255,.9)');mg.addColorStop(1,'rgba(120,140,255,0)');cx.fillStyle=mg;cx.beginPath();cx.moveTo(-20,h*.15);cx.quadraticCurveTo(w*.5,h*.45,w+20,h*.55);cx.lineTo(w+20,h*.75);cx.quadraticCurveTo(w*.5,h*.62,-20,h*.38);cx.closePath();cx.filter='blur(22px)';cx.fill();cx.filter='none';cx.restore()}
+  for(const s of (hasBg?C.bg.slice(0,28):C.bg)){const a=.25+.5*(.5+.5*Math.sin(T*s.sp+s.ph));cx.fillStyle='rgba(220,230,255,'+a.toFixed(3)+')';cx.fillRect(s.x,s.y,s.r,s.r)}
   const win=C.done?(now-C.done)/1000:0,ed=C.c.ed,st=C.st,lv=C.L;
   const flap=win>2.6?Math.sin((win-2.6)*3.2):0;
   /* position d'une étoile (les ailes battent après l'éveil) */
