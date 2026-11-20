@@ -134,6 +134,17 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
 .tile b{font-size:15px;line-height:1.1}.tile span{font-size:13px;color:var(--gold)}
 .tile.lu{background:rgba(159,200,255,.08);border-color:rgba(159,200,255,.42)}.tile.lu span{color:#cfe4ff}
 .tile.sp{background:rgba(180,140,255,.08);border-color:rgba(180,140,255,.45)}.tile.sp span{color:#d9c4ff}
+#cstQuit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,210,122,.45);background:rgba(10,8,22,.6);color:#ffd27a;font-size:20px;cursor:pointer}
+#cstHud{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:0;right:0;text-align:center;pointer-events:none;z-index:2;font-family:"Cormorant Garamond",serif}
+#cstTitle{font-family:"Cinzel Decorative",serif;color:#ffd27a;font-size:20px}#cstSub{color:#cfe4ff;font-size:15px;margin-top:2px}
+.cstPanel{position:relative;z-index:2;max-width:340px;width:calc(100% - 40px);text-align:center;font-family:"Cormorant Garamond",serif;color:var(--ink);display:flex;flex-direction:column;gap:10px}
+.cstPanel.end{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);gap:6px;background:rgba(10,8,22,.82);border:1px solid rgba(255,210,122,.4);border-radius:20px;padding:16px;max-width:360px}
+.cstH{font-family:"Cinzel Decorative",serif;color:#ffd27a;font-size:24px}.cstP{margin:0;font-size:18px;line-height:1.3}.cstK{color:#d9c4ff;font-size:16px;margin:4px 0}
+.cstB{border-radius:16px;border:1px solid rgba(255,210,122,.5);background:rgba(255,210,122,.1);color:var(--ink);padding:11px 8px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:1px}.cstB b{font-size:19px}.cstB small{font-size:14px;color:#cfe4ff}
+.cstR{display:flex;justify-content:center;gap:18px}.cstX{background:none;border:none;color:#cfe4ff;font:16px "Cormorant Garamond",serif;padding:8px;cursor:pointer;text-decoration:underline}
+.tile.cs{background:rgba(255,226,150,.08);border-color:rgba(255,226,150,.45)}.tile.cs span{color:#ffe9a8}
+.mtop .ttiles.t4{grid-template-columns:repeat(4,minmax(0,1fr))}.mtop .ttiles.t4 .tile{gap:3px;padding:6px 2px}.mtop .ttiles.t4 .tile b{font-size:14px}
+.ta .ttiles{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tile.hot{box-shadow:0 0 18px rgba(255,190,90,.45)}
 .tile i{position:absolute;top:-7px;right:8px;background:#ff8a5a;color:#1a0a04;font:700 12px/1 "Cormorant Garamond",serif;font-style:normal;border-radius:999px;padding:3px 7px}
 .ta .tfoot{display:flex;justify-content:space-between;align-items:center;width:100%}
@@ -239,6 +250,7 @@ body:has(#title:not([hidden])) #mus{right:auto;left:12px}
   <p id="iNote">Le micro n'est pas obligatoire : s'il est indisponible sur ton téléphone, un bouton te laissera lancer le sort sans parler. Tu peux aussi désactiver le mode rituel dans « Plus ».</p>
 </div></div>
 
+<div id="cst" class="ov" hidden style="z-index:10;padding:0;background:#05040f"><canvas id="cstC" style="display:none;position:absolute;inset:0;touch-action:none"></canvas><div id="cstHud" hidden><div id="cstTitle"></div><div id="cstSub"></div></div><button id="cstQuit" aria-label="Fermer">✕</button><div id="cstPanel" class="cstPanel"></div></div>
 <div id="buy" class="ov" hidden style="z-index:9;background:rgba(5,3,10,.82)"><div class="panel" style="text-align:center;background:#120c1c;max-height:none;height:auto;padding:22px 18px"><h2>Le Grand Grimoire</h2><p class="hint">Cinq paliers de plus : le Hibou des étoiles, le Dragon de jade, le Phénix, le Kirin et l'Arbre-monde, avec leurs sorts légendaires.<br><b style="color:var(--gold)">4,99 € · achat unique</b></p><div class="btns" style="flex-direction:column;gap:10px"><button class="btn" id="buyGo">Débloquer · 4,99 €</button><button class="btn sec" id="buyRes">Restaurer mes achats</button><button class="btn sec" id="buyNo">Plus tard</button></div><p class="hint" id="buyMsg" style="min-height:20px;margin-top:10px"></p></div></div>
 <div id="trn" class="ov" hidden><div class="panel">
   <h3>Entraînement</h3>
@@ -3388,7 +3400,7 @@ function showMap(){if(SPI)spiQuit();DF=null;if(SFX.list.length)sfxCut();duStop()
   const ys=i=>top0+(N-i)*gap+(i<5?50:0),xs=[.3,.62,.77,.5,.24,.33,.64,.77,.52,.28,.5],Hc=ys(0)+90,pts=[];for(let i=0;i<=N;i++)pts.push([xs[i]*Wc,ys(i)]);
   const pathD=(a,b)=>{let d=`M${pts[a][0]} ${pts[a][1]}`;for(let i=a;i<b;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(N,i+2)];d+=` C${p1[0]+(p2[0]-p0[0])/6} ${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6} ${p2[1]-(p3[1]-p1[1])/6} ${p2[0]} ${p2[1]}`}return d};
   const TINT=['','','','','','#7af0ff','#5affc0','#ff9a4a','#ff8ad0','#a0e678'];
-  let h=`<div class="mtop"><div class="r1"><h2>Les Paliers</h2><div class="spill">★ ${tot} / 30<u><em style="width:${Math.round(tot/30*100)}%"></em></u></div></div><div class="ttiles">${homeTiles(true)}</div></div>`;
+  let h=`<div class="mtop"><div class="r1"><h2>Les Paliers</h2><div class="spill">★ ${tot} / 30<u><em style="width:${Math.round(tot/30*100)}%"></em></u></div></div><div class="ttiles t4">${homeTiles(true)}</div></div>`;
   h+=`<div class="mscroll" id="mScroll"><div class="mpath" style="width:${Wc}px;height:${Hc}px"><svg width="${Wc}" height="${Hc}" aria-hidden="true">${cur>0?`<path d="${pathD(0,cur)}" fill="none" stroke="#ffd27a" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>`:''}<path d="${pathD(cur,N)}" fill="none" stroke="#f3e6c8" stroke-opacity=".25" stroke-width="2.4" stroke-dasharray="2 9" stroke-linecap="round"/></svg>`;
   const yb=(ys(4)+ys(5))/2;h+=`<div class="mband" style="top:${yb}px">Le Grand Grimoire · prise de vue réelle<small>${RELEASE?(SAVE.premium?'débloqué ✓':'5 paliers · 4,99 € les cinq'):'5 paliers premium · ouverts pour les tests'}</small></div>`;
   for(let i=0;i<N;i++){const p=PAL[i];if(!p)continue;const [x,y]=pts[i],reach=!!p.sig&&(i===0||SAVE.stars[i-1]>=2||(!RELEASE&&!!SAVE.allOpen)),open=reach&&prem(i),buy=reach&&!open,st=SAVE.stars[i]||0,isC=open&&i===cur,right=xs[i]<.5;
@@ -3409,8 +3421,8 @@ function homeTiles(compact){const sk=dayStreak(),dk=dayInfo().key,done=!!(SAVE.d
   const star='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd27a" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.2 7.2 7.3.1-5.9 4.4 2.2 7.3-5.8-4.4-5.8 4.4 2.2-7.3-5.9-4.4 7.3-.1z"/></svg>',
     moon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfe4ff" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 7 7 0 0 0 20 14.5z"/></svg>',
     spi='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d9c4ff" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 12a1.5 1.5 0 0 1 3 0 3 3 0 0 1-6 0 4.5 4.5 0 0 1 9 0 6 6 0 0 1-12 0 7.5 7.5 0 0 1 15 0"/></svg>';
-  if(compact)return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Du jour</b>${!done?'<i>1</i>':sk>1?`<i>${sk} j</i>`:''}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${mo?'Ce soir !':m?'J-'+dd:'Lune'}</b></button><button class="tile sp" data-tspi="1">${spi}<b>Spirale</b></button>`;
-  return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Sceau du jour</b><span>${done?(sk>1?`Série ${sk} jours ✓`:'fait ✓'):sk>0?`Série ${sk} j · à tracer`:'à tracer'}</span>${done?'':'<i>1</i>'}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${m?m.def.nm:'Pleine lune'}</b><span>${mo?'ce soir !':`dans ${dd} jour${dd>1?'s':''}`}</span></button><button class="tile sp" data-tspi="1">${spi}<b>La Spirale</b><span>${best?'record '+best:'sans fin'}</span></button>`}
+  if(compact)return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Du jour</b>${!done?'<i>1</i>':sk>1?`<i>${sk} j</i>`:''}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${mo?'Ce soir !':m?'J-'+dd:'Lune'}</b></button><button class="tile sp" data-tspi="1">${spi}<b>Spirale</b></button><button class="tile cs" data-tcst="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffe9a8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18l5-9 5 5 6-10"/><circle cx="4" cy="18" r="1.3"/><circle cx="9" cy="9" r="1.3"/><circle cx="14" cy="14" r="1.3"/><circle cx="20" cy="4" r="1.3"/></svg><b>Étoiles</b></button>`;
+  return`<button class="tile${done?'':' hot'}" data-tday="1">${star}<b>Sceau du jour</b><span>${done?(sk>1?`Série ${sk} jours ✓`:'fait ✓'):sk>0?`Série ${sk} j · à tracer`:'à tracer'}</span>${done?'':'<i>1</i>'}</button><button class="tile lu${mo?' hot':''}" data-tmoon="1">${moon}<b>${m?m.def.nm:'Pleine lune'}</b><span>${mo?'ce soir !':`dans ${dd} jour${dd>1?'s':''}`}</span></button><button class="tile sp" data-tspi="1">${spi}<b>La Spirale</b><span>${best?'record '+best:'sans fin'}</span></button><button class="tile cs" data-tcst="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffe9a8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18l5-9 5 5 6-10"/><circle cx="4" cy="18" r="1.3"/><circle cx="9" cy="9" r="1.3"/><circle cx="14" cy="14" r="1.3"/><circle cx="20" cy="4" r="1.3"/></svg><b>Constellations</b><span>mystère</span></button>`}
 /* ----- rappels (appli installée : notifications locales programmées sur le téléphone, rien ne part sur un serveur) ----- */
 const NT_DAY=['Le sceau du jour t\'attend : un seul essai, le même pour tout le monde ✦','La lune se lève : trace le sceau du jour avant minuit 🌙','Ta baguette s\'impatiente : le sceau du jour est prêt ✦','Une nouvelle créature rôde dans le Jardin des Esprits : viens la réveiller 🦋'];
 const NT_HRS=[['12:00','Midi'],['18:30','18 h 30'],['20:00','20 h'],['21:30','21 h 30']];
@@ -5012,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='201';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='202';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6225,6 +6237,105 @@ function makeSky(map,ok,light){
 }
 makeSky(document.getElementById('map'),t=>t.closest('.mscroll')&&!t.closest('button,a,.node,.mband,input,[onclick]'),true);
 makeSky(document.getElementById('title'),t=>!t.closest('button,a,.ttiles,.tfoot,input,[onclick]'),true);
+/* ===== Mode Constellations (prototype : carte du Phénix) =====
+   On relie les étoiles pour dessiner la créature endormie ; elle s'éveille quand la figure est complète.
+   3 niveaux : Éveil (traits fantômes), Veille (étoiles leurres), Nuit noire (plus de leurres, aide tardive). */
+const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',
+  st:[[.07,.30],[.20,.27],[.15,.14],[.26,.15],[.28,.42],[.33,.58],[.45,.68],[.62,.62],[.52,.44],[.46,.36],[.60,.22],[.46,.05],[.68,.04],[.86,.14],[.92,.32],[.76,.40],[.82,.76],[.93,.93],[.70,.92],[.54,.96]],
+  ed:[[0,1],[1,2],[2,3],[3,1],[1,4],[4,9],[9,11],[11,10],[10,12],[12,13],[13,14],[14,15],[15,8],[8,4],[4,5],[5,6],[6,7],[7,16],[16,17],[17,18],[18,19],[19,7],[7,8]],
+  out:[0,2,3,11,12,13,14,15,16,17,18,19,6,5,4,1],
+  wing:[10,11,12,13,14,15],base:9,eye:[.19,.255],plume:[[9,[11,12,13,14,15]],[7,[16,17,18,19]]]}];
+const CST_LV=[{k:1,nm:'Éveil',sub:'les traits se devinent',dec:0,hint:0,ghost:true},{k:2,nm:'Veille',sub:'des étoiles leurres',dec:11,hint:7,ghost:false},{k:3,nm:'Nuit noire',sub:'beaucoup de leurres',dec:26,hint:13,ghost:false}];
+let CST=null;
+function cstSave(){return SAVE.cst||(SAVE.cst={})}
+function cstSeedRng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function cstOpen(){audioInit();$('cst').hidden=false;cstSelect()}
+function cstClose(){if(CST){CST.run=false;CST=null}$('cst').hidden=true;try{SND.click()}catch(e){}}
+function cstSelect(){
+  if(CST)CST.run=false;CST=null;const P=$('cstPanel'),c=CST_CARDS[0],sv=cstSave()[c.id]||{};
+  P.hidden=false;$('cstC').style.display='none';$('cstHud').hidden=true;
+  P.innerHTML=`<div class="cstH">✦ Constellations</div><p class="cstP">Une créature dort dans les étoiles.<br>Relie-les dans le bon ordre pour la réveiller.</p><div class="cstK">Constellation I · l’animal de ${c.pal}</div>${CST_LV.map(l=>`<button class="cstB" data-cl="${l.k}"><b>${sv[l.k]?'★ ':''}${l.nm}</b><small>${l.sub}</small></button>`).join('')}<button class="cstX" data-cx="1">Retour</button>`}
+function cstStart(lv){
+  const c=CST_CARDS[0],L=CST_LV[lv-1],cv=$('cstC');$('cstPanel').hidden=true;cv.style.display='block';$('cstHud').hidden=false;
+  const dpr=Math.min(2,window.devicePixelRatio||1),w=innerWidth,h=innerHeight;cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const S=Math.min(w*.84,h*.56),ox=(w-S)/2,oy=h*.45-S*.5;
+  const st=c.st.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S}));
+  const rng=cstSeedRng(1234+lv*77),dec=[];let tries=0;
+  while(dec.length<L.dec&&tries++<900){const p=[rng()*1.1-.05,rng()*1.1-.03];if(c.st.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.085))continue;if(dec.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.07))continue;dec.push(p)}
+  const bg=[];for(let i=0;i<90;i++)bg.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.2+.3,ph:Math.random()*6.28,sp:.5+Math.random()*1.8});
+  CST={c,L,lv,cv,cx:cv.getContext('2d'),dpr,w,h,S,ox,oy,st,dec:dec.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S,ph:Math.random()*6.28})),bg,cur:0,drag:false,px:0,py:0,err:0,lastWrong:-1,idle:performance.now(),t0:performance.now(),done:0,sparks:[],ripples:[],run:true,last:performance.now(),shown:false,R:Math.max(24,S*.07)};
+  $('cstTitle').textContent='Constellation mystère';$('cstSub').textContent='Niveau '+L.nm+' · 0 / '+c.ed.length;
+  requestAnimationFrame(cstFrame)}
+function cstPos(e){const r=CST.cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+function cstNear(x,y,i){const s=CST.st[i];return Math.hypot(s.x-x,s.y-y)<CST.R}
+function cstSegDist(ax,ay,bx,by,px,py){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;let t=l?((px-ax)*dx+(py-ay)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(ax+dx*t-px,ay+dy*t-py)}
+function cstWrongAt(x,y,except){const C=CST;for(let i=0;i<C.st.length;i++){if(except.includes(i))continue;if(Math.hypot(C.st[i].x-x,C.st[i].y-y)<C.R*.6)return{x:C.st[i].x,y:C.st[i].y,k:'s'+i}}for(let i=0;i<C.dec.length;i++){if(Math.hypot(C.dec[i].x-x,C.dec[i].y-y)<C.R*.6)return{x:C.dec[i].x,y:C.dec[i].y,k:'d'+i}}return null}
+function cstDown(e){const C=CST;if(!C||C.done)return;e.preventDefault();const[x,y]=cstPos(e);C.idle=performance.now();C.px=x;C.py=y;try{C.cv.setPointerCapture(e.pointerId)}catch(_){}
+  const ed=C.c.ed[C.cur];if(ed&&cstNear(x,y,ed[0])){C.drag=true;C.lastWrong=-1;try{SND.click()}catch(_){}return}
+  const w=cstWrongAt(x,y,[]);if(w)cstWrong(w)}
+function cstWrong(w){const C=CST;if(C.lastWrong===w.k)return;C.lastWrong=w.k;C.err++;C.ripples.push({x:w.x,y:w.y,t:performance.now(),bad:1});try{SND.dud()}catch(_){}}
+function cstMove(e){const C=CST;if(!C||C.done||!C.drag)return;e.preventDefault();const[x,y]=cstPos(e),ox=C.px,oy=C.py;C.px=x;C.py=y;C.idle=performance.now();
+  for(let g=0;g<3&&C.drag&&!C.done;g++){const ed=C.c.ed[C.cur],b=C.st[ed[1]];
+    if(cstNear(x,y,ed[1])||cstSegDist(ox,oy,x,y,b.x,b.y)<C.R*.8){cstLink();if(C.drag&&!C.done){const n=C.c.ed[C.cur];if(n&&n[0]!==ed[1]){C.drag=false}}}else break}
+  if(C.drag&&!C.done){const ed=C.c.ed[C.cur];const w=cstWrongAt(x,y,[ed[0],ed[1]]);if(w)cstWrong(w);else C.lastWrong=-1}}
+function cstLink(){const C=CST,ed=C.c.ed[C.cur],a=C.st[ed[0]],b=C.st[ed[1]];C.cur++;C.done=0;
+  for(let i=0;i<9;i++){const an=Math.random()*6.28,v=40+Math.random()*90;C.sparks.push({x:b.x,y:b.y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,t:performance.now(),l:.55+Math.random()*.4,c:'255,230,160'})}
+  C.ripples.push({x:b.x,y:b.y,t:performance.now()});try{const A_=[74,78,81,86,88,90,93];if(typeof celesta==='function'&&A){const m=A_[C.cur%A_.length]+(C.cur>12?12:0);celesta(at(),m,.9,A.master)}}catch(_){}
+  C.lastWrong=-1;$('cstSub').textContent='Niveau '+C.L.nm+' · '+C.cur+' / '+C.c.ed.length;
+  if(C.cur>=C.c.ed.length){C.drag=false;C.done=performance.now();cstWin()}}
+function cstUp(e){const C=CST;if(!C)return;C.drag=false;C.lastWrong=-1}
+function cstWin(){const C=CST;try{SND.lit(3);setTimeout(()=>{try{SND.ignite()}catch(_){}},900)}catch(_){}
+  const sv=cstSave(),id=C.c.id;sv[id]=sv[id]||{};sv[id][C.lv]=1;save();
+  $('cstTitle').textContent=C.c.nm;
+  setTimeout(()=>{if(!CST||!CST.run)return;const P=$('cstPanel');P.hidden=false;P.classList.add('end');const nx=C.lv<3;
+    P.innerHTML=`<div class="cstH">${C.c.nm} s’éveille !</div><p class="cstP">Constellation I · niveau ${C.L.nm} réussi ★</p>${nx?`<button class="cstB" data-cl="${C.lv+1}"><b>Niveau suivant</b><small>${CST_LV[C.lv].nm}</small></button>`:''}<button class="cstB" data-cl="${C.lv}"><b>Rejouer</b></button><div class="cstR"><button class="cstX" data-cs="1">Choisir le niveau</button><button class="cstX" data-cx="1">Retour</button></div>`;CST.shown=true},6200)}
+function cstPoly(cx,pts){/* courbe douce passant au milieu des segments */const n=pts.length;cx.beginPath();const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let m=mid(pts[n-1],pts[0]);cx.moveTo(m[0],m[1]);for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n],mm=mid(p,q);cx.quadraticCurveTo(p[0],p[1],mm[0],mm[1])}cx.closePath()}
+function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cstFrame);const cx=C.cx,w=C.w,h=C.h,T=now/1000;cx.setTransform(C.dpr,0,0,C.dpr,0,0);
+  const g=cx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#05040f');g.addColorStop(.55,'#0b0a24');g.addColorStop(1,'#150f2c');cx.fillStyle=g;cx.fillRect(0,0,w,h);
+  cx.save();cx.globalAlpha=.16;const mg=cx.createLinearGradient(0,h*.2,w,h*.8);mg.addColorStop(0,'rgba(120,140,255,0)');mg.addColorStop(.5,'rgba(170,150,255,.9)');mg.addColorStop(1,'rgba(120,140,255,0)');cx.fillStyle=mg;cx.beginPath();cx.moveTo(-20,h*.15);cx.quadraticCurveTo(w*.5,h*.45,w+20,h*.55);cx.lineTo(w+20,h*.75);cx.quadraticCurveTo(w*.5,h*.62,-20,h*.38);cx.closePath();cx.filter='blur(22px)';cx.fill();cx.filter='none';cx.restore();
+  for(const s of C.bg){const a=.25+.5*(.5+.5*Math.sin(T*s.sp+s.ph));cx.fillStyle='rgba(220,230,255,'+a.toFixed(3)+')';cx.fillRect(s.x,s.y,s.r,s.r)}
+  const win=C.done?(now-C.done)/1000:0,ed=C.c.ed,st=C.st,lv=C.L;
+  const flap=win>2.6?Math.sin((win-2.6)*3.2):0;
+  /* position d'une étoile (les ailes battent après l'éveil) */
+  const P=i=>{const s=st[i];if(win<2.6||!C.c.wing.includes(i))return[s.x,s.y];const bs=st[C.c.base],k=Math.hypot(s.x-bs.x,s.y-bs.y)/C.S;return[s.x,s.y-flap*C.S*.16*k]};
+  /* traits fantômes (niveau 1) */
+  if(lv.ghost&&!C.done){cx.save();cx.setLineDash([3,7]);cx.strokeStyle='rgba(190,205,255,.20)';cx.lineWidth=1.2;for(let i=C.cur;i<ed.length;i++){const a=st[ed[i][0]],b=st[ed[i][1]];cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}cx.restore()}
+  /* leurres */
+  for(const d of C.dec){const a=.35+.35*Math.sin(T*1.3+d.ph);cx.fillStyle='rgba(235,240,255,'+a.toFixed(3)+')';cx.beginPath();cx.arc(d.x,d.y,1.9,0,6.283);cx.fill()}
+  /* silhouette éveillée : plumes effilées, corps, tête de profil */
+  if(win>.9){const k=Math.min(1,(win-.9)/2.1),S=C.S,c=C.c,Q=(x,y)=>[C.ox+x*S,C.oy+y*S],sw=Math.sin(T*6);
+    cx.save();cx.globalAlpha=k;cx.shadowColor='rgba(255,150,50,.9)';cx.shadowBlur=20+7*sw;
+    const fth=(o,t,wd,bend,c1,c2)=>{const dx=t[0]-o[0],dy=t[1]-o[1],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,mx=(o[0]+t[0])/2+nx*bend*L,my=(o[1]+t[1])/2+ny*bend*L,w=wd*L,g=cx.createLinearGradient(o[0],o[1],t[0],t[1]);g.addColorStop(0,c1);g.addColorStop(1,c2);cx.fillStyle=g;cx.beginPath();cx.moveTo(o[0]+nx*w*.45,o[1]+ny*w*.45);cx.quadraticCurveTo(mx+nx*w,my+ny*w,t[0],t[1]);cx.quadraticCurveTo(mx-nx*w,my-ny*w,o[0]-nx*w*.45,o[1]-ny*w*.45);cx.closePath();cx.fill()};
+    const fan=(bi,tips,wd,bend,c1,c2)=>{const o=P(bi),pts=tips.map(P);const all=[];for(let i=0;i<pts.length;i++){all.push(pts[i]);if(i<pts.length-1)all.push([(pts[i][0]+pts[i+1][0])/2*.5+o[0]*.5+(pts[i][0]+pts[i+1][0])*0,(pts[i][1]+pts[i+1][1])/2*.5+o[1]*.5])}for(const t of all)fth(o,t,wd,bend,c1,c2)};
+    fan(7,[16,17,18,19],.075,-.13,'rgba(255,214,110,.96)','rgba(215,40,28,.78)');
+    fan(9,[11,12,13,14,15],.085,.10,'rgba(255,236,150,.97)','rgba(255,96,36,.8)');
+    const body=[[.07,.30],[.15,.21],[.14,.11],[.19,.16],[.23,.07],[.27,.17],[.33,.27],[.43,.35],[.53,.43],[.63,.56],[.60,.67],[.45,.71],[.33,.63],[.27,.47],[.20,.37]].map(p=>Q(p[0],p[1]));
+    cstPoly(cx,body);const bg=cx.createRadialGradient(...Q(.36,.46),S*.02,...Q(.40,.46),S*.34);bg.addColorStop(0,'rgba(255,252,215,1)');bg.addColorStop(.45,'rgba(255,205,95,.97)');bg.addColorStop(1,'rgba(255,110,40,.9)');cx.fillStyle=bg;cx.fill();
+    cx.shadowBlur=0;cx.fillStyle='rgba(255,236,170,.98)';const bk=[Q(.045,.305),Q(.145,.255),Q(.135,.335)];cx.beginPath();cx.moveTo(bk[0][0],bk[0][1]);cx.lineTo(bk[1][0],bk[1][1]);cx.lineTo(bk[2][0],bk[2][1]);cx.closePath();cx.fill();
+    cx.globalAlpha=k*.5;cx.strokeStyle='rgba(255,246,210,.9)';cx.lineWidth=1;for(const[bi,tl]of c.plume){const o=P(bi);for(const t of tl){const q=P(t);cx.beginPath();cx.moveTo(o[0],o[1]);cx.lineTo(q[0],q[1]);cx.stroke()}}
+    cx.restore();const ex=C.ox+c.eye[0]*S,ey=C.oy+c.eye[1]*S;cx.globalAlpha=k;cx.fillStyle='#3a1000';cx.beginPath();cx.arc(ex,ey,2.7,0,6.283);cx.fill();cx.fillStyle='#fff';cx.beginPath();cx.arc(ex-.8,ey-.8,.9,0,6.283);cx.fill();cx.globalAlpha=1;
+    if(Math.random()<.6)C.sparks.push({x:C.ox+Math.random()*S,y:C.oy+S*(.2+Math.random()*.7),vx:(Math.random()-.5)*30,vy:-40-Math.random()*70,t:now,l:1+Math.random()*1.2,c:Math.random()<.5?'255,190,80':'255,120,50'})}
+  /* lignes reliées */
+  const pulse=.7+.3*Math.sin(T*8);cx.lineCap='round';
+  for(let i=0;i<C.cur;i++){const a=P(ed[i][0]),b=P(ed[i][1]),fade=win>1.2?Math.max(.22,1-(win-1.2)*.5):1;cx.strokeStyle='rgba(255,226,150,'+(.9*fade).toFixed(3)+')';cx.shadowColor='rgba(255,200,100,'+fade+')';cx.shadowBlur=C.done&&win<1.2?18*pulse:10;cx.lineWidth=2.4;cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}cx.shadowBlur=0;
+  /* trait en cours */
+  if(C.drag&&!C.done){const a=st[ed[C.cur][0]];cx.strokeStyle='rgba(255,240,200,.9)';cx.lineWidth=2.4;cx.shadowColor='#ffe9a8';cx.shadowBlur=14;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(C.px,C.py);cx.stroke();cx.shadowBlur=0;cx.fillStyle='rgba(255,246,220,.95)';cx.beginPath();cx.arc(C.px,C.py,5,0,6.283);cx.fill()}
+  /* étoiles du dessin */
+  const conn=new Set();for(let i=0;i<C.cur;i++){conn.add(ed[i][0]);conn.add(ed[i][1])}
+  const nxt=C.cur<ed.length?ed[C.cur][0]:-1,hintOn=lv.ghost||(now-C.idle)/1000>lv.hint||C.err>=(lv.k===2?3:5);
+  for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),tw=.5+.5*Math.sin(T*1.7+i*1.9);
+    if(on){cx.fillStyle='rgba(255,240,190,.28)';cx.beginPath();cx.arc(p[0],p[1],9+3*tw,0,6.283);cx.fill();cx.fillStyle='#fff7d8';cx.beginPath();cx.arc(p[0],p[1],3.6,0,6.283);cx.fill()}
+    else{cx.fillStyle='rgba(235,240,255,'+(.55+.4*tw).toFixed(3)+')';cx.beginPath();cx.arc(p[0],p[1],lv.ghost?2.8:2.2,0,6.283);cx.fill()}
+    if(i===nxt&&!C.done&&hintOn){const r=10+5*Math.sin(T*5);cx.strokeStyle='rgba(255,226,150,.8)';cx.lineWidth=1.6;cx.beginPath();cx.arc(p[0],p[1],r,0,6.283);cx.stroke()}}
+  /* ondes et étincelles */
+  C.ripples=C.ripples.filter(r=>now-r.t<700);for(const r of C.ripples){const k=(now-r.t)/700;cx.strokeStyle=(r.bad?'rgba(255,120,120,':'rgba(255,236,170,')+(1-k).toFixed(3)+')';cx.lineWidth=1.6;cx.beginPath();cx.arc(r.x,r.y,6+k*(r.bad?22:30),0,6.283);cx.stroke()}
+  C.sparks=C.sparks.filter(s=>(now-s.t)/1000<s.l);for(const s of C.sparks){const a=(now-s.t)/1000,k=1-a/s.l;cx.fillStyle='rgba('+s.c+','+k.toFixed(3)+')';cx.beginPath();cx.arc(s.x+s.vx*a,s.y+s.vy*a,1.6+k*1.4,0,6.283);cx.fill()}
+}
+$('cstC').addEventListener('pointerdown',cstDown);$('cstC').addEventListener('pointermove',cstMove);$('cstC').addEventListener('pointerup',cstUp);$('cstC').addEventListener('pointercancel',cstUp);
+$('cst').addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-cx],[data-cs]');if(!b)return;try{SND.click()}catch(_){}if(b.dataset.cl){$('cstPanel').classList.remove('end');cstStart(+b.dataset.cl)}else if(b.dataset.cs){$('cstPanel').classList.remove('end');cstSelect()}else cstClose()});
+$('cstQuit').addEventListener('click',()=>{if(CST&&CST.run&&!CST.shown){$('cstPanel').classList.remove('end');cstSelect()}else cstClose()});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tcst]');if(t){e.preventDefault();cstOpen()}},true);
+if(/[?&]cst=(\d)/.test(location.search)){const m=+RegExp.$1;setTimeout(()=>{cstOpen();if(m>0)cstStart(m)},300)}
 </script>
 </body>
 </html>
