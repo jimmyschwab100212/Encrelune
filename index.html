@@ -5024,7 +5024,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='203';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='204';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
@@ -6239,13 +6239,13 @@ makeSky(document.getElementById('map'),t=>t.closest('.mscroll')&&!t.closest('but
 makeSky(document.getElementById('title'),t=>!t.closest('button,a,.ttiles,.tfoot,input,[onclick]'),true);
 /* ===== Mode Constellations (prototype : carte du Phénix) =====
    On relie les étoiles pour dessiner la créature endormie ; elle s'éveille quand la figure est complète.
-   3 niveaux : Éveil (traits fantômes), Veille (étoiles leurres), Nuit noire (plus de leurres, aide tardive). */
+   3 niveaux : Éveil (étoiles de la figure un peu plus brillantes), Veille (leurres), Nuit noire (presque aucun repère). Aucun indice, ordre libre. */
 const CST_CARDS=[{id:'phenix',nm:'Le Phénix',pal:'l’Envol',bg:'ciel_1.jpg',
   st:[[.07,.30],[.20,.27],[.15,.14],[.26,.15],[.28,.42],[.33,.58],[.45,.68],[.62,.62],[.52,.44],[.46,.36],[.60,.22],[.46,.05],[.68,.04],[.86,.14],[.92,.32],[.76,.40],[.82,.76],[.93,.93],[.70,.92],[.54,.96]],
   ed:[[0,1],[1,2],[2,3],[3,1],[1,4],[4,9],[9,11],[11,10],[10,12],[12,13],[13,14],[14,15],[15,8],[8,4],[4,5],[5,6],[6,7],[7,16],[16,17],[17,18],[18,19],[19,7],[7,8]],
   out:[0,2,3,11,12,13,14,15,16,17,18,19,6,5,4,1],
   wing:[10,11,12,13,14,15],base:9,eye:[.19,.255],plume:[[9,[11,12,13,14,15]],[7,[16,17,18,19]]]}];
-const CST_LV=[{k:1,nm:'Éveil',sub:'les traits se devinent',dec:0,hint:0,ghost:true},{k:2,nm:'Veille',sub:'des étoiles leurres',dec:11,hint:7,ghost:false},{k:3,nm:'Nuit noire',sub:'beaucoup de leurres',dec:26,hint:13,ghost:false}];
+const CST_LV=[{k:1,nm:'Éveil',sub:'les étoiles brillent un peu plus',dec:5,boost:.34},{k:2,nm:'Veille',sub:'des étoiles leurres',dec:14,boost:.2},{k:3,nm:'Nuit noire',sub:'presque aucun repère',dec:30,boost:.09}];
 let CST=null;
 function cstSave(){return SAVE.cst||(SAVE.cst={})}
 function cstSeedRng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
@@ -6263,26 +6263,29 @@ function cstStart(lv){
   const rng=cstSeedRng(1234+lv*77),dec=[];let tries=0;
   while(dec.length<L.dec&&tries++<900){const p=[rng()*1.1-.05,rng()*1.1-.03];if(c.st.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.085))continue;if(dec.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<.07))continue;dec.push(p)}
   const bg=[];for(let i=0;i<90;i++)bg.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.2+.3,ph:Math.random()*6.28,sp:.5+Math.random()*1.8});
-  const bgi=new Image();bgi.src=c.bg;CST={bgi,c,L,lv,cv,cx:cv.getContext('2d'),dpr,w,h,S,ox,oy,st,dec:dec.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S,ph:Math.random()*6.28})),bg,cur:0,drag:false,px:0,py:0,err:0,lastWrong:-1,idle:performance.now(),t0:performance.now(),done:0,sparks:[],ripples:[],run:true,last:performance.now(),shown:false,R:Math.max(24,S*.07)};
-  $('cstTitle').textContent='Constellation mystère';$('cstSub').textContent='Niveau '+L.nm+' · 0 / '+c.ed.length;
+  const bgi=new Image();bgi.src=c.bg;CST={bgi,c,L,lv,cv,cx:cv.getContext('2d'),dpr,w,h,S,ox,oy,st,dec:dec.map(p=>({x:ox+p[0]*S,y:oy+p[1]*S,ph:Math.random()*6.28})),bg,cur:0,nd:0,dn:c.ed.map(()=>0),from:-1,drag:false,px:0,py:0,err:0,lastWrong:-1,idle:performance.now(),t0:performance.now(),done:0,sparks:[],ripples:[],run:true,last:performance.now(),shown:false,R:Math.max(24,S*.07)};
+  $('cstTitle').textContent='Constellation mystère';$('cstSub').textContent='Niveau '+L.nm;
   requestAnimationFrame(cstFrame)}
 function cstPos(e){const r=CST.cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
 function cstNear(x,y,i){const s=CST.st[i];return Math.hypot(s.x-x,s.y-y)<CST.R}
 function cstSegDist(ax,ay,bx,by,px,py){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;let t=l?((px-ax)*dx+(py-ay)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(ax+dx*t-px,ay+dy*t-py)}
 function cstWrongAt(x,y,except){const C=CST;for(let i=0;i<C.st.length;i++){if(except.includes(i))continue;if(Math.hypot(C.st[i].x-x,C.st[i].y-y)<C.R*.6)return{x:C.st[i].x,y:C.st[i].y,k:'s'+i}}for(let i=0;i<C.dec.length;i++){if(Math.hypot(C.dec[i].x-x,C.dec[i].y-y)<C.R*.6)return{x:C.dec[i].x,y:C.dec[i].y,k:'d'+i}}return null}
-function cstDown(e){const C=CST;if(!C||C.done)return;e.preventDefault();const[x,y]=cstPos(e);C.idle=performance.now();C.px=x;C.py=y;try{C.cv.setPointerCapture(e.pointerId)}catch(_){}
-  const ed=C.c.ed[C.cur];if(ed&&cstNear(x,y,ed[0])){C.drag=true;C.lastWrong=-1;try{SND.click()}catch(_){}return}
+function cstEdge(a,b){const ed=CST.c.ed;for(let i=0;i<ed.length;i++){if((ed[i][0]===a&&ed[i][1]===b)||(ed[i][0]===b&&ed[i][1]===a))return i}return-1}
+function cstOpenAt(i){const ed=CST.c.ed;for(let k=0;k<ed.length;k++){if(!CST.dn[k]&&(ed[k][0]===i||ed[k][1]===i))return true}return false}
+function cstDown(e){const C=CST;if(!C||C.done)return;e.preventDefault();const[x,y]=cstPos(e);C.px=x;C.py=y;try{C.cv.setPointerCapture(e.pointerId)}catch(_){}
+  let best=-1,bd=1e9;for(let i=0;i<C.st.length;i++){const d=Math.hypot(C.st[i].x-x,C.st[i].y-y);if(d<C.R&&d<bd&&cstOpenAt(i)){bd=d;best=i}}
+  if(best>=0){C.drag=true;C.from=best;C.lastWrong=-1;try{SND.click()}catch(_){}return}
   const w=cstWrongAt(x,y,[]);if(w)cstWrong(w)}
 function cstWrong(w){const C=CST;if(C.lastWrong===w.k)return;C.lastWrong=w.k;C.err++;C.ripples.push({x:w.x,y:w.y,t:performance.now(),bad:1});try{SND.dud()}catch(_){}}
-function cstMove(e){const C=CST;if(!C||C.done||!C.drag)return;e.preventDefault();const[x,y]=cstPos(e),ox=C.px,oy=C.py;C.px=x;C.py=y;C.idle=performance.now();
-  for(let g=0;g<3&&C.drag&&!C.done;g++){const ed=C.c.ed[C.cur],b=C.st[ed[1]];
-    if(cstNear(x,y,ed[1])||cstSegDist(ox,oy,x,y,b.x,b.y)<C.R*.8){cstLink();if(C.drag&&!C.done){const n=C.c.ed[C.cur];if(n&&n[0]!==ed[1]){C.drag=false}}}else break}
-  if(C.drag&&!C.done){const ed=C.c.ed[C.cur];const w=cstWrongAt(x,y,[ed[0],ed[1]]);if(w)cstWrong(w);else C.lastWrong=-1}}
-function cstLink(){const C=CST,ed=C.c.ed[C.cur],a=C.st[ed[0]],b=C.st[ed[1]];C.cur++;C.done=0;
+function cstMove(e){const C=CST;if(!C||C.done||!C.drag)return;e.preventDefault();const[x,y]=cstPos(e),ox=C.px,oy=C.py;C.px=x;C.py=y;
+  let best=-1,bd=1e9;for(let j=0;j<C.st.length;j++){if(j===C.from)continue;const b=C.st[j],d=Math.min(Math.hypot(b.x-x,b.y-y),cstSegDist(ox,oy,x,y,b.x,b.y)*1.25);if(d<C.R*.8&&d<bd){bd=d;best=j}}
+  if(best>=0){const k=cstEdge(C.from,best);if(k>=0&&!C.dn[k]){cstLink(k,best)}else if(k<0||C.dn[k]){if(Math.hypot(C.st[best].x-x,C.st[best].y-y)<C.R*.6){cstWrong({x:C.st[best].x,y:C.st[best].y,k:'s'+best})}}}
+  else{const w=cstWrongAt(x,y,[C.from]);if(w)cstWrong(w);else C.lastWrong=-1}}
+function cstLink(k,to){const C=CST,ed=C.c.ed[k],b=C.st[to];C.dn[k]=1;C.nd++;C.from=to;
   for(let i=0;i<9;i++){const an=Math.random()*6.28,v=40+Math.random()*90;C.sparks.push({x:b.x,y:b.y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,t:performance.now(),l:.55+Math.random()*.4,c:'255,230,160'})}
-  C.ripples.push({x:b.x,y:b.y,t:performance.now()});try{const A_=[74,78,81,86,88,90,93];if(typeof celesta==='function'&&A){const m=A_[C.cur%A_.length]+(C.cur>12?12:0);celesta(at(),m,.9,A.master)}}catch(_){}
-  C.lastWrong=-1;$('cstSub').textContent='Niveau '+C.L.nm+' · '+C.cur+' / '+C.c.ed.length;
-  if(C.cur>=C.c.ed.length){C.drag=false;C.done=performance.now();cstWin()}}
+  C.ripples.push({x:b.x,y:b.y,t:performance.now()});try{const A_=[74,78,81,86,88,90,93];if(typeof celesta==='function'&&A){const m=A_[C.nd%A_.length]+(C.nd>12?12:0);celesta(at(),m,.9,A.master)}}catch(_){}
+  C.lastWrong=-1;$('cstSub').textContent='Niveau '+C.L.nm+' · '+C.nd+' traits';
+  if(C.nd>=C.c.ed.length){C.drag=false;C.done=performance.now();cstWin()}else if(!cstOpenAt(to)){C.drag=false}}
 function cstUp(e){const C=CST;if(!C)return;C.drag=false;C.lastWrong=-1}
 function cstWin(){const C=CST;try{SND.lit(3);setTimeout(()=>{try{SND.ignite()}catch(_){}},900)}catch(_){}
   const sv=cstSave(),id=C.c.id;sv[id]=sv[id]||{};sv[id][C.lv]=1;save();
@@ -6301,10 +6304,8 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
   const flap=win>2.6?Math.sin((win-2.6)*3.2):0;
   /* position d'une étoile (les ailes battent après l'éveil) */
   const P=i=>{const s=st[i];if(win<2.6||!C.c.wing.includes(i))return[s.x,s.y];const bs=st[C.c.base],k=Math.hypot(s.x-bs.x,s.y-bs.y)/C.S;return[s.x,s.y-flap*C.S*.16*k]};
-  /* traits fantômes (niveau 1) */
-  if(lv.ghost&&!C.done){cx.save();cx.setLineDash([3,7]);cx.strokeStyle='rgba(190,205,255,.20)';cx.lineWidth=1.2;for(let i=C.cur;i<ed.length;i++){const a=st[ed[i][0]],b=st[ed[i][1]];cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}cx.restore()}
-  /* leurres */
-  for(const d of C.dec){const a=.35+.35*Math.sin(T*1.3+d.ph);cx.fillStyle='rgba(235,240,255,'+a.toFixed(3)+')';cx.beginPath();cx.arc(d.x,d.y,1.9,0,6.283);cx.fill()}
+    /* leurres */
+  for(const d of C.dec){const a=.3+.3*Math.sin(T*1.3+d.ph);cx.fillStyle='rgba(235,240,255,'+a.toFixed(3)+')';cx.beginPath();cx.arc(d.x,d.y,1.9,0,6.283);cx.fill()}
   /* silhouette éveillée : plumes effilées, corps, tête de profil */
   if(win>.9){const k=Math.min(1,(win-.9)/2.1),S=C.S,c=C.c,Q=(x,y)=>[C.ox+x*S,C.oy+y*S],sw=Math.sin(T*6);
     cx.save();cx.globalAlpha=k;cx.shadowColor='rgba(255,150,50,.9)';cx.shadowBlur=20+7*sw;
@@ -6320,16 +6321,15 @@ function cstFrame(now){const C=CST;if(!C||!C.run)return;requestAnimationFrame(cs
     if(Math.random()<.6)C.sparks.push({x:C.ox+Math.random()*S,y:C.oy+S*(.2+Math.random()*.7),vx:(Math.random()-.5)*30,vy:-40-Math.random()*70,t:now,l:1+Math.random()*1.2,c:Math.random()<.5?'255,190,80':'255,120,50'})}
   /* lignes reliées */
   const pulse=.7+.3*Math.sin(T*8);cx.lineCap='round';
-  for(let i=0;i<C.cur;i++){const a=P(ed[i][0]),b=P(ed[i][1]),fade=win>1.2?Math.max(.22,1-(win-1.2)*.5):1;cx.strokeStyle='rgba(255,226,150,'+(.9*fade).toFixed(3)+')';cx.shadowColor='rgba(255,200,100,'+fade+')';cx.shadowBlur=C.done&&win<1.2?18*pulse:10;cx.lineWidth=2.4;cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}cx.shadowBlur=0;
+  for(let i=0;i<ed.length;i++){if(!C.dn[i])continue;const a=P(ed[i][0]),b=P(ed[i][1]),fade=win>1.2?Math.max(.22,1-(win-1.2)*.5):1;cx.strokeStyle='rgba(255,226,150,'+(.9*fade).toFixed(3)+')';cx.shadowColor='rgba(255,200,100,'+fade+')';cx.shadowBlur=C.done&&win<1.2?18*pulse:10;cx.lineWidth=2.4;cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}cx.shadowBlur=0;
   /* trait en cours */
-  if(C.drag&&!C.done){const a=st[ed[C.cur][0]];cx.strokeStyle='rgba(255,240,200,.9)';cx.lineWidth=2.4;cx.shadowColor='#ffe9a8';cx.shadowBlur=14;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(C.px,C.py);cx.stroke();cx.shadowBlur=0;cx.fillStyle='rgba(255,246,220,.95)';cx.beginPath();cx.arc(C.px,C.py,5,0,6.283);cx.fill()}
+  if(C.drag&&!C.done){const a=st[C.from];cx.strokeStyle='rgba(255,240,200,.9)';cx.lineWidth=2.4;cx.shadowColor='#ffe9a8';cx.shadowBlur=14;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(C.px,C.py);cx.stroke();cx.shadowBlur=0;cx.fillStyle='rgba(255,246,220,.95)';cx.beginPath();cx.arc(C.px,C.py,5,0,6.283);cx.fill()}
   /* étoiles du dessin */
-  const conn=new Set();for(let i=0;i<C.cur;i++){conn.add(ed[i][0]);conn.add(ed[i][1])}
-  const nxt=C.cur<ed.length?ed[C.cur][0]:-1,hintOn=lv.ghost||(now-C.idle)/1000>lv.hint||C.err>=(lv.k===2?3:5);
+  const conn=new Set();for(let i=0;i<ed.length;i++){if(C.dn[i]){conn.add(ed[i][0]);conn.add(ed[i][1])}}
   for(let i=0;i<st.length;i++){const p=P(i),on=conn.has(i),tw=.5+.5*Math.sin(T*1.7+i*1.9);
     if(on){cx.fillStyle='rgba(255,240,190,.28)';cx.beginPath();cx.arc(p[0],p[1],9+3*tw,0,6.283);cx.fill();cx.fillStyle='#fff7d8';cx.beginPath();cx.arc(p[0],p[1],3.6,0,6.283);cx.fill()}
-    else{cx.fillStyle='rgba(235,240,255,'+(.55+.4*tw).toFixed(3)+')';cx.beginPath();cx.arc(p[0],p[1],lv.ghost?2.8:2.2,0,6.283);cx.fill()}
-    if(i===nxt&&!C.done&&hintOn){const r=10+5*Math.sin(T*5);cx.strokeStyle='rgba(255,226,150,.8)';cx.lineWidth=1.6;cx.beginPath();cx.arc(p[0],p[1],r,0,6.283);cx.stroke()}}
+    else{const al=Math.min(1,.5+.4*tw+lv.boost);cx.fillStyle='rgba(240,244,255,'+al.toFixed(3)+')';cx.beginPath();cx.arc(p[0],p[1],2.1+lv.boost*1.7,0,6.283);cx.fill();
+      if(lv.boost>.15){cx.fillStyle='rgba(235,240,255,'+(lv.boost*.5*(.6+.4*tw)).toFixed(3)+')';cx.beginPath();cx.arc(p[0],p[1],5+lv.boost*10,0,6.283);cx.fill()}}}
   /* ondes et étincelles */
   C.ripples=C.ripples.filter(r=>now-r.t<700);for(const r of C.ripples){const k=(now-r.t)/700;cx.strokeStyle=(r.bad?'rgba(255,120,120,':'rgba(255,236,170,')+(1-k).toFixed(3)+')';cx.lineWidth=1.6;cx.beginPath();cx.arc(r.x,r.y,6+k*(r.bad?22:30),0,6.283);cx.stroke()}
   C.sparks=C.sparks.filter(s=>(now-s.t)/1000<s.l);for(const s of C.sparks){const a=(now-s.t)/1000,k=1-a/s.l;cx.fillStyle='rgba('+s.c+','+k.toFixed(3)+')';cx.beginPath();cx.arc(s.x+s.vx*a,s.y+s.vy*a,1.6+k*1.4,0,6.283);cx.fill()}
