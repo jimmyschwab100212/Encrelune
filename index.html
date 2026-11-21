@@ -181,6 +181,7 @@ body.ff #quit,body.ff #mus{top:calc(50% - 21px)}body.ff #mus{right:12px}body.ff 
 .msheet .tog{display:block;margin:4px auto 0}
 .mtr{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:2px 0 10px}.mtl{width:100%;text-align:center;color:var(--dim);font-style:italic;font-size:15px}.chip{font:inherit;font-size:15px;color:var(--ink,#f3e6c8);background:rgba(255,210,122,.08);border:1px solid rgba(255,210,122,.35);border-radius:999px;padding:7px 14px;cursor:pointer;min-height:38px}.chip.on{background:linear-gradient(#ffe2a0,#e0a84a);color:#1a1008;border-color:transparent;font-weight:700}
 body:has(#title:not([hidden])) #mus{right:auto;left:12px}
+body:has(#map:not([hidden])) #mus{right:12px}.mtop .r1{padding-right:62px}
 @media (max-height:520px){.ta .tsky{opacity:.3}.ta .tbox{justify-content:center}.ta .tsub{margin-bottom:10px}}
 </style>
 </head>
@@ -5012,7 +5013,7 @@ const EL={ns:undefined,R:null,code:'',host:false,nm:'',lob:'form',msgT:'',tok:0,
 /* ----- salon (panneau du menu Duel, en vertical) ----- */
 function elLobMsg(){return{conn:'Connexion au salon…',wait:'En attente de ton ami… ⏳',nohost:'Personne dans ce salon pour l’instant. Vérifie le code, ou attends que ton ami le crée.',seen:'Ton ami est là, la partie commence…',full:'Ce salon est déjà complet.',ver:'Ton ami n’a pas la même version du jeu : rechargez la page tous les deux.'}[EL.lob]||''}
 function elLobMsgUpd(){const m=$('elMsg');if(m)m.textContent=elLobMsg()}
-const EL_VER='218';const EL_FP=true;const EL_NOCR=true;
+const EL_VER='219';const EL_FP=true;const EL_NOCR=true;
 // ===== Salons hors de Claude : mini-client MQTT sur WebSocket (serveurs publics gratuits) =====
 // Imite l'API « room » utilisée par le duel : join(nom) → {presence, peers, onPeers, leave}.
 // Chaque joueur publie son état complet sur son propre sujet (toutes les 2,5 s au minimum) ; deux serveurs en parallèle pour la fiabilité.
